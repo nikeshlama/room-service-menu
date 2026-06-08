@@ -195,7 +195,7 @@ function App() {
         <h1>Pesto's Italian Eatery</h1>
         {/* Clicking this subtitle link jumps back-door straight into the Admin Controls! */}
         <p className="subtitle" onClick={() => setIsAdminView(true)} style={{ cursor: 'pointer', textDecoration: 'underline' }}>
-          Authentic Sudbury Kitchen • Room Service Menu
+          Authentic Sudbury Kitchen • Room Test Menu
         </p>
         <div className="header-line"></div>
       </header>
