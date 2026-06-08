@@ -1,0 +1,230 @@
+/* Global Reset and Background */
+:root {
+  --primary-gold: #c5a059;
+  --dark-charcoal: #1a1a1a;
+  --light-beige: #f9f6f0;
+  --border-color: #e0dad0;
+  --text-muted: #555555;
+  --success-green: #2e7d32;
+}
+
+body {
+  margin: 0;
+  font-family: 'Playfair Display', 'Georgia', serif;
+  background-color: var(--light-beige);
+  color: var(--dark-charcoal);
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+/* Header Design */
+.menu-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.menu-header h1 {
+  font-size: 3rem;
+  margin: 0 0 10px 0;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--dark-charcoal);
+}
+
+.subtitle {
+  font-size: 1.1rem;
+  font-style: italic;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.header-line {
+  width: 150px;
+  height: 2px;
+  background-color: var(--primary-gold);
+  margin: 20px auto 0 auto;
+}
+
+/* Category Navigation Bar */
+.category-nav {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 50px;
+}
+
+.category-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  padding: 10px 20px;
+  font-size: 0.95rem;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 4px;
+}
+
+.category-btn:hover, .category-btn.active {
+  background-color: var(--dark-charcoal);
+  color: #ffffff;
+  border-color: var(--dark-charcoal);
+}
+
+/* Grid System for Food Cards */
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 30px;
+  margin-bottom: 60px;
+}
+
+.menu-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+  border-radius: 6px;
+  transition: transform 0.2s ease;
+}
+
+.menu-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.card-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--primary-gold);
+}
+
+.description {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+  margin: 0 0 20px 0;
+  flex-grow: 1;
+}
+
+.card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border-color);
+  padding-top: 15px;
+  margin-top: auto;
+}
+
+/* Badges & Tags */
+.tags-container {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tag-badge {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  font-weight: bold;
+  font-family: sans-serif;
+}
+
+.tag-badge.V {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.tag-badge.GF {
+  background-color: #fff3e0;
+  color: #ef6c00;
+}
+
+.status-badge {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.available {
+  color: var(--success-green);
+}
+
+.status-badge.unavailable {
+  color: #c62828;
+}
+
+.menu-card.sold-out {
+  opacity: 0.6;
+}
+
+/* Footer Layout */
+.menu-footer {
+  text-align: center;
+  border-top: 2px solid var(--primary-gold);
+  padding-top: 30px;
+  margin-top: 40px;
+}
+
+.menu-footer p {
+  font-size: 1.1rem;
+  margin: 5px 0;
+}
+
+.footer-note {
+  font-size: 0.9rem !important;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Loading Spinner Screen */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  text-align: center;
+  padding: 20px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid var(--border-color);
+  border-top: 5px solid var(--primary-gold);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
