@@ -82,91 +82,46 @@ function App() {
     : menuItems.filter(item => item.category === activeCategory);
 
   if (loading) {
-    return (
-      <div className="loading-container">
-        <div className="spinner"></div>
-        <h2>Loading Pesto's Cloud Database...</h2>
-      </div>
-    );
+    return <div className="loading-container"><div className="spinner"></div><h2>Loading Pesto's Cloud Database...</h2></div>;
   }
 
   if (isAdminView) {
     return (
       <div className="admin-container">
         <header className="admin-header">
-          <div>
-            <h1>Pesto's Control Panel</h1>
-            <p className="subtitle">Database Live Dashboard</p>
-          </div>
+          <div><h1>Pesto's Control Panel</h1><p className="subtitle">Database Live Dashboard</p></div>
           <button className="back-btn" onClick={() => setIsAdminView(false)}>← Back to Menu View</button>
         </header>
-
         <form className="admin-form" onSubmit={handleAddItemSubmit}>
           <h3>Add New Kitchen Dish Record</h3>
           <div className="form-grid">
-            <div className="form-group">
-              <label>Dish Name *</label>
-              <input type="text" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="e.g. Garlic Gnocchi" />
-            </div>
-            <div className="form-group">
-              <label>Price ($ USD) *</label>
-              <input type="number" step="0.01" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} placeholder="e.g. 24.99" />
-            </div>
-            <div className="form-group">
-              <label>Category</label>
-              <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)}>
-                {categories.filter(c => c !== 'All').map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Tags (Comma separated)</label>
-              <input type="text" value={newTags} onChange={(e) => setNewTags(e.target.value)} placeholder="V, GF" />
-            </div>
+            <input type="text" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Dish Name" />
+            <input type="number" step="0.01" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} placeholder="Price" />
+            <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)}>
+              {categories.filter(c => c !== 'All').map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <input type="text" value={newTags} onChange={(e) => setNewTags(e.target.value)} placeholder="Tags (V, GF)" />
           </div>
-          <div className="form-group" style={{ marginBottom: '20px' }}>
-            <label>Menu Description</label>
-            <textarea rows="2" value={newDescription} onChange={(e) => setNewDescription(e.target.value)} placeholder="Describe preparation elements..."></textarea>
-          </div>
+          <textarea rows="2" value={newDescription} onChange={(e) => setNewDescription(e.target.value)} placeholder="Description..."></textarea>
           <button type="submit" className="submit-btn">Save to Cloud Database</button>
         </form>
-
         <h3>Live Inventory Control List</h3>
-        <div className="table-responsive">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Dish Name</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Stock Status Toggle</th>
+        <table className="admin-table">
+          <thead><tr><th>Dish Name</th><th>Status</th></tr></thead>
+          <tbody>
+            {menuItems.map((item) => (
+              <tr key={item._id}>
+                <td><strong>{item.name}</strong></td>
+                <td>
+                  <label className="switch">
+                    <input type="checkbox" checked={item.available} onChange={() => handleToggleAvailable(item._id, item.available)} />
+                    <span className="slider"></span>
+                  </label>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {menuItems.map((item) => (
-                <tr key={item._id}>
-                  <td><strong>{item.name}</strong></td>
-                  <td>{item.category}</td>
-                  <td>${item.price.toFixed(2)}</td>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <label className="switch">
-                        <input 
-                          type="checkbox" 
-                          checked={item.available} 
-                          onChange={() => handleToggleAvailable(item._id, item.available)} 
-                        />
-                        <span className="slider"></span>
-                      </label>
-                      <span style={{ fontWeight: 'bold', color: item.available ? '#2e7d32' : '#c62828' }}>
-                        {item.available ? 'In Stock' : 'Sold Out'}
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
     );
   }
@@ -175,52 +130,16 @@ function App() {
     <div className="app-container">
       <header className="menu-header">
         <h1>Pesto's Italian Eatery</h1>
-        <p className="subtitle" onClick={() => setIsAdminView(true)} style={{ cursor: 'pointer', textDecoration: 'underline' }}>
-          Authentic Sudbury Kitchen • Room Test Menu
-        </p>
-        <div className="header-line"></div>
+        <p className="subtitle" onClick={() => setIsAdminView(true)} style={{cursor: 'pointer'}}>Authentic Sudbury Kitchen</p>
       </header>
-
-      <nav className="category-nav">
-        {categories.map((category) => (
-          <button
-            key={category}
-            className={`category-btn ${activeCategory === category ? 'active' : ''}`}
-            onClick={() => setActiveCategory(category)}
-          >
-            {category}
-          </button>
-        ))}
-      </nav>
-
       <main className="menu-grid">
         {filteredItems.map((item) => (
           <div key={item._id} className={`menu-card ${!item.available ? 'sold-out' : ''}`}>
-            <div className="card-header">
-              <h3>{item.name}</h3>
-              <span className="price">${item.price.toFixed(2)}</span>
-            </div>
-            <p className="description">{item.description}</p>
-            <div className="card-footer">
-              <div className="tags-container">
-                {item.tags && item.tags.map((tag) => (
-                  <span key={tag} className={`tag-badge ${tag}`}>
-                    {tag === 'V' ? 'Vegetarian' : tag === 'GF' ? 'Gluten-Free' : tag}
-                  </span>
-                ))}
-              </div>
-              <span className={`status-badge ${item.available ? 'available' : 'unavailable'}`}>
-                {item.available ? 'Available' : 'Sold Out'}
-              </span>
-            </div>
+            <h3>{item.name}</h3>
+            <span>${item.price.toFixed(2)}</span>
           </div>
         ))}
       </main>
-
-      <footer className="menu-footer">
-        <p>To place your order, please dial <strong>Ext. 404</strong> from your room telephone.</p>
-        <p className="footer-note">15% service charge and applicable taxes will be added to your bill.</p>
-      </footer>
     </div>
   );
 }
