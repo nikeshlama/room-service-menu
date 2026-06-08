@@ -5,9 +5,8 @@ function App() {
   const [menuItems, setMenuItems] = useState([]);
   const [activeCategory, setActiveCategory] = useState('All');
   const [loading, setLoading] = useState(true);
-  const [isAdminView, setIsAdminView] = useState(false); // Controls view panel toggle
+  const [isAdminView, setIsAdminView] = useState(false);
 
-  // Admin Panel New Form Input Fields States
   const [newName, setNewName] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newCategory, setNewCategory] = useState('Appetizers');
@@ -16,7 +15,6 @@ function App() {
 
   const categories = ['All', 'Appetizers', 'Salads & Sandwiches', 'Entrées & Pasta', 'Kids Menu', 'Desserts'];
 
-  // Fetch from Live Cloud Backend
   const fetchMenu = () => {
     fetch('https://pestos-backend.onrender.com/api/menu')
       .then((res) => {
@@ -37,8 +35,6 @@ function App() {
     fetchMenu();
   }, []);
 
-  // Admin Function: Toggle Available / Sold out via API Update
-  // FIXED: Now correctly accepts _id
   const handleToggleAvailable = (id, currentStatus) => {
     fetch(`https://pestos-backend.onrender.com/api/menu/${id}`, {
       method: 'PUT',
@@ -52,7 +48,6 @@ function App() {
     .catch(err => console.error("Error updating stock item:", err));
   };
 
-  // Admin Function: Post an Entirely New Dish to Database
   const handleAddItemSubmit = (e) => {
     e.preventDefault();
     if (!newName || !newPrice) return alert("Please fill out Name and Price fields!");
@@ -75,10 +70,7 @@ function App() {
     })
     .then(res => res.json())
     .then(() => {
-      setNewName('');
-      setNewPrice('');
-      setNewDescription('');
-      setNewTags('');
+      setNewName(''); setNewPrice(''); setNewDescription(''); setNewTags('');
       fetchMenu();
       alert("New menu dish successfully saved to database!");
     })
@@ -98,9 +90,6 @@ function App() {
     );
   }
 
-  // ==========================================
-  // VIEW SCREEN 1: ADMIN MANAGEMENT DASHBOARD
-  // ==========================================
   if (isAdminView) {
     return (
       <div className="admin-container">
@@ -153,24 +142,29 @@ function App() {
               </tr>
             </thead>
             <tbody>
-    {menuItems.map((item) => (
-    <tr key={item._id}> {/* Use _id here */}
-      <td><strong>{item.name}</strong></td>
-      {/* ... other cells ... */}
-      <td>
-        <label className="switch">
-          <input 
-            type="checkbox" 
-            checked={item.available} 
-            // Ensure you pass item._id here
-            onChange={() => handleToggleAvailable(item._id, item.available)} 
-          />
-          <span className="slider"></span>
-        </label>
-      </td>
-    </tr>
-  ))}
-</tbody>
+              {menuItems.map((item) => (
+                <tr key={item._id}>
+                  <td><strong>{item.name}</strong></td>
+                  <td>{item.category}</td>
+                  <td>${item.price.toFixed(2)}</td>
+                  <td>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <label className="switch">
+                        <input 
+                          type="checkbox" 
+                          checked={item.available} 
+                          onChange={() => handleToggleAvailable(item._id, item.available)} 
+                        />
+                        <span className="slider"></span>
+                      </label>
+                      <span style={{ fontWeight: 'bold', color: item.available ? '#2e7d32' : '#c62828' }}>
+                        {item.available ? 'In Stock' : 'Sold Out'}
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </div>
       </div>
