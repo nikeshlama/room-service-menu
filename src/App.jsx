@@ -38,6 +38,7 @@ function App() {
   }, []);
 
   // Admin Function: Toggle Available / Sold out via API Update
+  // FIXED: Now correctly accepts _id
   const handleToggleAvailable = (id, currentStatus) => {
     fetch(`https://pestos-backend.onrender.com/api/menu/${id}`, {
       method: 'PUT',
@@ -46,7 +47,6 @@ function App() {
     })
     .then(res => res.json())
     .then(() => {
-      // Refresh local array values to reflect changes instantly
       fetchMenu();
     })
     .catch(err => console.error("Error updating stock item:", err));
@@ -57,7 +57,6 @@ function App() {
     e.preventDefault();
     if (!newName || !newPrice) return alert("Please fill out Name and Price fields!");
 
-    // Convert comma tags string to functional clean data array
     const tagsArray = newTags ? newTags.split(',').map(t => t.trim().toUpperCase()) : [];
 
     const itemPayload = {
@@ -76,12 +75,11 @@ function App() {
     })
     .then(res => res.json())
     .then(() => {
-      // Clear input form fields upon success
       setNewName('');
       setNewPrice('');
       setNewDescription('');
       setNewTags('');
-      fetchMenu(); // Re-fetch list
+      fetchMenu();
       alert("New menu dish successfully saved to database!");
     })
     .catch(err => console.error("Error adding dish:", err));
@@ -114,7 +112,6 @@ function App() {
           <button className="back-btn" onClick={() => setIsAdminView(false)}>← Back to Menu View</button>
         </header>
 
-        {/* Create Dish Form Box */}
         <form className="admin-form" onSubmit={handleAddItemSubmit}>
           <h3>Add New Kitchen Dish Record</h3>
           <div className="form-grid">
@@ -144,7 +141,6 @@ function App() {
           <button type="submit" className="submit-btn">Save to Cloud Database</button>
         </form>
 
-        {/* Database Inventory Table */}
         <h3>Live Inventory Control List</h3>
         <div className="table-responsive">
           <table className="admin-table">
@@ -158,7 +154,8 @@ function App() {
             </thead>
             <tbody>
               {menuItems.map((item) => (
-                <tr key={item.id || item._id}>
+                // FIXED: Using _id for the key and toggle call
+                <tr key={item._id}>
                   <td><strong>{item.name}</strong></td>
                   <td>{item.category}</td>
                   <td>${item.price.toFixed(2)}</td>
@@ -168,7 +165,7 @@ function App() {
                         <input 
                           type="checkbox" 
                           checked={item.available} 
-                          onChange={() => handleToggleAvailable(item.id, item.available)} 
+                          onChange={() => handleToggleAvailable(item._id, item.available)} 
                         />
                         <span className="slider"></span>
                       </label>
@@ -186,14 +183,10 @@ function App() {
     );
   }
 
-  // ==========================================
-  // VIEW SCREEN 2: STANDARD CUSTOMER VIEW
-  // ==========================================
   return (
     <div className="app-container">
       <header className="menu-header">
         <h1>Pesto's Italian Eatery</h1>
-        {/* Clicking this subtitle link jumps back-door straight into the Admin Controls! */}
         <p className="subtitle" onClick={() => setIsAdminView(true)} style={{ cursor: 'pointer', textDecoration: 'underline' }}>
           Authentic Sudbury Kitchen • Room Test Menu
         </p>
@@ -214,14 +207,12 @@ function App() {
 
       <main className="menu-grid">
         {filteredItems.map((item) => (
-          <div key={item.id || item._id} className={`menu-card ${!item.available ? 'sold-out' : ''}`}>
+          <div key={item._id} className={`menu-card ${!item.available ? 'sold-out' : ''}`}>
             <div className="card-header">
               <h3>{item.name}</h3>
               <span className="price">${item.price.toFixed(2)}</span>
             </div>
-            
             <p className="description">{item.description}</p>
-            
             <div className="card-footer">
               <div className="tags-container">
                 {item.tags && item.tags.map((tag) => (
@@ -230,7 +221,6 @@ function App() {
                   </span>
                 ))}
               </div>
-              
               <span className={`status-badge ${item.available ? 'available' : 'unavailable'}`}>
                 {item.available ? 'Available' : 'Sold Out'}
               </span>
