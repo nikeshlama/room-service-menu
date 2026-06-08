@@ -3,115 +3,96 @@ import './App.css';
 
 function App() {
   const [menuItems, setMenuItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [isAdminView, setIsAdminView] = useState(false);
   const [newName, setNewName] = useState('');
   const [newPrice, setNewPrice] = useState('');
+  const [newCategory, setNewCategory] = useState('Appetizers');
+  const [newDescription, setNewDescription] = useState('');
 
-  // Use your live Render backend URL here
   const API_URL = 'https://pestos-backend.onrender.com/api/menu';
 
   const fetchMenu = () => {
     fetch(API_URL)
       .then((res) => res.json())
-      .then((data) => {
-        setMenuItems(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("Error fetching menu data:", err);
-        setLoading(false);
-      });
+      .then((data) => setMenuItems(data))
+      .catch((err) => console.error("Error fetching menu data:", err));
   };
 
   useEffect(() => {
     fetchMenu();
   }, []);
 
-  const handleToggleAvailable = (id, currentStatus) => {
-    fetch(`${API_URL}/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ available: !currentStatus })
-    })
-    .then((res) => res.json())
-    .then(() => {
-      fetchMenu(); // Refresh the list after update
-    })
-    .catch((err) => console.error("Error updating item:", err));
-  };
-
   const handleAddItemSubmit = (e) => {
     e.preventDefault();
-    if (!newName || !newPrice) return alert("Please fill out Name and Price fields!");
-
     fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: newName,
         price: parseFloat(newPrice),
+        category: newCategory,
+        description: newDescription,
         available: true
       })
     })
-    .then((res) => res.json())
-    .then(() => {
+    .then(res => res.json())
+    .then(data => {
+      alert("Dish added!");
       setNewName('');
       setNewPrice('');
-      fetchMenu();
-      alert("Dish added successfully!");
+      setNewDescription('');
+      fetchMenu(); // Refresh the list
     })
-    .catch((err) => console.error("Error adding dish:", err));
+    .catch(err => console.error("Error:", err));
   };
-
-  if (loading) {
-    return <div className="loading">Loading Pesto's Menu...</div>;
-  }
 
   return (
     <div className="app-container">
-      <header onClick={() => setIsAdminView(!isAdminView)} style={{ cursor: 'pointer' }}>
-        <h1>PESTO'S ITALIAN EATERY</h1>
-        <p>Authentic Sudbury Kitchen</p>
-      </header>
+      <h1>Pesto's Control Panel</h1>
+      
+      <form className="admin-form" onSubmit={handleAddItemSubmit}>
+        <input 
+          placeholder="Dish Name" 
+          value={newName} 
+          onChange={(e) => setNewName(e.target.value)} 
+          required 
+        />
+        <input 
+          type="number" 
+          placeholder="Price" 
+          value={newPrice} 
+          onChange={(e) => setNewPrice(e.target.value)} 
+          required 
+        />
+        <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)}>
+          <option value="Appetizers">Appetizers</option>
+          <option value="Entrées">Entrées</option>
+          <option value="Desserts">Desserts</option>
+        </select>
+        <textarea 
+          placeholder="Description" 
+          value={newDescription} 
+          onChange={(e) => setNewDescription(e.target.value)} 
+        />
+        <button type="submit">Save to Cloud Database</button>
+      </form>
 
-      {isAdminView ? (
-        <div className="admin-container">
-          <h2>Admin Dashboard</h2>
-          <form onSubmit={handleAddItemSubmit}>
-            <input placeholder="Dish Name" value={newName} onChange={(e) => setNewName(e.target.value)} />
-            <input type="number" step="0.01" placeholder="Price" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} />
-            <button type="submit">Save to Cloud</button>
-          </form>
-          
-          <table className="admin-table">
-            <thead><tr><th>Dish</th><th>Available</th></tr></thead>
-            <tbody>
-              {menuItems.map((item) => (
-                <tr key={item._id}>
-                  <td>{item.name}</td>
-                  <td>
-                    <input 
-                      type="checkbox" 
-                      checked={item.available} 
-                      onChange={() => handleToggleAvailable(item._id, item.available)} 
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <div className="menu-grid">
+      <h3>Live Inventory</h3>
+      <table className="admin-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
           {menuItems.map((item) => (
-            <div key={item._id} className={`menu-card ${!item.available ? 'sold-out' : ''}`}>
-              <h3>{item.name}</h3>
-              <p>${item.price.toFixed(2)}</p>
-            </div>
+            <tr key={item._id}>
+              <td>{item.name}</td>
+              <td>${item.price ? item.price.toFixed(2) : '0.00'}</td>
+            </tr>
           ))}
-        </div>
-      )}
+        </tbody>
+      </table>
     </div>
   );
 }
