@@ -153,30 +153,24 @@ function App() {
               </tr>
             </thead>
             <tbody>
-              {menuItems.map((item) => (
-                // FIXED: Using _id for the key and toggle call
-                <tr key={item._id}>
-                  <td><strong>{item.name}</strong></td>
-                  <td>{item.category}</td>
-                  <td>${item.price.toFixed(2)}</td>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <label className="switch">
-                        <input 
-                          type="checkbox" 
-                          checked={item.available} 
-                          onChange={() => handleToggleAvailable(item._id, item.available)} 
-                        />
-                        <span className="slider"></span>
-                      </label>
-                      <span style={{ fontWeight: 'bold', color: item.available ? '#2e7d32' : '#c62828' }}>
-                        {item.available ? 'In Stock' : 'Sold Out'}
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
+    {menuItems.map((item) => (
+    <tr key={item._id}> {/* Use _id here */}
+      <td><strong>{item.name}</strong></td>
+      {/* ... other cells ... */}
+      <td>
+        <label className="switch">
+          <input 
+            type="checkbox" 
+            checked={item.available} 
+            // Ensure you pass item._id here
+            onChange={() => handleToggleAvailable(item._id, item.available)} 
+          />
+          <span className="slider"></span>
+        </label>
+      </td>
+    </tr>
+  ))}
+</tbody>
           </table>
         </div>
       </div>
