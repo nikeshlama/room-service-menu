@@ -2,118 +2,156 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 
 function App() {
+  const API_URL = 'https://pestos-backend.onrender.com/api/menu';
+
   const [menuItems, setMenuItems] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
   const [clickCount, setClickCount] = useState(0);
+
   const [newName, setNewName] = useState('');
   const [newPrice, setNewPrice] = useState('');
 
-  // 🔐 NEW: auth state (keeps admin locked even after refresh)
-  const [isLocked, setIsLocked] = useState(true);
-
-  const API_URL = 'https://pestos-backend.onrender.com/api/menu';
-
+  /* =========================
+     FETCH MENU
+  ========================= */
   const fetchMenu = () => {
     fetch(API_URL)
       .then(res => res.json())
       .then(data => setMenuItems(data))
-      .catch(err => console.error("Error:", err));
+      .catch(err => console.error(err));
   };
 
+  /* =========================
+     ON LOAD
+  ========================= */
   useEffect(() => {
     fetchMenu();
 
-    // 🔐 restore admin session if already unlocked
-    const saved = localStorage.getItem("admin_access");
-    if (saved === "true") {
-      setIsLocked(false);
+    const token = localStorage.getItem('admin_token');
+    if (token) {
       setIsAdmin(true);
     }
   }, []);
 
-  // 🔐 UPDATED SECRET CLICK
-  const handleSecretClick = () => {
-    const newCount = clickCount + 1;
-    setClickCount(newCount);
+  /* =========================
+     AUTH HEADER
+  ========================= */
+  const getAuthHeaders = () => ({
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${localStorage.getItem('admin_token')}`
+  });
 
-    if (newCount === 3) {
-      const password = prompt("Enter Admin Password:");
+  /* =========================
+     SECRET LOGIN (3 CLICKS)
+  ========================= */
+  const handleSecretClick = async () => {
+    const count = clickCount + 1;
+    setClickCount(count);
 
-      if (password === "Pesto123") {
-        setIsAdmin(true);
-        setIsLocked(false);
+    if (count === 3) {
+      const password = prompt('Enter Admin Password:');
 
-        // persist login
-        localStorage.setItem("admin_access", "true");
-      } else {
-        alert("Access Denied");
+      if (!password) {
+        setClickCount(0);
+        return;
+      }
+
+      try {
+        const res = await fetch(
+          'https://pestos-backend.onrender.com/api/login',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+          }
+        );
+
+        const data = await res.json();
+
+        if (data.success) {
+          localStorage.setItem('admin_token', data.token);
+          setIsAdmin(true);
+        } else {
+          alert('Wrong password');
+        }
+      } catch (err) {
+        alert('Login failed');
       }
 
       setClickCount(0);
     }
   };
 
-  // 🔐 logout
+  /* =========================
+     LOGOUT
+  ========================= */
   const handleLogout = () => {
+    localStorage.removeItem('admin_token');
     setIsAdmin(false);
-    setIsLocked(true);
-    localStorage.removeItem("admin_access");
   };
 
+  /* =========================
+     ADD ITEM
+  ========================= */
   const handleAddItemSubmit = (e) => {
     e.preventDefault();
 
     fetch(API_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       body: JSON.stringify({
         name: newName,
         price: parseFloat(newPrice),
         available: true
       })
-    })
-      .then(() => {
-        fetchMenu();
-        setNewName('');
-        setNewPrice('');
-      });
+    }).then(() => {
+      fetchMenu();
+      setNewName('');
+      setNewPrice('');
+    });
   };
 
+  /* =========================
+     DELETE ITEM
+  ========================= */
   const handleDelete = (id) => {
-    if (window.confirm("Delete this dish?")) {
-      fetch(`${API_URL}/${id}`, { method: 'DELETE' })
-        .then(() => fetchMenu());
+    if (window.confirm('Delete this item?')) {
+      fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      }).then(() => fetchMenu());
     }
   };
 
-  const handleToggleAvailable = (id, currentStatus) => {
+  /* =========================
+     TOGGLE AVAILABLE
+  ========================= */
+  const handleToggleAvailable = (id, current) => {
     fetch(`${API_URL}/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ available: !currentStatus })
-    })
-      .then(() => fetchMenu());
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ available: !current })
+    }).then(() => fetchMenu());
   };
 
   return (
     <div>
 
-      {/* HEADER */}
       <h1
         onClick={handleSecretClick}
-        style={{ cursor: 'pointer', textAlign: 'center' }}
+        style={{ textAlign: 'center', cursor: 'pointer' }}
       >
         Pesto's Eatery
       </h1>
 
-      {/* ================= PUBLIC VIEW ================= */}
+      {/* ================= PUBLIC ================= */}
       {!isAdmin && (
         <div className="app-container">
           <h2 style={{ textAlign: 'center' }}>Our Menu</h2>
 
           <div className="menu-grid">
             {menuItems
-              .filter(item => item.available)
+              .filter(i => i.available)
               .map(item => (
                 <div key={item._id} className="menu-card">
                   <h3>{item.name}</h3>
@@ -124,19 +162,15 @@ function App() {
         </div>
       )}
 
-      {/* ================= ADMIN VIEW ================= */}
-      {isAdmin && !isLocked && (
+      {/* ================= ADMIN ================= */}
+      {isAdmin && (
         <div className="admin-container">
 
-          <button
-            onClick={handleLogout}
-            className="back-btn"
-            style={{ marginBottom: '20px' }}
-          >
-            Logout Admin
+          <button onClick={handleLogout} className="back-btn">
+            Logout
           </button>
 
-          <form className="admin-form" onSubmit={handleAddItemSubmit}>
+          <form onSubmit={handleAddItemSubmit} className="admin-form">
             <input
               placeholder="Dish Name"
               value={newName}
@@ -153,61 +187,54 @@ function App() {
             />
 
             <button type="submit" className="submit-btn">
-              Save to Cloud
+              Add Item
             </button>
           </form>
 
-          <h3>Live Inventory</h3>
+          <h3>Menu Control</h3>
 
-          <div className="table-responsive">
-            <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>Dish Name</th>
-                  <th>Price</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Price</th>
+                <th>Available</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {menuItems.map(item => (
+                <tr key={item._id}>
+                  <td>{item.name}</td>
+                  <td>${item.price}</td>
+
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={item.available}
+                      onChange={() =>
+                        handleToggleAvailable(item._id, item.available)
+                      }
+                    />
+                  </td>
+
+                  <td>
+                    <button
+                      onClick={() => handleDelete(item._id)}
+                      className="back-btn"
+                      style={{ background: 'red' }}
+                    >
+                      Delete
+                    </button>
+                  </td>
                 </tr>
-              </thead>
+              ))}
+            </tbody>
+          </table>
 
-              <tbody>
-                {menuItems.map(item => (
-                  <tr key={item._id}>
-                    <td>{item.name}</td>
-                    <td>${item.price?.toFixed(2)}</td>
-
-                    <td>
-                      <label className="switch">
-                        <input
-                          type="checkbox"
-                          checked={item.available}
-                          onChange={() =>
-                            handleToggleAvailable(item._id, item.available)
-                          }
-                        />
-                        <span className="slider"></span>
-                      </label>
-                    </td>
-
-                    <td>
-                      <button
-                        onClick={() => handleDelete(item._id)}
-                        className="back-btn"
-                        style={{ backgroundColor: '#c62828' }}
-                      >
-                        Delete
-                      </button>
-                    </td>
-
-                  </tr>
-                ))}
-              </tbody>
-
-            </table>
-          </div>
         </div>
       )}
-
     </div>
   );
 }
