@@ -1,145 +1,222 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
+import React, { useState, useEffect } from 'react';
+import './App.css';
 
-const app = express();
+function App() {
+  const API_URL = 'https://pestos-backend.onrender.com/api/menu';
 
-/* =========================
-   MIDDLEWARE
-========================= */
-app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+  const [menuItems, setMenuItems] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [clickCount, setClickCount] = useState(0);
 
-app.use(express.json());
+  const [newName, setNewName] = useState('');
+  const [newPrice, setNewPrice] = useState('');
 
-/* =========================
-   DB CONNECTION
-========================= */
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('✅ Connected to MongoDB'))
-  .catch(err => console.error('❌ MongoDB Error:', err));
+  /* =========================
+     FETCH MENU
+  ========================= */
+  const fetchMenu = async () => {
+    try {
+      const res = await fetch(API_URL);
+      const data = await res.json();
 
-/* DEBUG (IMPORTANT) */
-console.log("MONGO DB URI:", process.env.MONGO_URI);
+      console.log("MENU:", data);
 
-/* =========================
-   MODEL
-========================= */
-const menuItemSchema = new mongoose.Schema({
-  name: String,
-  price: Number,
-  category: String,
-  description: String,
-  available: { type: Boolean, default: true }
-}, { timestamps: true });
+      setMenuItems(data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-const MenuItem = mongoose.model('MenuItem', menuItemSchema, 'menuitems');
+  useEffect(() => {
+    fetchMenu();
 
-/* =========================
-   AUTH MIDDLEWARE
-========================= */
-const verifyToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+    const token = localStorage.getItem('admin_token');
+    if (token) setIsAdmin(true);
+  }, []);
 
-  if (!authHeader) {
-    return res.status(401).json({ success: false, message: 'No token provided' });
-  }
+  /* =========================
+     AUTH HEADERS
+  ========================= */
+  const getAuthHeaders = () => {
+    const token = localStorage.getItem('admin_token');
 
-  const token = authHeader.split(' ')[1];
+    return {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` })
+    };
+  };
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
-  } catch (err) {
-    return res.status(401).json({ success: false, message: 'Invalid token' });
-  }
-};
+  /* =========================
+     SECRET LOGIN
+  ========================= */
+  const handleSecretClick = async () => {
+    const count = clickCount + 1;
+    setClickCount(count);
 
-/* =========================
-   LOGIN
-========================= */
-app.post('/api/login', (req, res) => {
-  const { password } = req.body;
+    if (count === 3) {
+      const password = prompt("Admin Password:");
 
-  if (password !== process.env.ADMIN_PASSWORD) {
-    return res.status(401).json({ success: false, message: 'Wrong password' });
-  }
+      const res = await fetch('https://pestos-backend.onrender.com/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
 
-  const token = jwt.sign({ role: 'admin' }, process.env.JWT_SECRET, {
-    expiresIn: '7d'
-  });
+      const data = await res.json();
 
-  res.json({ success: true, token });
-});
+      if (data.success) {
+        localStorage.setItem('admin_token', data.token);
+        setIsAdmin(true);
+      } else {
+        alert("Wrong password");
+      }
 
-/* =========================
-   GET MENU (PUBLIC)
-========================= */
-app.get('/api/menu', async (req, res) => {
-  const items = await MenuItem.find();
+      setClickCount(0);
+    }
+  };
 
-  console.log("FOUND ITEMS:", items.length);
+  /* =========================
+     LOGOUT
+  ========================= */
+  const logout = () => {
+    localStorage.removeItem('admin_token');
+    setIsAdmin(false);
+  };
 
-  res.json(items);
-});
+  /* =========================
+     ADD ITEM (FIXED)
+  ========================= */
+  const addItem = async (e) => {
+    e.preventDefault();
 
-/* =========================
-   ADD ITEM
-========================= */
-app.post('/api/menu', verifyToken, async (req, res) => {
-  try {
-    const item = new MenuItem(req.body);
-    const saved = await item.save();
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          name: newName,
+          price: Number(newPrice),
+          available: true
+        })
+      });
 
-    console.log("SAVED ITEM:", saved);
+      const data = await res.json();
+      console.log("ADD RESPONSE:", data);
 
-    res.status(201).json({ success: true, item: saved });
-  } catch (err) {
-    res.status(400).json({ success: false, error: err.message });
-  }
-});
+      if (!res.ok || !data.success) {
+        alert(data.message || "Add failed");
+        return;
+      }
 
-/* =========================
-   UPDATE ITEM
-========================= */
-app.put('/api/menu/:id', verifyToken, async (req, res) => {
-  try {
-    const updated = await MenuItem.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
+      // instant UI update
+      setMenuItems(prev => [...prev, data.item]);
+
+      setNewName('');
+      setNewPrice('');
+
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    }
+  };
+
+  /* =========================
+     DELETE ITEM
+  ========================= */
+  const deleteItem = async (id) => {
+    await fetch(`${API_URL}/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
+
+    setMenuItems(prev => prev.filter(i => i._id !== id));
+  };
+
+  /* =========================
+     TOGGLE AVAILABLE
+  ========================= */
+  const toggleAvailable = async (id, current) => {
+    await fetch(`${API_URL}/${id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ available: !current })
+    });
+
+    setMenuItems(prev =>
+      prev.map(item =>
+        item._id === id
+          ? { ...item, available: !current }
+          : item
+      )
     );
+  };
 
-    res.json({ success: true, item: updated });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+  return (
+    <div>
 
-/* =========================
-   DELETE ITEM
-========================= */
-app.delete('/api/menu/:id', verifyToken, async (req, res) => {
-  try {
-    await MenuItem.findByIdAndDelete(req.params.id);
+      <h1 onClick={handleSecretClick} style={{ textAlign: 'center' }}>
+        Pesto's Eatery
+      </h1>
 
-    res.json({ success: true, message: 'Deleted' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+      {!isAdmin && (
+        <div>
+          <h2>Menu</h2>
 
-/* =========================
-   START SERVER
-========================= */
-const PORT = process.env.PORT || 5000;
+          <div className="menu-grid">
+            {menuItems
+              .filter(i => i.available)
+              .map(item => (
+                <div key={item._id}>
+                  <h3>{item.name}</h3>
+                  <p>${Number(item.price).toFixed(2)}</p>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
+      {isAdmin && (
+        <div>
+
+          <button onClick={logout}>Logout</button>
+
+          <form onSubmit={addItem}>
+            <input
+              placeholder="Name"
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+            />
+
+            <input
+              placeholder="Price"
+              value={newPrice}
+              onChange={e => setNewPrice(e.target.value)}
+            />
+
+            <button type="submit">Add</button>
+          </form>
+
+          <h3>Admin Panel</h3>
+
+          {menuItems.map(item => (
+            <div key={item._id}>
+              <span>{item.name}</span>
+
+              <button onClick={() => toggleAvailable(item._id, item.available)}>
+                Toggle
+              </button>
+
+              <button onClick={() => deleteItem(item._id)}>
+                Delete
+              </button>
+            </div>
+          ))}
+
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+export default App;
