@@ -40,14 +40,19 @@ function App() {
   const getAuthHeaders = () => {
     const token = localStorage.getItem('admin_token');
 
+    if (!token) {
+      console.log("NO TOKEN FOUND");
+      return { 'Content-Type': 'application/json' };
+    }
+
     return {
       'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` })
+      Authorization: `Bearer ${token}`
     };
   };
 
   /* =========================
-     SECRET LOGIN
+     LOGIN
   ========================= */
   const handleSecretClick = async () => {
     const count = clickCount + 1;
@@ -101,6 +106,7 @@ function App() {
       });
 
       const data = await res.json();
+
       console.log("ADD RESPONSE:", data);
 
       if (!res.ok || !data.success) {
@@ -108,7 +114,6 @@ function App() {
         return;
       }
 
-      // instant UI update
       setMenuItems(prev => [...prev, data.item]);
 
       setNewName('');
@@ -121,7 +126,7 @@ function App() {
   };
 
   /* =========================
-     DELETE ITEM
+     DELETE
   ========================= */
   const deleteItem = async (id) => {
     await fetch(`${API_URL}/${id}`, {
@@ -133,7 +138,7 @@ function App() {
   };
 
   /* =========================
-     TOGGLE AVAILABLE
+     TOGGLE
   ========================= */
   const toggleAvailable = async (id, current) => {
     await fetch(`${API_URL}/${id}`, {
@@ -154,24 +159,18 @@ function App() {
   return (
     <div>
 
-      <h1 onClick={handleSecretClick} style={{ textAlign: 'center' }}>
-        Pesto's Eatery
-      </h1>
+      <h1>Pesto's Eatery</h1>
 
       {!isAdmin && (
         <div>
-          <h2>Menu</h2>
-
-          <div className="menu-grid">
-            {menuItems
-              .filter(i => i.available)
-              .map(item => (
-                <div key={item._id}>
-                  <h3>{item.name}</h3>
-                  <p>${Number(item.price).toFixed(2)}</p>
-                </div>
-              ))}
-          </div>
+          {menuItems
+            .filter(i => i.available)
+            .map(item => (
+              <div key={item._id}>
+                <h3>{item.name}</h3>
+                <p>${Number(item.price).toFixed(2)}</p>
+              </div>
+            ))}
         </div>
       )}
 
@@ -196,11 +195,9 @@ function App() {
             <button type="submit">Add</button>
           </form>
 
-          <h3>Admin Panel</h3>
-
           {menuItems.map(item => (
             <div key={item._id}>
-              <span>{item.name}</span>
+              {item.name}
 
               <button onClick={() => toggleAvailable(item._id, item.available)}>
                 Toggle
