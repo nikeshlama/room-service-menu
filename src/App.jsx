@@ -1,33 +1,45 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './App.css';
 
 function App() {
   const [menuItems, setMenuItems] = useState([]);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [clickCount, setClickCount] = useState(0);
 
   const [newName, setNewName] = useState('');
   const [newPrice, setNewPrice] = useState('');
+
+  const clickRef = useRef(0);
+  const clickTimer = useRef(null);
 
   const API_URL = 'https://pestos-backend.onrender.com/api/menu';
 
   const fetchMenu = () => {
     fetch(API_URL)
-      .then(res => res.json())
-      .then(data => setMenuItems(data))
-      .catch(err => console.error('Error:', err));
+      .then((res) => res.json())
+      .then((data) => setMenuItems(data))
+      .catch((err) => console.error('Error:', err));
   };
 
   useEffect(() => {
     fetchMenu();
   }, []);
 
-  // Hidden Admin Access
+  // Hidden admin access:
+  // Click the gold divider line 3 times within 1.5 seconds.
   const handleSecretClick = () => {
-    const newCount = clickCount + 1;
-    setClickCount(newCount);
+    clickRef.current += 1;
 
-    if (newCount === 3) {
+    if (clickTimer.current) {
+      clearTimeout(clickTimer.current);
+    }
+
+    clickTimer.current = setTimeout(() => {
+      clickRef.current = 0;
+    }, 1500);
+
+    if (clickRef.current === 3) {
+      clickRef.current = 0;
+
       const password = prompt('Enter Admin Password:');
 
       if (password === 'Pesto123') {
@@ -35,13 +47,7 @@ function App() {
       } else {
         alert('Access Denied');
       }
-
-      setClickCount(0);
     }
-
-    setTimeout(() => {
-      setClickCount(0);
-    }, 1500);
   };
 
   const handleAddItemSubmit = (e) => {
@@ -50,29 +56,29 @@ function App() {
     fetch(API_URL, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         name: newName,
         price: parseFloat(newPrice),
-        available: true
-      })
+        available: true,
+      }),
     })
       .then(() => {
         fetchMenu();
         setNewName('');
         setNewPrice('');
       })
-      .catch(err => console.error(err));
+      .catch((err) => console.error(err));
   };
 
   const handleDelete = (id) => {
     if (window.confirm('Delete this dish?')) {
       fetch(`${API_URL}/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
       })
         .then(() => fetchMenu())
-        .catch(err => console.error(err));
+        .catch((err) => console.error(err));
     }
   };
 
@@ -80,20 +86,19 @@ function App() {
     fetch(`${API_URL}/${id}`, {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        available: !currentStatus
-      })
+        available: !currentStatus,
+      }),
     })
       .then(() => fetchMenu())
-      .catch(err => console.error(err));
+      .catch((err) => console.error(err));
   };
 
   return (
     <div>
       {isAdmin ? (
-        // ADMIN PANEL
         <div className="admin-container">
           <button
             className="back-btn"
@@ -179,29 +184,28 @@ function App() {
           </div>
         </div>
       ) : (
-        // PUBLIC MENU
         <div className="app-container">
           <div className="menu-header">
             <h1>Pesto's Eatery</h1>
 
-            <p
-              className="subtitle"
-              onClick={handleSecretClick}
-              style={{
-                cursor: 'pointer',
-                userSelect: 'none'
-              }}
-            >
+            <p className="subtitle">
               Authentic Sudbury Kitchen • Room Service Menu
             </p>
 
-            <div className="header-line"></div>
+            <div
+              className="header-line"
+              onClick={handleSecretClick}
+              title=""
+              style={{
+                cursor: 'default',
+              }}
+            />
           </div>
 
           <div className="menu-grid">
             {menuItems
-              .filter(item => item.available)
-              .map(item => (
+              .filter((item) => item.available)
+              .map((item) => (
                 <div key={item._id} className="menu-card">
                   <h3>{item.name}</h3>
 
