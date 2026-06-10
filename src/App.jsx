@@ -14,11 +14,14 @@ function App() {
   /* =========================
      FETCH MENU
   ========================= */
-  const fetchMenu = () => {
-    fetch(API_URL)
-      .then(res => res.json())
-      .then(data => setMenuItems(data))
-      .catch(err => console.error(err));
+  const fetchMenu = async () => {
+    try {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      setMenuItems(data);
+    } catch (err) {
+      console.error("Fetch menu error:", err);
+    }
   };
 
   /* =========================
@@ -28,9 +31,7 @@ function App() {
     fetchMenu();
 
     const token = localStorage.getItem('admin_token');
-    if (token) {
-      setIsAdmin(true);
-    }
+    if (token) setIsAdmin(true);
   }, []);
 
   /* =========================
@@ -68,11 +69,11 @@ function App() {
 
         const data = await res.json();
 
-        if (data.success) {
+        if (res.ok && data.success) {
           localStorage.setItem('admin_token', data.token);
           setIsAdmin(true);
         } else {
-          alert('Wrong password');
+          alert(data.message || 'Wrong password');
         }
       } catch (err) {
         alert('Login failed');
@@ -91,47 +92,88 @@ function App() {
   };
 
   /* =========================
-     ADD ITEM
+     ADD ITEM (FIXED)
   ========================= */
-  const handleAddItemSubmit = (e) => {
+  const handleAddItemSubmit = async (e) => {
     e.preventDefault();
 
-    fetch(API_URL, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({
-        name: newName,
-        price: parseFloat(newPrice),
-        available: true
-      })
-    }).then(() => {
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          name: newName,
+          price: parseFloat(newPrice),
+          available: true
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        alert(data.message || "Failed to add item");
+        return;
+      }
+
       fetchMenu();
       setNewName('');
       setNewPrice('');
-    });
-  };
 
-  /* =========================
-     DELETE ITEM
-  ========================= */
-  const handleDelete = (id) => {
-    if (window.confirm('Delete this item?')) {
-      fetch(`${API_URL}/${id}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders()
-      }).then(() => fetchMenu());
+    } catch (err) {
+      console.error("Add item error:", err);
+      alert("Server error while adding item");
     }
   };
 
   /* =========================
-     TOGGLE AVAILABLE
+     DELETE ITEM (FIXED)
   ========================= */
-  const handleToggleAvailable = (id, current) => {
-    fetch(`${API_URL}/${id}`, {
-      method: 'PUT',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({ available: !current })
-    }).then(() => fetchMenu());
+  const handleDelete = async (id) => {
+    if (!window.confirm('Delete this item?')) return;
+
+    try {
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        alert("Delete failed");
+        return;
+      }
+
+      fetchMenu();
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    }
+  };
+
+  /* =========================
+     TOGGLE AVAILABLE (FIXED)
+  ========================= */
+  const handleToggleAvailable = async (id, current) => {
+    try {
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ available: !current })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        alert("Update failed");
+        return;
+      }
+
+      fetchMenu();
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    }
   };
 
   return (
