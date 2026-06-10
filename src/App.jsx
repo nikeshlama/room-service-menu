@@ -1,284 +1,145 @@
-import React, { useState, useEffect } from 'react';
-import './App.css';
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
-function App() {
-  const API_URL = 'https://pestos-backend.onrender.com/api/menu';
+const app = express();
 
-  const [menuItems, setMenuItems] = useState([]);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [clickCount, setClickCount] = useState(0);
+/* =========================
+   MIDDLEWARE
+========================= */
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
-  const [newName, setNewName] = useState('');
-  const [newPrice, setNewPrice] = useState('');
+app.use(express.json());
 
-  /* =========================
-     FETCH MENU
-  ========================= */
-  const fetchMenu = async () => {
-    try {
-      const res = await fetch(API_URL);
-      const data = await res.json();
-      setMenuItems(data);
-    } catch (err) {
-      console.error("Fetch menu error:", err);
-    }
-  };
+/* =========================
+   DB CONNECTION
+========================= */
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ Connected to MongoDB'))
+  .catch(err => console.error('❌ MongoDB Error:', err));
 
-  /* =========================
-     ON LOAD
-  ========================= */
-  useEffect(() => {
-    fetchMenu();
+/* DEBUG (IMPORTANT) */
+console.log("MONGO DB URI:", process.env.MONGO_URI);
 
-    const token = localStorage.getItem('admin_token');
-    if (token) setIsAdmin(true);
-  }, []);
+/* =========================
+   MODEL
+========================= */
+const menuItemSchema = new mongoose.Schema({
+  name: String,
+  price: Number,
+  category: String,
+  description: String,
+  available: { type: Boolean, default: true }
+}, { timestamps: true });
 
-  /* =========================
-     AUTH HEADER
-  ========================= */
-  const getAuthHeaders = () => ({
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${localStorage.getItem('admin_token')}`
+const MenuItem = mongoose.model('MenuItem', menuItemSchema, 'menuitems');
+
+/* =========================
+   AUTH MIDDLEWARE
+========================= */
+const verifyToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({ success: false, message: 'No token provided' });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ success: false, message: 'Invalid token' });
+  }
+};
+
+/* =========================
+   LOGIN
+========================= */
+app.post('/api/login', (req, res) => {
+  const { password } = req.body;
+
+  if (password !== process.env.ADMIN_PASSWORD) {
+    return res.status(401).json({ success: false, message: 'Wrong password' });
+  }
+
+  const token = jwt.sign({ role: 'admin' }, process.env.JWT_SECRET, {
+    expiresIn: '7d'
   });
 
-  /* =========================
-     SECRET LOGIN (3 CLICKS)
-  ========================= */
-  const handleSecretClick = async () => {
-    const count = clickCount + 1;
-    setClickCount(count);
+  res.json({ success: true, token });
+});
 
-    if (count === 3) {
-      const password = prompt('Enter Admin Password:');
+/* =========================
+   GET MENU (PUBLIC)
+========================= */
+app.get('/api/menu', async (req, res) => {
+  const items = await MenuItem.find();
 
-      if (!password) {
-        setClickCount(0);
-        return;
-      }
+  console.log("FOUND ITEMS:", items.length);
 
-      try {
-        const res = await fetch(
-          'https://pestos-backend.onrender.com/api/login',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password })
-          }
-        );
+  res.json(items);
+});
 
-        const data = await res.json();
+/* =========================
+   ADD ITEM
+========================= */
+app.post('/api/menu', verifyToken, async (req, res) => {
+  try {
+    const item = new MenuItem(req.body);
+    const saved = await item.save();
 
-        if (res.ok && data.success) {
-          localStorage.setItem('admin_token', data.token);
-          setIsAdmin(true);
-        } else {
-          alert(data.message || 'Wrong password');
-        }
-      } catch (err) {
-        alert('Login failed');
-      }
+    console.log("SAVED ITEM:", saved);
 
-      setClickCount(0);
-    }
-  };
+    res.status(201).json({ success: true, item: saved });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
 
-  /* =========================
-     LOGOUT
-  ========================= */
-  const handleLogout = () => {
-    localStorage.removeItem('admin_token');
-    setIsAdmin(false);
-  };
+/* =========================
+   UPDATE ITEM
+========================= */
+app.put('/api/menu/:id', verifyToken, async (req, res) => {
+  try {
+    const updated = await MenuItem.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
 
-  /* =========================
-     ADD ITEM (FIXED)
-  ========================= */
-  const handleAddItemSubmit = async (e) => {
-    e.preventDefault();
+    res.json({ success: true, item: updated });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
-    try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          name: newName,
-          price: parseFloat(newPrice),
-          available: true
-        })
-      });
+/* =========================
+   DELETE ITEM
+========================= */
+app.delete('/api/menu/:id', verifyToken, async (req, res) => {
+  try {
+    await MenuItem.findByIdAndDelete(req.params.id);
 
-      const data = await res.json();
+    res.json({ success: true, message: 'Deleted' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
-      if (!res.ok || !data.success) {
-        alert(data.message || "Failed to add item");
-        return;
-      }
+/* =========================
+   START SERVER
+========================= */
+const PORT = process.env.PORT || 5000;
 
-      fetchMenu();
-      setNewName('');
-      setNewPrice('');
-
-    } catch (err) {
-      console.error("Add item error:", err);
-      alert("Server error while adding item");
-    }
-  };
-
-  /* =========================
-     DELETE ITEM (FIXED)
-  ========================= */
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this item?')) return;
-
-    try {
-      const res = await fetch(`${API_URL}/${id}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders()
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        alert("Delete failed");
-        return;
-      }
-
-      fetchMenu();
-    } catch (err) {
-      console.error(err);
-      alert("Server error");
-    }
-  };
-
-  /* =========================
-     TOGGLE AVAILABLE (FIXED)
-  ========================= */
-  const handleToggleAvailable = async (id, current) => {
-    try {
-      const res = await fetch(`${API_URL}/${id}`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ available: !current })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok || !data.success) {
-        alert("Update failed");
-        return;
-      }
-
-      fetchMenu();
-    } catch (err) {
-      console.error(err);
-      alert("Server error");
-    }
-  };
-
-  return (
-    <div>
-
-      <h1
-        onClick={handleSecretClick}
-        style={{ textAlign: 'center', cursor: 'pointer' }}
-      >
-        Pesto's Eatery
-      </h1>
-
-      {/* ================= PUBLIC ================= */}
-      {!isAdmin && (
-        <div className="app-container">
-          <h2 style={{ textAlign: 'center' }}>Our Menu</h2>
-
-          <div className="menu-grid">
-            {menuItems
-              .filter(i => i.available)
-              .map(item => (
-                <div key={item._id} className="menu-card">
-                  <h3>{item.name}</h3>
-                  <p className="price">${item.price?.toFixed(2)}</p>
-                </div>
-              ))}
-          </div>
-        </div>
-      )}
-
-      {/* ================= ADMIN ================= */}
-      {isAdmin && (
-        <div className="admin-container">
-
-          <button onClick={handleLogout} className="back-btn">
-            Logout
-          </button>
-
-          <form onSubmit={handleAddItemSubmit} className="admin-form">
-            <input
-              placeholder="Dish Name"
-              value={newName}
-              onChange={e => setNewName(e.target.value)}
-              required
-            />
-
-            <input
-              type="number"
-              placeholder="Price"
-              value={newPrice}
-              onChange={e => setNewPrice(e.target.value)}
-              required
-            />
-
-            <button type="submit" className="submit-btn">
-              Add Item
-            </button>
-          </form>
-
-          <h3>Menu Control</h3>
-
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Available</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {menuItems.map(item => (
-                <tr key={item._id}>
-                  <td>{item.name}</td>
-                  <td>${item.price}</td>
-
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={item.available}
-                      onChange={() =>
-                        handleToggleAvailable(item._id, item.available)
-                      }
-                    />
-                  </td>
-
-                  <td>
-                    <button
-                      onClick={() => handleDelete(item._id)}
-                      className="back-btn"
-                      style={{ background: 'red' }}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-        </div>
-      )}
-    </div>
-  );
-}
-
-export default App;
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
