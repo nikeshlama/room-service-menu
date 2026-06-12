@@ -25,14 +25,23 @@ function App() {
   ];
 
   const fetchMenu = async () => {
-    const res = await fetch(API_URL);
-    const data = await res.json();
-    setMenuItems(Array.isArray(data) ? data : []);
+    try {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      setMenuItems(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('GET ERROR:', err);
+    }
   };
 
   useEffect(() => {
     fetchMenu();
   }, []);
+
+  const getAuthHeaders = () => ({
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${localStorage.getItem('admin_token')}`
+  });
 
   const handleSecretClick = async () => {
     const newCount = clickCount + 1;
@@ -41,90 +50,125 @@ function App() {
     if (newCount === 3) {
       const password = prompt('Enter admin password');
 
-      const res = await fetch(LOGIN_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password })
-      });
-
-      const data = await res.json();
-
-      if (data.success) {
-        localStorage.setItem('admin_token', data.token);
-        setShowAdmin(true);
-      } else {
-        alert('Wrong password');
+      if (!password) {
+        setClickCount(0);
+        return;
       }
 
-      setClickCount(0);
+      try {
+        const res = await fetch(LOGIN_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ password })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          alert(data.message || 'Wrong password');
+          setClickCount(0);
+          return;
+        }
+
+        localStorage.setItem('admin_token', data.token);
+        setShowAdmin(true);
+        setClickCount(0);
+      } catch (err) {
+        console.error('LOGIN ERROR:', err);
+        alert('Could not login');
+        setClickCount(0);
+      }
     }
   };
-
-  const getAuthHeaders = () => ({
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${localStorage.getItem('admin_token')}`
-  });
 
   const addItem = async (e) => {
     e.preventDefault();
 
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({
-        name,
-        price: Number(price),
-        category,
-        tags,
-        description,
-        available: true
-      })
-    });
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          name,
+          price: Number(price),
+          category,
+          tags,
+          description,
+          available: true
+        })
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!data.success) {
-      alert(data.message || 'Save failed');
-      return;
+      if (!res.ok || !data.success) {
+        alert(data.message || 'Save failed');
+        return;
+      }
+
+      setName('');
+      setPrice('');
+      setCategory('Appetizers');
+      setTags('');
+      setDescription('');
+
+      fetchMenu();
+    } catch (err) {
+      console.error('POST ERROR:', err);
+      alert('Frontend could not reach backend');
     }
-
-    setName('');
-    setPrice('');
-    setCategory('Appetizers');
-    setTags('');
-    setDescription('');
-
-    fetchMenu();
   };
 
   const toggleAvailability = async (item) => {
-    await fetch(`${API_URL}/${item._id}`, {
-      method: 'PUT',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({
-        available: item.available === false ? true : false
-      })
-    });
+    try {
+      const res = await fetch(`${API_URL}/${item._id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          available: item.available === false ? true : false
+        })
+      });
 
-    fetchMenu();
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        alert(data.message || 'Update failed');
+        return;
+      }
+
+      fetchMenu();
+    } catch (err) {
+      console.error('PUT ERROR:', err);
+    }
   };
 
   const deleteItem = async (id) => {
     if (!window.confirm('Delete this menu item?')) return;
 
-    const res = await fetch(`${API_URL}/${id}`, {
-      method: 'DELETE',
-      headers: getAuthHeaders()
-    });
+    try {
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!data.success) {
-      alert(data.message || 'Delete failed');
-      return;
+      if (!res.ok || !data.success) {
+        alert(data.message || 'Delete failed');
+        return;
+      }
+
+      fetchMenu();
+    } catch (err) {
+      console.error('DELETE ERROR:', err);
+      alert('Could not delete item');
     }
+  };
 
-    fetchMenu();
+  const backToGuestView = () => {
+    localStorage.removeItem('admin_token');
+    setShowAdmin(false);
   };
 
   if (showAdmin) {
@@ -139,7 +183,7 @@ function App() {
 
             <button
               className="back-btn"
-              onClick={() => setShowAdmin(false)}
+              onClick={backToGuestView}
             >
               ← Back to Menu View
             </button>
@@ -257,6 +301,14 @@ function App() {
                     </td>
                   </tr>
                 ))}
+
+                {menuItems.length === 0 && (
+                  <tr>
+                    <td colSpan="5" className="empty-text">
+                      No menu items found.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
