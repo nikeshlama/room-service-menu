@@ -25,9 +25,6 @@ function App() {
     try {
       const res = await fetch(API_URL);
       const data = await res.json();
-
-      console.log('GET RESPONSE:', data);
-
       setMenuItems(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('GET ERROR:', err);
@@ -40,8 +37,6 @@ function App() {
 
   const addItem = async (e) => {
     e.preventDefault();
-
-    console.log('Trying to save item...');
 
     try {
       const res = await fetch(API_URL, {
@@ -61,15 +56,10 @@ function App() {
 
       const data = await res.json();
 
-      console.log('POST STATUS:', res.status);
-      console.log('POST RESPONSE:', data);
-
       if (!res.ok || !data.success) {
         alert(data.message || 'Save failed');
         return;
       }
-
-      alert('Item saved!');
 
       setName('');
       setPrice('');
@@ -86,7 +76,7 @@ function App() {
 
   const toggleAvailability = async (item) => {
     try {
-      const res = await fetch(`${API_URL}/${item._id}`, {
+      await fetch(`${API_URL}/${item._id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -96,11 +86,6 @@ function App() {
         })
       });
 
-      const data = await res.json();
-
-      console.log('PUT STATUS:', res.status);
-      console.log('PUT RESPONSE:', data);
-
       fetchMenu();
     } catch (err) {
       console.error('PUT ERROR:', err);
@@ -108,9 +93,7 @@ function App() {
   };
 
   const deleteItem = async (id) => {
-    const confirmDelete = window.confirm('Delete this menu item?');
-
-    if (!confirmDelete) return;
+    if (!window.confirm('Delete this menu item?')) return;
 
     try {
       const res = await fetch(`${API_URL}/${id}`, {
@@ -118,9 +101,6 @@ function App() {
       });
 
       const data = await res.json();
-
-      console.log('DELETE STATUS:', res.status);
-      console.log('DELETE RESPONSE:', data);
 
       if (!res.ok || !data.success) {
         alert(data.message || 'Delete failed');
