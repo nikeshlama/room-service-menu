@@ -205,7 +205,7 @@ function App() {
               </div>
 
               <div className="form-group">
-                <label>PRICE ($ USD) *</label>
+                <label>PRICE </label>
                 <input
                   type="number"
                   step="0.01"
