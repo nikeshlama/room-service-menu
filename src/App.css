@@ -162,3 +162,63 @@ td {
     grid-template-columns: 1fr;
   }
 }
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.menu-card {
+  background: white;
+  border: 1px solid #ddd2c2;
+  border-radius: 6px;
+  padding: 24px;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.card-head h3 {
+  margin: 0;
+}
+
+.card-head span {
+  color: #c9a24f;
+  font-weight: bold;
+}
+
+.category {
+  font-weight: bold;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.tags {
+  color: #2e7d32;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.back-btn {
+  background: #111;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.back-btn:hover {
+  background: #333;
+}
+
+@media (max-width: 900px) {
+  .menu-grid {
+    grid-template-columns: 1fr;
+  }
+}
