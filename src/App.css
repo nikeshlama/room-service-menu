@@ -131,9 +131,13 @@ h1 {
 }
 
 .tags {
-  color: #0b7d7d !important;
-  font-weight: bold;
-  font-size: 13px;
+  display: inline-block;
+  margin-top: 12px;
+  color: #0f7a36;
+  font-weight: 700;
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .form-card {
