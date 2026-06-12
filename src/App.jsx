@@ -1,213 +1,107 @@
-import React, { useEffect, useState } from 'react';
-import './App.css';
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+require('dotenv').config();
 
-const API_URL = 'https://pestos-backend.onrender.com/api/menu';
+const app = express();
 
-function App() {
-  const [menuItems, setMenuItems] = useState([]);
+app.use(cors());
+app.use(express.json());
 
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
-  const [category, setCategory] = useState('Appetizers');
-  const [description, setDescription] = useState('');
-  const [available, setAvailable] = useState(true);
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('MongoDB Connected'))
+  .catch(err => console.log('MongoDB Error:', err));
 
-  const categories = [
-    'Appetizers',
-    'Salads & Sandwiches',
-    'Pasta',
-    'Pizza',
-    'Desserts',
-    'Beverages'
-  ];
+const menuSchema = new mongoose.Schema({
+  name: String,
+  price: Number,
+  category: String,
+  description: String,
+  tags: String,
+  available: {
+    type: Boolean,
+    default: true
+  }
+});
 
-  const fetchMenu = async () => {
-    try {
-      const res = await fetch(API_URL);
-      const data = await res.json();
-      setMenuItems(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error('Fetch Error:', err);
-    }
-  };
+const Menu = mongoose.model('Menu', menuSchema, 'menuitems');
 
-  useEffect(() => {
-    fetchMenu();
-  }, []);
+app.get('/', (req, res) => {
+  res.send('Pesto backend is running');
+});
 
-  const addItem = async (e) => {
-    e.preventDefault();
+app.get('/api/menu', async (req, res) => {
+  try {
+    const items = await Menu.find().sort({ _id: -1 });
+    res.json(items);
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
+});
 
-    try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          name,
-          price: Number(price),
-          category,
-          description,
-          available
-        })
-      });
+app.post('/api/menu', async (req, res) => {
+  try {
+    const item = await Menu.create({
+      name: req.body.name,
+      price: Number(req.body.price),
+      category: req.body.category,
+      description: req.body.description,
+      tags: req.body.tags,
+      available: req.body.available !== false
+    });
 
-      const data = await res.json();
+    res.json({
+      success: true,
+      item
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
+});
 
-      if (!data.success) {
-        alert(data.message || 'Failed to add item');
-        return;
-      }
-
-      setName('');
-      setPrice('');
-      setCategory('Appetizers');
-      setDescription('');
-      setAvailable(true);
-
-      fetchMenu();
-    } catch (err) {
-      console.error('Add Error:', err);
-    }
-  };
-
-  const deleteItem = async (id) => {
-    const confirmDelete = window.confirm(
-      'Are you sure you want to delete this menu item?'
+app.put('/api/menu/:id', async (req, res) => {
+  try {
+    const updated = await Menu.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
     );
 
-    if (!confirmDelete) return;
+    res.json({
+      success: true,
+      item: updated
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
+});
 
-    try {
-      const res = await fetch(`${API_URL}/${id}`, {
-        method: 'DELETE'
-      });
+app.delete('/api/menu/:id', async (req, res) => {
+  try {
+    await Menu.findByIdAndDelete(req.params.id);
 
-      const data = await res.json();
+    res.json({
+      success: true
+    });
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
+});
 
-      if (data.success) {
-        fetchMenu();
-      } else {
-        alert('Delete failed');
-      }
-    } catch (err) {
-      console.error('Delete Error:', err);
-    }
-  };
+const PORT = process.env.PORT || 5000;
 
-  return (
-    <div className="app-container">
-
-      <header className="menu-header">
-        <h1>Pesto's Eatery</h1>
-        <p className="subtitle">
-          Fresh • Authentic • Delicious
-        </p>
-      </header>
-
-      <form
-        className="admin-form"
-        onSubmit={addItem}
-      >
-        <h2>Add Menu Item</h2>
-
-        <input
-          type="text"
-          placeholder="Item Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-
-        <input
-          type="number"
-          step="0.01"
-          placeholder="Price"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
-          required
-        />
-
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        >
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
-
-        <textarea
-          placeholder="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-
-        <label>
-          <input
-            type="checkbox"
-            checked={available}
-            onChange={(e) =>
-              setAvailable(e.target.checked)
-            }
-          />
-          Available
-        </label>
-
-        <button type="submit">
-          Add Item
-        </button>
-      </form>
-
-      <div className="menu-grid">
-        {menuItems.map((item) => (
-          <div
-            className="menu-card"
-            key={item._id}
-          >
-            <h3>{item.name}</h3>
-
-            <p>
-              <strong>Category:</strong>{' '}
-              {item.category}
-            </p>
-
-            <p>{item.description}</p>
-
-            <p>
-              <strong>
-                ${Number(item.price).toFixed(2)}
-              </strong>
-            </p>
-
-            <p>
-              Status:{' '}
-              {item.available !== false
-                ? '✅ Available'
-                : '❌ Unavailable'}
-            </p>
-
-            <button
-              onClick={() =>
-                deleteItem(item._id)
-              }
-              style={{
-                marginTop: '10px',
-                padding: '8px 12px',
-                cursor: 'pointer'
-              }}
-            >
-              Delete Item
-            </button>
-          </div>
-        ))}
-      </div>
-
-    </div>
-  );
-}
-
-export default App;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
