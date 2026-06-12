@@ -3,12 +3,14 @@ import './App.css';
 
 const API_URL = 'https://pestos-backend.onrender.com/api/menu';
 const LOGIN_URL = 'https://pestos-backend.onrender.com/api/login';
+const TAX_RATE = 0.13;
 
 function App() {
   const [menuItems, setMenuItems] = useState([]);
   const [showAdmin, setShowAdmin] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [cart, setCart] = useState([]);
 
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
@@ -163,6 +165,70 @@ function App() {
     setShowAdmin(false);
   };
 
+  const addToCart = (item) => {
+    if (item.available === false) return;
+
+    setCart((currentCart) => {
+      const existingItem = currentCart.find(
+        (cartItem) => cartItem._id === item._id
+      );
+
+      if (existingItem) {
+        return currentCart.map((cartItem) =>
+          cartItem._id === item._id
+            ? { ...cartItem, quantity: cartItem.quantity + 1 }
+            : cartItem
+        );
+      }
+
+      return [
+        ...currentCart,
+        {
+          _id: item._id,
+          name: item.name,
+          price: Number(item.price),
+          quantity: 1
+        }
+      ];
+    });
+  };
+
+  const increaseQuantity = (id) => {
+    setCart((currentCart) =>
+      currentCart.map((item) =>
+        item._id === id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      )
+    );
+  };
+
+  const decreaseQuantity = (id) => {
+    setCart((currentCart) =>
+      currentCart
+        .map((item) =>
+          item._id === id
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
+        )
+        .filter((item) => item.quantity > 0)
+    );
+  };
+
+  const removeFromCart = (id) => {
+    setCart((currentCart) =>
+      currentCart.filter((item) => item._id !== id)
+    );
+  };
+
+  const subtotal = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  const tax = subtotal * TAX_RATE;
+  const total = subtotal + tax;
+
   const visibleItems =
     selectedCategory === 'All'
       ? menuItems
@@ -201,7 +267,7 @@ function App() {
               </div>
 
               <div className="form-group">
-                <label>PRICE </label>
+                <label>PRICE</label>
                 <input
                   type="number"
                   step="0.01"
@@ -281,7 +347,9 @@ function App() {
                         }
                         onClick={() => toggleAvailability(item)}
                       >
-                        {item.available !== false ? 'In Stock' : 'Out of Stock'}
+                        {item.available !== false
+                          ? 'In Stock'
+                          : 'Out of Stock'}
                       </button>
                     </td>
 
@@ -329,31 +397,95 @@ function App() {
           ))}
         </div>
 
-        <div className="menu-grid">
-          {visibleItems.map((item) => (
-            <div
-              className={`menu-card ${
-                item.available === false ? 'unavailable-card' : ''
-              }`}
-              key={item._id}
-            >
-              <div className="card-head">
-                <h3>{item.name}</h3>
-                <span>${Number(item.price).toFixed(2)}</span>
+        <div className="guest-layout">
+          <div className="menu-grid">
+            {visibleItems.map((item) => (
+              <div
+                className={`menu-card ${
+                  item.available === false ? 'unavailable-card' : ''
+                }`}
+                key={item._id}
+                onClick={() => addToCart(item)}
+              >
+                <div className="card-head">
+                  <h3>{item.name}</h3>
+                  <span>${Number(item.price).toFixed(2)}</span>
+                </div>
+
+                <p className="category">{item.category}</p>
+                <p>{item.description}</p>
+
+                {Array.isArray(item.tags) && item.tags.length > 0 && (
+                  <p className="tags">{item.tags.join(', ')}</p>
+                )}
+
+                {item.available === false ? (
+                  <p className="unavailable-label">
+                    Currently unavailable
+                  </p>
+                ) : (
+                  <p className="add-hint">Click to add to cart</p>
+                )}
               </div>
+            ))}
+          </div>
 
-              <p className="category">{item.category}</p>
-              <p>{item.description}</p>
+          <div className="cart-box">
+            <h2>Your Order</h2>
 
-              {Array.isArray(item.tags) && item.tags.length > 0 && (
-                <p className="tags">{item.tags.join(', ')}</p>
-              )}
+            {cart.length === 0 && (
+              <p className="empty-cart">No items added yet.</p>
+            )}
 
-              {item.available === false && (
-                <p className="unavailable-label">Currently unavailable</p>
-              )}
-            </div>
-          ))}
+            {cart.map((item) => (
+              <div className="cart-item" key={item._id}>
+                <div>
+                  <strong>{item.name}</strong>
+                  <p>
+                    ${item.price.toFixed(2)} × {item.quantity}
+                  </p>
+                </div>
+
+                <div className="cart-controls">
+                  <button onClick={() => decreaseQuantity(item._id)}>
+                    −
+                  </button>
+
+                  <span>{item.quantity}</span>
+
+                  <button onClick={() => increaseQuantity(item._id)}>
+                    +
+                  </button>
+
+                  <button
+                    className="remove-cart-btn"
+                    onClick={() => removeFromCart(item._id)}
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {cart.length > 0 && (
+              <div className="cart-summary">
+                <div>
+                  <span>Subtotal</span>
+                  <strong>${subtotal.toFixed(2)}</strong>
+                </div>
+
+                <div>
+                  <span>Tax 13%</span>
+                  <strong>${tax.toFixed(2)}</strong>
+                </div>
+
+                <div className="cart-total">
+                  <span>Total</span>
+                  <strong>${total.toFixed(2)}</strong>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
