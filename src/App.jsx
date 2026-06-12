@@ -78,7 +78,6 @@ function App() {
         setShowAdmin(true);
         setClickCount(0);
       } catch (err) {
-        console.error('LOGIN ERROR:', err);
         alert('Could not login');
         setClickCount(0);
       }
@@ -88,84 +87,70 @@ function App() {
   const addItem = async (e) => {
     e.preventDefault();
 
-    try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          name,
-          price: Number(price),
-          category,
-          tags,
-          description,
-          available: true
-        })
-      });
+    const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        name,
+        price: Number(price),
+        category,
+        tags,
+        description,
+        available: true
+      })
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (!res.ok || !data.success) {
-        alert(data.message || 'Save failed');
-        return;
-      }
-
-      setName('');
-      setPrice('');
-      setCategory('Appetizers');
-      setTags('');
-      setDescription('');
-
-      fetchMenu();
-    } catch (err) {
-      console.error('POST ERROR:', err);
-      alert('Frontend could not reach backend');
+    if (!res.ok || !data.success) {
+      alert(data.message || 'Save failed');
+      return;
     }
+
+    setName('');
+    setPrice('');
+    setCategory('Appetizers');
+    setTags('');
+    setDescription('');
+
+    fetchMenu();
   };
 
   const toggleAvailability = async (item) => {
-    try {
-      const res = await fetch(`${API_URL}/${item._id}`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({
-          available: item.available === false ? true : false
-        })
-      });
+    const res = await fetch(`${API_URL}/${item._id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        available: item.available === false ? true : false
+      })
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (!res.ok || !data.success) {
-        alert(data.message || 'Update failed');
-        return;
-      }
-
-      fetchMenu();
-    } catch (err) {
-      console.error('PUT ERROR:', err);
+    if (!res.ok || !data.success) {
+      alert(data.message || 'Update failed');
+      return;
     }
+
+    fetchMenu();
   };
 
   const deleteItem = async (id) => {
     if (!window.confirm('Delete this menu item?')) return;
 
-    try {
-      const res = await fetch(`${API_URL}/${id}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders()
-      });
+    const res = await fetch(`${API_URL}/${id}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders()
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (!res.ok || !data.success) {
-        alert(data.message || 'Delete failed');
-        return;
-      }
-
-      fetchMenu();
-    } catch (err) {
-      console.error('DELETE ERROR:', err);
-      alert('Could not delete item');
+    if (!res.ok || !data.success) {
+      alert(data.message || 'Delete failed');
+      return;
     }
+
+    fetchMenu();
   };
 
   const backToGuestView = () => {
@@ -183,10 +168,7 @@ function App() {
               <p className="subtitle">Database Live Dashboard</p>
             </div>
 
-            <button
-              className="back-btn"
-              onClick={backToGuestView}
-            >
+            <button className="back-btn" onClick={backToGuestView}>
               ← Back to Menu View
             </button>
           </div>
@@ -201,7 +183,6 @@ function App() {
                 <label>DISH NAME *</label>
                 <input
                   type="text"
-                  placeholder="e.g. Garlic Gnocchi"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
@@ -213,7 +194,6 @@ function App() {
                 <input
                   type="number"
                   step="0.01"
-                  placeholder="e.g. 24.99"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   required
@@ -238,7 +218,6 @@ function App() {
                 <label>TAGS</label>
                 <input
                   type="text"
-                  placeholder="V, GF"
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
                 />
@@ -248,7 +227,6 @@ function App() {
             <div className="form-group">
               <label>MENU DESCRIPTION</label>
               <textarea
-                placeholder="Describe preparation elements..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
@@ -303,14 +281,6 @@ function App() {
                     </td>
                   </tr>
                 ))}
-
-                {menuItems.length === 0 && (
-                  <tr>
-                    <td colSpan="5" className="empty-text">
-                      No menu items found.
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>
