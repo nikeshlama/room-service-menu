@@ -22,9 +22,13 @@ function App() {
   ];
 
   const fetchMenu = async () => {
-    const res = await fetch(API_URL);
-    const data = await res.json();
-    setMenuItems(Array.isArray(data) ? data : []);
+    try {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      setMenuItems(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Fetch error:', err);
+    }
   };
 
   useEffect(() => {
@@ -34,48 +38,77 @@ function App() {
   const addItem = async (e) => {
     e.preventDefault();
 
-    await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name,
-        price: Number(price),
-        category,
-        tags,
-        description,
-        available: true
-      })
-    });
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name,
+          price: Number(price),
+          category,
+          tags,
+          description,
+          available: true
+        })
+      });
 
-    setName('');
-    setPrice('');
-    setCategory('Appetizers');
-    setTags('');
-    setDescription('');
+      const data = await res.json();
 
-    fetchMenu();
+      if (!data.success) {
+        alert(data.message || 'Failed to add item');
+        return;
+      }
+
+      setName('');
+      setPrice('');
+      setCategory('Appetizers');
+      setTags('');
+      setDescription('');
+
+      fetchMenu();
+    } catch (err) {
+      console.error('Add error:', err);
+      alert('Could not add item');
+    }
   };
 
   const toggleAvailability = async (item) => {
-    await fetch(`${API_URL}/${item._id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        available: item.available === false ? true : false
-      })
-    });
+    try {
+      await fetch(`${API_URL}/${item._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          available: item.available === false ? true : false
+        })
+      });
 
-    fetchMenu();
+      fetchMenu();
+    } catch (err) {
+      console.error('Toggle error:', err);
+    }
   };
 
   const deleteItem = async (id) => {
-    if (!window.confirm('Delete this menu item?')) return;
+    const confirmDelete = window.confirm('Delete this menu item?');
 
-    await fetch(`${API_URL}/${id}`, {
-      method: 'DELETE'
-    });
+    if (!confirmDelete) return;
 
-    fetchMenu();
+    try {
+      const res = await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE'
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        fetchMenu();
+      } else {
+        alert('Delete failed');
+      }
+    } catch (err) {
+      console.error('Delete error:', err);
+      alert('Could not delete item');
+    }
   };
 
   return (
