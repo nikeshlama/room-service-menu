@@ -1,107 +1,219 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-require('dotenv').config();
+import React, { useEffect, useState } from 'react';
+import './App.css';
 
-const app = express();
+const API_URL = 'https://pestos-backend.onrender.com/api/menu';
 
-app.use(cors());
-app.use(express.json());
+function App() {
+  const [menuItems, setMenuItems] = useState([]);
 
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB Connected'))
-  .catch(err => console.log('MongoDB Error:', err));
+  const [name, setName] = useState('');
+  const [price, setPrice] = useState('');
+  const [category, setCategory] = useState('Appetizers');
+  const [tags, setTags] = useState('');
+  const [description, setDescription] = useState('');
 
-const menuSchema = new mongoose.Schema({
-  name: String,
-  price: Number,
-  category: String,
-  description: String,
-  tags: String,
-  available: {
-    type: Boolean,
-    default: true
-  }
-});
+  const categories = [
+    'Appetizers',
+    'Salads & Sandwiches',
+    'Pasta',
+    'Pizza',
+    'Desserts',
+    'Beverages'
+  ];
 
-const Menu = mongoose.model('Menu', menuSchema, 'menuitems');
+  const fetchMenu = async () => {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+    setMenuItems(Array.isArray(data) ? data : []);
+  };
 
-app.get('/', (req, res) => {
-  res.send('Pesto backend is running');
-});
+  useEffect(() => {
+    fetchMenu();
+  }, []);
 
-app.get('/api/menu', async (req, res) => {
-  try {
-    const items = await Menu.find().sort({ _id: -1 });
-    res.json(items);
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message
-    });
-  }
-});
+  const addItem = async (e) => {
+    e.preventDefault();
 
-app.post('/api/menu', async (req, res) => {
-  try {
-    const item = await Menu.create({
-      name: req.body.name,
-      price: Number(req.body.price),
-      category: req.body.category,
-      description: req.body.description,
-      tags: req.body.tags,
-      available: req.body.available !== false
+    await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        price: Number(price),
+        category,
+        tags,
+        description,
+        available: true
+      })
     });
 
-    res.json({
-      success: true,
-      item
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message
-    });
-  }
-});
+    setName('');
+    setPrice('');
+    setCategory('Appetizers');
+    setTags('');
+    setDescription('');
 
-app.put('/api/menu/:id', async (req, res) => {
-  try {
-    const updated = await Menu.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
+    fetchMenu();
+  };
 
-    res.json({
-      success: true,
-      item: updated
+  const toggleAvailability = async (item) => {
+    await fetch(`${API_URL}/${item._id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        available: item.available === false ? true : false
+      })
     });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message
+
+    fetchMenu();
+  };
+
+  const deleteItem = async (id) => {
+    if (!window.confirm('Delete this menu item?')) return;
+
+    await fetch(`${API_URL}/${id}`, {
+      method: 'DELETE'
     });
-  }
-});
 
-app.delete('/api/menu/:id', async (req, res) => {
-  try {
-    await Menu.findByIdAndDelete(req.params.id);
+    fetchMenu();
+  };
 
-    res.json({
-      success: true
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message
-    });
-  }
-});
+  return (
+    <div className="page">
+      <div className="container">
+        <div className="top-row">
+          <div>
+            <h1>Pesto's Control Panel</h1>
+            <p className="subtitle">Database Live Dashboard</p>
+          </div>
+        </div>
 
-const PORT = process.env.PORT || 5000;
+        <div className="gold-line"></div>
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+        <form className="form-card" onSubmit={addItem}>
+          <h2>Add New Kitchen Dish Record</h2>
+
+          <div className="form-grid">
+            <div className="form-group">
+              <label>DISH NAME *</label>
+              <input
+                type="text"
+                placeholder="e.g. Garlic Gnocchi"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>PRICE ($ USD) *</label>
+              <input
+                type="number"
+                step="0.01"
+                placeholder="e.g. 24.99"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>CATEGORY</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>TAGS</label>
+              <input
+                type="text"
+                placeholder="V, GF"
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>MENU DESCRIPTION</label>
+            <textarea
+              placeholder="Describe preparation elements..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
+          <button className="save-btn" type="submit">
+            SAVE TO CLOUD DATABASE
+          </button>
+        </form>
+
+        <h2 className="section-title">Live Inventory Control List</h2>
+
+        <div className="table-box">
+          <table>
+            <thead>
+              <tr>
+                <th>DISH NAME</th>
+                <th>CATEGORY</th>
+                <th>PRICE</th>
+                <th>STOCK STATUS TOGGLE</th>
+                <th>DELETE</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {menuItems.map((item) => (
+                <tr key={item._id}>
+                  <td>{item.name}</td>
+                  <td>{item.category}</td>
+                  <td>${Number(item.price).toFixed(2)}</td>
+
+                  <td>
+                    <button
+                      className={
+                        item.available !== false
+                          ? 'stock-btn in-stock'
+                          : 'stock-btn out-stock'
+                      }
+                      onClick={() => toggleAvailability(item)}
+                    >
+                      {item.available !== false ? 'In Stock' : 'Out of Stock'}
+                    </button>
+                  </td>
+
+                  <td>
+                    <button
+                      className="delete-btn"
+                      onClick={() => deleteItem(item._id)}
+                    >
+                      DELETE
+                    </button>
+                  </td>
+                </tr>
+              ))}
+
+              {menuItems.length === 0 && (
+                <tr>
+                  <td colSpan="5" className="empty-text">
+                    No menu items found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default App;
