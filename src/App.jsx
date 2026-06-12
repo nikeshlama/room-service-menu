@@ -25,9 +25,12 @@ function App() {
     try {
       const res = await fetch(API_URL);
       const data = await res.json();
+
+      console.log('GET RESPONSE:', data);
+
       setMenuItems(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error('Fetch error:', err);
+      console.error('GET ERROR:', err);
     }
   };
 
@@ -38,10 +41,14 @@ function App() {
   const addItem = async (e) => {
     e.preventDefault();
 
+    console.log('Trying to save item...');
+
     try {
       const res = await fetch(API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
           name,
           price: Number(price),
@@ -54,10 +61,15 @@ function App() {
 
       const data = await res.json();
 
-      if (!data.success) {
-        alert(data.message || 'Failed to add item');
+      console.log('POST STATUS:', res.status);
+      console.log('POST RESPONSE:', data);
+
+      if (!res.ok || !data.success) {
+        alert(data.message || 'Save failed');
         return;
       }
+
+      alert('Item saved!');
 
       setName('');
       setPrice('');
@@ -67,24 +79,31 @@ function App() {
 
       fetchMenu();
     } catch (err) {
-      console.error('Add error:', err);
-      alert('Could not add item');
+      console.error('POST ERROR:', err);
+      alert('Frontend could not reach backend');
     }
   };
 
   const toggleAvailability = async (item) => {
     try {
-      await fetch(`${API_URL}/${item._id}`, {
+      const res = await fetch(`${API_URL}/${item._id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
           available: item.available === false ? true : false
         })
       });
 
+      const data = await res.json();
+
+      console.log('PUT STATUS:', res.status);
+      console.log('PUT RESPONSE:', data);
+
       fetchMenu();
     } catch (err) {
-      console.error('Toggle error:', err);
+      console.error('PUT ERROR:', err);
     }
   };
 
@@ -100,13 +119,17 @@ function App() {
 
       const data = await res.json();
 
-      if (data.success) {
-        fetchMenu();
-      } else {
-        alert('Delete failed');
+      console.log('DELETE STATUS:', res.status);
+      console.log('DELETE RESPONSE:', data);
+
+      if (!res.ok || !data.success) {
+        alert(data.message || 'Delete failed');
+        return;
       }
+
+      fetchMenu();
     } catch (err) {
-      console.error('Delete error:', err);
+      console.error('DELETE ERROR:', err);
       alert('Could not delete item');
     }
   };
