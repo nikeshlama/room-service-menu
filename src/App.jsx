@@ -8,6 +8,7 @@ function App() {
   const [menuItems, setMenuItems] = useState([]);
   const [showAdmin, setShowAdmin] = useState(false);
   const [clickCount, setClickCount] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
@@ -16,13 +17,17 @@ function App() {
   const [description, setDescription] = useState('');
 
   const categories = [
+    'All',
     'Appetizers',
     'Salads & Sandwiches',
     'Pasta',
     'Pizza',
+    'Kids Menu',
     'Desserts',
     'Beverages'
   ];
+
+  const adminCategories = categories.filter((cat) => cat !== 'All');
 
   const fetchMenu = async () => {
     try {
@@ -158,6 +163,15 @@ function App() {
     setShowAdmin(false);
   };
 
+  const visibleItems =
+    selectedCategory === 'All'
+      ? menuItems.filter((item) => item.available !== false)
+      : menuItems.filter(
+          (item) =>
+            item.available !== false &&
+            item.category === selectedCategory
+        );
+
   if (showAdmin) {
     return (
       <div className="page">
@@ -183,6 +197,7 @@ function App() {
                 <label>DISH NAME *</label>
                 <input
                   type="text"
+                  placeholder="e.g. Garlic Gnocchi"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
@@ -194,6 +209,7 @@ function App() {
                 <input
                   type="number"
                   step="0.01"
+                  placeholder="e.g. 24.99"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   required
@@ -206,7 +222,7 @@ function App() {
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                 >
-                  {categories.map((cat) => (
+                  {adminCategories.map((cat) => (
                     <option key={cat} value={cat}>
                       {cat}
                     </option>
@@ -218,6 +234,7 @@ function App() {
                 <label>TAGS</label>
                 <input
                   type="text"
+                  placeholder="V, GF"
                   value={tags}
                   onChange={(e) => setTags(e.target.value)}
                 />
@@ -227,6 +244,7 @@ function App() {
             <div className="form-group">
               <label>MENU DESCRIPTION</label>
               <textarea
+                placeholder="Describe preparation elements..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
@@ -301,24 +319,36 @@ function App() {
 
         <div className="gold-line"></div>
 
+        <div className="category-nav">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              className={`category-btn ${
+                selectedCategory === cat ? 'active' : ''
+              }`}
+              onClick={() => setSelectedCategory(cat)}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+
         <div className="menu-grid">
-          {menuItems
-            .filter((item) => item.available !== false)
-            .map((item) => (
-              <div className="menu-card" key={item._id}>
-                <div className="card-head">
-                  <h3>{item.name}</h3>
-                  <span>${Number(item.price).toFixed(2)}</span>
-                </div>
-
-                <p className="category">{item.category}</p>
-                <p>{item.description}</p>
-
-                {Array.isArray(item.tags) && item.tags.length > 0 && (
-                  <p className="tags">{item.tags.join(', ')}</p>
-                )}
+          {visibleItems.map((item) => (
+            <div className="menu-card" key={item._id}>
+              <div className="card-head">
+                <h3>{item.name}</h3>
+                <span>${Number(item.price).toFixed(2)}</span>
               </div>
-            ))}
+
+              <p className="category">{item.category}</p>
+              <p>{item.description}</p>
+
+              {Array.isArray(item.tags) && item.tags.length > 0 && (
+                <p className="tags">{item.tags.join(', ')}</p>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </div>

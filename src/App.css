@@ -222,3 +222,72 @@ td {
     grid-template-columns: 1fr;
   }
 }
+
+.category-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 35px;
+}
+
+.category-btn {
+  background: white;
+  color: #111;
+  border: 1px solid #c9a24f;
+  padding: 10px 18px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.category-btn:hover,
+.category-btn.active {
+  background: #c9a24f;
+  color: white;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.menu-card {
+  background: white;
+  border: 1px solid #ddd2c2;
+  border-radius: 6px;
+  padding: 24px;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-head h3 {
+  margin: 0;
+}
+
+.card-head span {
+  color: #c9a24f;
+  font-weight: bold;
+}
+
+.category {
+  font-weight: bold;
+  color: #666;
+}
+
+.tags {
+  color: #2e7d32;
+  font-weight: bold;
+}
+
+@media (max-width: 900px) {
+  .menu-grid {
+    grid-template-columns: 1fr;
+  }
+}
