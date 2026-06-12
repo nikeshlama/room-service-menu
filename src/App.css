@@ -1,21 +1,22 @@
 body {
   margin: 0;
-  background: #f7f4ed;
-  color: #4b2a16;
+  background: #f3f0ea;
+  color: #2b2118;
   font-family: Georgia, 'Times New Roman', serif;
 }
 
 .page {
   min-height: 100vh;
-  padding: 40px 20px;
+  padding: 48px 20px;
 }
 
 .container {
-  max-width: 1100px;
+  max-width: 1120px;
   margin: 0 auto;
   background: #fffdf8;
-  border: 2px solid #1f1f1f;
-  padding: 42px 55px;
+  border: 1px solid #d8cab8;
+  padding: 48px 58px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
 }
 
 .top-row {
@@ -28,124 +29,126 @@ body {
 h1 {
   margin: 0;
   font-size: 42px;
-  color: #1f5f73;
+  color: #155d73;
   font-weight: 900;
   letter-spacing: 1px;
 }
 
 .subtitle {
-  color: #4b2a16;
+  color: #5a4636;
   margin-top: 10px;
   font-size: 17px;
   font-style: italic;
 }
 
 .blue-label {
-  color: #1f5f73;
+  color: #155d73;
   font-weight: bold;
-  margin-top: 4px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 13px;
 }
 
 .gold-line {
-  height: 3px;
-  background: #1f5f73;
-  margin: 28px 0 38px;
+  height: 2px;
+  background: linear-gradient(to right, #155d73, #d4af37, #155d73);
+  margin: 30px 0 38px;
 }
 
 .category-nav {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 35px;
+  gap: 10px;
+  margin-bottom: 38px;
 }
 
 .category-btn {
-  background: white;
-  color: #1f5f73;
-  border: 2px solid #1f5f73;
+  background: #fffdf8;
+  color: #155d73;
+  border: 1px solid #155d73;
   padding: 10px 18px;
-  border-radius: 0;
   font-weight: bold;
   cursor: pointer;
   font-family: inherit;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .category-btn:hover,
 .category-btn.active {
-  background: #1f5f73;
+  background: #155d73;
   color: white;
 }
 
 .menu-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 28px 42px;
+  gap: 30px 46px;
 }
 
 .menu-card {
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid #b7a894;
-  border-radius: 0;
-  padding: 0 0 18px;
+  background: #ffffff;
+  border: 1px solid #e0d4c4;
+  padding: 24px;
+  box-shadow: 0 5px 16px rgba(21, 93, 115, 0.08);
 }
 
 .card-head {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 16px;
+  gap: 18px;
 }
 
 .card-head h3 {
   margin: 0;
   color: #6b3a1e;
-  font-size: 21px;
+  font-size: 20px;
   text-transform: uppercase;
   font-weight: 900;
 }
 
 .card-head span {
-  color: #6b3a1e;
+  color: #155d73;
   font-size: 16px;
   font-weight: bold;
   white-space: nowrap;
 }
 
 .category {
-  color: #1f5f73;
+  color: #155d73;
   font-weight: bold;
-  font-size: 14px;
-  margin: 8px 0;
+  font-size: 13px;
+  margin: 10px 0;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .menu-card p {
-  color: #4b2a16;
+  color: #4b2f20;
   font-size: 15px;
-  line-height: 1.35;
-  margin: 8px 0;
+  line-height: 1.45;
 }
 
 .tags {
-  color: #1f8a8a !important;
+  color: #0b7d7d !important;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .form-card {
-  background: #fffdf8;
-  border: 1px solid #b7a894;
-  border-radius: 0;
-  padding: 32px;
-  margin-bottom: 50px;
+  background: #ffffff;
+  border: 1px solid #d8cab8;
+  padding: 34px;
+  margin-bottom: 52px;
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.05);
 }
 
 .form-card h2,
 .section-title {
   color: #6b3a1e;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .form-grid {
@@ -162,48 +165,48 @@ h1 {
 
 label {
   font-weight: bold;
-  font-size: 14px;
+  font-size: 13px;
   margin-bottom: 8px;
-  color: #4b2a16;
+  color: #4b2f20;
+  text-transform: uppercase;
 }
 
 input,
 select,
 textarea {
-  border: 1px solid #b7a894;
+  border: 1px solid #cdbda8;
   padding: 12px;
   font-size: 14px;
-  border-radius: 0;
   font-family: inherit;
-  background: white;
+  background: #fffdf8;
 }
 
 textarea {
-  min-height: 60px;
+  min-height: 70px;
 }
 
 .save-btn,
 .back-btn {
-  background: #1f5f73;
+  background: #155d73;
   color: white;
   border: none;
   padding: 13px 30px;
   font-weight: bold;
-  font-size: 15px;
-  border-radius: 0;
+  font-size: 14px;
   cursor: pointer;
   font-family: inherit;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .save-btn:hover,
 .back-btn:hover {
-  background: #164757;
+  background: #0f4658;
 }
 
 .table-box {
   background: white;
-  border: 1px solid #b7a894;
-  border-radius: 0;
+  border: 1px solid #d8cab8;
   overflow-x: auto;
 }
 
@@ -213,32 +216,31 @@ table {
 }
 
 th {
-  background: #1f5f73;
+  background: #155d73;
   color: white;
   text-align: left;
   padding: 15px 18px;
-  font-size: 14px;
+  font-size: 13px;
   text-transform: uppercase;
 }
 
 td {
   padding: 15px 18px;
-  border-top: 1px solid #d8cbbd;
+  border-top: 1px solid #e4d8c8;
   font-weight: bold;
-  color: #4b2a16;
+  color: #3b2a20;
 }
 
 .stock-btn {
   border: none;
   color: white;
   padding: 8px 16px;
-  border-radius: 0;
   font-weight: bold;
   cursor: pointer;
 }
 
 .in-stock {
-  background: #1f5f73;
+  background: #155d73;
 }
 
 .out-stock {
@@ -250,7 +252,6 @@ td {
   color: white;
   border: none;
   padding: 8px 14px;
-  border-radius: 0;
   font-weight: bold;
   cursor: pointer;
 }
@@ -266,7 +267,7 @@ td {
 
 @media (max-width: 900px) {
   .container {
-    padding: 30px 24px;
+    padding: 32px 24px;
   }
 
   .form-grid,
