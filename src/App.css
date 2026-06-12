@@ -423,3 +423,58 @@ td {
     position: static;
   }
 }
+
+.checkout-btn {
+  width: 100%;
+  margin-top: 18px;
+  background: #0b5d7a;
+  color: white;
+  border: none;
+  padding: 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.checkout-btn:hover {
+  background: #08485f;
+}
+
+.checkout-form {
+  background: white;
+  border: 1px solid #d9d4ca;
+  padding: 32px;
+}
+
+.checkout-summary {
+  background: #f8f7f2;
+  border: 1px solid #d9d4ca;
+  padding: 24px;
+  margin: 24px 0;
+}
+
+.checkout-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.orders-list {
+  display: grid;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.order-card {
+  background: white;
+  border: 1px solid #d9d4ca;
+  padding: 24px;
+}
+
+.order-card h3 {
+  color: #0b5d7a;
+  margin-top: 0;
+}
+
+.order-card ul {
+  padding-left: 20px;
+}

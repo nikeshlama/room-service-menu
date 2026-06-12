@@ -3,14 +3,22 @@ import './App.css';
 
 const API_URL = 'https://pestos-backend.onrender.com/api/menu';
 const LOGIN_URL = 'https://pestos-backend.onrender.com/api/login';
+const ORDERS_URL = 'https://pestos-backend.onrender.com/api/orders';
 const TAX_RATE = 0.13;
 
 function App() {
   const [menuItems, setMenuItems] = useState([]);
+  const [orders, setOrders] = useState([]);
+
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
   const [clickCount, setClickCount] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [cart, setCart] = useState([]);
+
+  const [guestName, setGuestName] = useState('');
+  const [roomNumber, setRoomNumber] = useState('');
+  const [guestMessage, setGuestMessage] = useState('');
 
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
@@ -37,7 +45,23 @@ function App() {
       const data = await res.json();
       setMenuItems(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error('GET ERROR:', err);
+      console.error('GET MENU ERROR:', err);
+    }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      const res = await fetch(ORDERS_URL, {
+        headers: getAuthHeaders()
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setOrders(data.orders);
+      }
+    } catch (err) {
+      console.error('GET ORDERS ERROR:', err);
     }
   };
 
@@ -83,7 +107,9 @@ function App() {
 
         localStorage.setItem('admin_token', data.token);
         setShowAdmin(true);
+        setShowCheckout(false);
         setClickCount(0);
+        fetchOrders();
       } catch (err) {
         alert('Could not login');
         setClickCount(0);
@@ -160,11 +186,6 @@ function App() {
     fetchMenu();
   };
 
-  const backToGuestView = () => {
-    localStorage.removeItem('admin_token');
-    setShowAdmin(false);
-  };
-
   const addToCart = (item) => {
     if (item.available === false) return;
 
@@ -219,6 +240,56 @@ function App() {
     setCart((currentCart) =>
       currentCart.filter((item) => item._id !== id)
     );
+  };
+
+  const wordCount = guestMessage
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+
+  const placeOrder = async (e) => {
+    e.preventDefault();
+
+    if (wordCount > 50) {
+      alert('Message must be 50 words or less.');
+      return;
+    }
+
+    const res = await fetch(ORDERS_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        guestName,
+        roomNumber,
+        message: guestMessage,
+        items: cart,
+        subtotal,
+        tax,
+        total
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      alert(data.message || 'Order failed');
+      return;
+    }
+
+    alert(`Order placed successfully! Order #${data.order.orderNumber}`);
+
+    setCart([]);
+    setGuestName('');
+    setRoomNumber('');
+    setGuestMessage('');
+    setShowCheckout(false);
+  };
+
+  const backToGuestView = () => {
+    localStorage.removeItem('admin_token');
+    setShowAdmin(false);
   };
 
   const subtotal = cart.reduce(
@@ -366,6 +437,120 @@ function App() {
               </tbody>
             </table>
           </div>
+
+          <h2 className="section-title">Guest Orders</h2>
+
+          <div className="orders-list">
+            {orders.length === 0 && (
+              <p className="empty-cart">No orders placed yet.</p>
+            )}
+
+            {orders.map((order) => (
+              <div className="order-card" key={order._id}>
+                <h3>Order #{order.orderNumber}</h3>
+
+                <p><strong>Guest:</strong> {order.guestName}</p>
+                <p><strong>Room:</strong> {order.roomNumber}</p>
+                <p>
+                  <strong>Date:</strong>{' '}
+                  {new Date(order.createdAt).toLocaleString()}
+                </p>
+
+                {order.message && (
+                  <p><strong>Message:</strong> {order.message}</p>
+                )}
+
+                <ul>
+                  {order.items.map((item, index) => (
+                    <li key={index}>
+                      {item.quantity} × {item.name} — $
+                      {(item.price * item.quantity).toFixed(2)}
+                    </li>
+                  ))}
+                </ul>
+
+                <p><strong>Subtotal:</strong> ${order.subtotal.toFixed(2)}</p>
+                <p><strong>Tax:</strong> ${order.tax.toFixed(2)}</p>
+                <p><strong>Total:</strong> ${order.total.toFixed(2)}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (showCheckout) {
+    return (
+      <div className="page">
+        <div className="container">
+          <h1>Pesto's Checkout</h1>
+          <p className="subtitle">Guest Information</p>
+
+          <div className="gold-line"></div>
+
+          <form className="checkout-form" onSubmit={placeOrder}>
+            <div className="form-group">
+              <label>FULL NAME *</label>
+              <input
+                type="text"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>ROOM NUMBER *</label>
+              <input
+                type="text"
+                value={roomNumber}
+                onChange={(e) => setRoomNumber(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-group">
+              <label>MESSAGE / SPECIAL REQUESTS</label>
+              <textarea
+                value={guestMessage}
+                onChange={(e) => setGuestMessage(e.target.value)}
+                placeholder="Maximum 50 words"
+              />
+              <small>{wordCount}/50 words</small>
+            </div>
+
+            <div className="checkout-summary">
+              <h2>Order Summary</h2>
+
+              {cart.map((item) => (
+                <p key={item._id}>
+                  {item.quantity} × {item.name} — $
+                  {(item.price * item.quantity).toFixed(2)}
+                </p>
+              ))}
+
+              <hr />
+
+              <p>Subtotal: ${subtotal.toFixed(2)}</p>
+              <p>Tax 13%: ${tax.toFixed(2)}</p>
+              <h3>Total: ${total.toFixed(2)}</h3>
+            </div>
+
+            <div className="checkout-buttons">
+              <button
+                type="button"
+                className="back-btn"
+                onClick={() => setShowCheckout(false)}
+              >
+                ← Back to Order
+              </button>
+
+              <button type="submit" className="save-btn">
+                PLACE ORDER
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     );
@@ -483,6 +668,13 @@ function App() {
                   <span>Total</span>
                   <strong>${total.toFixed(2)}</strong>
                 </div>
+
+                <button
+                  className="checkout-btn"
+                  onClick={() => setShowCheckout(true)}
+                >
+                  CHECKOUT
+                </button>
               </div>
             )}
           </div>
