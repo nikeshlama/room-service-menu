@@ -35,6 +35,8 @@ function App() {
   };
 
   useEffect(() => {
+    localStorage.removeItem('admin_token');
+    setShowAdmin(false);
     fetchMenu();
   }, []);
 
