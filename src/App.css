@@ -369,3 +369,18 @@ input:checked + .slider {
 input:checked + .slider:before {
   transform: translateX(26px);
 }
+
+.menu-card button {
+  display: inline-block;
+  background-color: #c0392b;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.menu-card button:hover {
+  background-color: #a93226;
+}
