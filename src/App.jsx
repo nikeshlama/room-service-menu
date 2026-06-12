@@ -11,7 +11,9 @@ function App() {
   const [orders, setOrders] = useState([]);
 
   const [showAdmin, setShowAdmin] = useState(false);
+  const [adminPage, setAdminPage] = useState('inventory');
   const [showCheckout, setShowCheckout] = useState(false);
+
   const [clickCount, setClickCount] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [cart, setCart] = useState([]);
@@ -38,6 +40,24 @@ function App() {
   ];
 
   const adminCategories = categories.filter((cat) => cat !== 'All');
+
+  const subtotal = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+
+  const tax = subtotal * TAX_RATE;
+  const total = subtotal + tax;
+
+  const wordCount = guestMessage
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean).length;
+
+  const getAuthHeaders = () => ({
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${localStorage.getItem('admin_token')}`
+  });
 
   const fetchMenu = async () => {
     try {
@@ -71,11 +91,6 @@ function App() {
     fetchMenu();
   }, []);
 
-  const getAuthHeaders = () => ({
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${localStorage.getItem('admin_token')}`
-  });
-
   const handleSecretClick = async () => {
     const newCount = clickCount + 1;
     setClickCount(newCount);
@@ -88,32 +103,25 @@ function App() {
         return;
       }
 
-      try {
-        const res = await fetch(LOGIN_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ password })
-        });
+      const res = await fetch(LOGIN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
 
-        const data = await res.json();
+      const data = await res.json();
 
-        if (!res.ok || !data.success) {
-          alert(data.message || 'Wrong password');
-          setClickCount(0);
-          return;
-        }
-
-        localStorage.setItem('admin_token', data.token);
-        setShowAdmin(true);
-        setShowCheckout(false);
+      if (!res.ok || !data.success) {
+        alert(data.message || 'Wrong password');
         setClickCount(0);
-        fetchOrders();
-      } catch (err) {
-        alert('Could not login');
-        setClickCount(0);
+        return;
       }
+
+      localStorage.setItem('admin_token', data.token);
+      setShowAdmin(true);
+      setAdminPage('inventory');
+      setClickCount(0);
+      fetchOrders();
     }
   };
 
@@ -145,7 +153,6 @@ function App() {
     setCategory('Appetizers');
     setTags('');
     setDescription('');
-
     fetchMenu();
   };
 
@@ -242,11 +249,6 @@ function App() {
     );
   };
 
-  const wordCount = guestMessage
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean).length;
-
   const placeOrder = async (e) => {
     e.preventDefault();
 
@@ -257,9 +259,7 @@ function App() {
 
     const res = await fetch(ORDERS_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         guestName,
         roomNumber,
@@ -292,14 +292,6 @@ function App() {
     setShowAdmin(false);
   };
 
-  const subtotal = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
-  const tax = subtotal * TAX_RATE;
-  const total = subtotal + tax;
-
   const visibleItems =
     selectedCategory === 'All'
       ? menuItems
@@ -322,159 +314,201 @@ function App() {
 
           <div className="gold-line"></div>
 
-          <form className="form-card" onSubmit={addItem}>
-            <h2>Add New Kitchen Dish Record</h2>
-
-            <div className="form-grid">
-              <div className="form-group">
-                <label>DISH NAME *</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Garlic Gnocchi"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>PRICE</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  placeholder="e.g. 24.99"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label>CATEGORY</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                >
-                  {adminCategories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>TAGS</label>
-                <input
-                  type="text"
-                  placeholder="V, GF"
-                  value={tags}
-                  onChange={(e) => setTags(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label>MENU DESCRIPTION</label>
-              <textarea
-                placeholder="Describe preparation elements..."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-
-            <button className="save-btn" type="submit">
-              SAVE TO CLOUD DATABASE
+          <div className="admin-nav">
+            <button
+              className={`admin-nav-btn ${
+                adminPage === 'inventory' ? 'active-admin' : ''
+              }`}
+              onClick={() => setAdminPage('inventory')}
+            >
+              Inventory
             </button>
-          </form>
 
-          <h2 className="section-title">Live Inventory Control List</h2>
-
-          <div className="table-box">
-            <table>
-              <thead>
-                <tr>
-                  <th>DISH NAME</th>
-                  <th>CATEGORY</th>
-                  <th>PRICE</th>
-                  <th>STOCK STATUS TOGGLE</th>
-                  <th>DELETE</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {menuItems.map((item) => (
-                  <tr key={item._id}>
-                    <td>{item.name}</td>
-                    <td>{item.category}</td>
-                    <td>${Number(item.price).toFixed(2)}</td>
-
-                    <td>
-                      <button
-                        className={
-                          item.available !== false
-                            ? 'stock-btn in-stock'
-                            : 'stock-btn out-stock'
-                        }
-                        onClick={() => toggleAvailability(item)}
-                      >
-                        {item.available !== false
-                          ? 'In Stock'
-                          : 'Out of Stock'}
-                      </button>
-                    </td>
-
-                    <td>
-                      <button
-                        className="delete-btn"
-                        onClick={() => deleteItem(item._id)}
-                      >
-                        DELETE
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <button
+              className={`admin-nav-btn ${
+                adminPage === 'orders' ? 'active-admin' : ''
+              }`}
+              onClick={() => {
+                setAdminPage('orders');
+                fetchOrders();
+              }}
+            >
+              Orders
+            </button>
           </div>
 
-          <h2 className="section-title">Guest Orders</h2>
+          {adminPage === 'inventory' && (
+            <>
+              <form className="form-card" onSubmit={addItem}>
+                <h2>Add New Kitchen Dish Record</h2>
 
-          <div className="orders-list">
-            {orders.length === 0 && (
-              <p className="empty-cart">No orders placed yet.</p>
-            )}
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>DISH NAME *</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Garlic Gnocchi"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                    />
+                  </div>
 
-            {orders.map((order) => (
-              <div className="order-card" key={order._id}>
-                <h3>Order #{order.orderNumber}</h3>
+                  <div className="form-group">
+                    <label>PRICE</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="e.g. 24.99"
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      required
+                    />
+                  </div>
 
-                <p><strong>Guest:</strong> {order.guestName}</p>
-                <p><strong>Room:</strong> {order.roomNumber}</p>
-                <p>
-                  <strong>Date:</strong>{' '}
-                  {new Date(order.createdAt).toLocaleString()}
-                </p>
+                  <div className="form-group">
+                    <label>CATEGORY</label>
+                    <select
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                    >
+                      {adminCategories.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-                {order.message && (
-                  <p><strong>Message:</strong> {order.message}</p>
+                  <div className="form-group">
+                    <label>TAGS</label>
+                    <input
+                      type="text"
+                      placeholder="V, GF"
+                      value={tags}
+                      onChange={(e) => setTags(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>MENU DESCRIPTION</label>
+                  <textarea
+                    placeholder="Describe preparation elements..."
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                </div>
+
+                <button className="save-btn" type="submit">
+                  SAVE TO CLOUD DATABASE
+                </button>
+              </form>
+
+              <h2 className="section-title">Live Inventory Control List</h2>
+
+              <div className="table-box">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>DISH NAME</th>
+                      <th>CATEGORY</th>
+                      <th>PRICE</th>
+                      <th>STOCK STATUS TOGGLE</th>
+                      <th>DELETE</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {menuItems.map((item) => (
+                      <tr key={item._id}>
+                        <td>{item.name}</td>
+                        <td>{item.category}</td>
+                        <td>${Number(item.price).toFixed(2)}</td>
+
+                        <td>
+                          <button
+                            className={
+                              item.available !== false
+                                ? 'stock-btn in-stock'
+                                : 'stock-btn out-stock'
+                            }
+                            onClick={() => toggleAvailability(item)}
+                          >
+                            {item.available !== false
+                              ? 'In Stock'
+                              : 'Out of Stock'}
+                          </button>
+                        </td>
+
+                        <td>
+                          <button
+                            className="delete-btn"
+                            onClick={() => deleteItem(item._id)}
+                          >
+                            DELETE
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+
+          {adminPage === 'orders' && (
+            <>
+              <h2 className="section-title">Guest Orders</h2>
+
+              <div className="orders-list">
+                {orders.length === 0 && (
+                  <p className="empty-cart">No orders placed yet.</p>
                 )}
 
-                <ul>
-                  {order.items.map((item, index) => (
-                    <li key={index}>
-                      {item.quantity} × {item.name} — $
-                      {(item.price * item.quantity).toFixed(2)}
-                    </li>
-                  ))}
-                </ul>
+                {orders.map((order) => (
+                  <div className="order-card" key={order._id}>
+                    <div className="order-header">
+                      <h3>Order #{order.orderNumber}</h3>
 
-                <p><strong>Subtotal:</strong> ${order.subtotal.toFixed(2)}</p>
-                <p><strong>Tax:</strong> ${order.tax.toFixed(2)}</p>
-                <p><strong>Total:</strong> ${order.total.toFixed(2)}</p>
+                      <span>
+                        {new Date(order.createdAt).toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className="order-info">
+                      <p>
+                        <strong>Guest:</strong> {order.guestName}
+                      </p>
+
+                      <p>
+                        <strong>Room:</strong> {order.roomNumber}
+                      </p>
+
+                      {order.message && (
+                        <p>
+                          <strong>Message:</strong> {order.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="order-items">
+                      {order.items.map((item, index) => (
+                        <p key={index}>
+                          {item.quantity} × {item.name} — $
+                          {(item.price * item.quantity).toFixed(2)}
+                        </p>
+                      ))}
+                    </div>
+
+                    <div className="order-total">
+                      Total: ${Number(order.total).toFixed(2)}
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
         </div>
       </div>
     );
