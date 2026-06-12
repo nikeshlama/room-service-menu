@@ -1,7 +1,7 @@
 body {
   margin: 0;
-  background: #eef5fb;
-  color: #0b1f33;
+  background: #f7f4ed;
+  color: #4b2a16;
   font-family: Georgia, 'Times New Roman', serif;
 }
 
@@ -13,6 +13,9 @@ body {
 .container {
   max-width: 1100px;
   margin: 0 auto;
+  background: #fffdf8;
+  border: 2px solid #1f1f1f;
+  padding: 42px 55px;
 }
 
 .top-row {
@@ -21,31 +24,128 @@ body {
   justify-content: space-between;
 }
 
+.brand-title,
 h1 {
   margin: 0;
-  font-size: 34px;
-  color: #0b3d91;
+  font-size: 42px;
+  color: #1f5f73;
+  font-weight: 900;
+  letter-spacing: 1px;
 }
 
 .subtitle {
+  color: #4b2a16;
+  margin-top: 10px;
+  font-size: 17px;
   font-style: italic;
-  color: #345;
-  margin-top: 20px;
-  font-size: 18px;
+}
+
+.blue-label {
+  color: #1f5f73;
+  font-weight: bold;
+  margin-top: 4px;
 }
 
 .gold-line {
-  height: 2px;
-  background: #0b66c3;
-  margin: 20px 0 45px;
+  height: 3px;
+  background: #1f5f73;
+  margin: 28px 0 38px;
+}
+
+.category-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 35px;
+}
+
+.category-btn {
+  background: white;
+  color: #1f5f73;
+  border: 2px solid #1f5f73;
+  padding: 10px 18px;
+  border-radius: 0;
+  font-weight: bold;
+  cursor: pointer;
+  font-family: inherit;
+  text-transform: uppercase;
+}
+
+.category-btn:hover,
+.category-btn.active {
+  background: #1f5f73;
+  color: white;
+}
+
+.menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 28px 42px;
+}
+
+.menu-card {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #b7a894;
+  border-radius: 0;
+  padding: 0 0 18px;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.card-head h3 {
+  margin: 0;
+  color: #6b3a1e;
+  font-size: 21px;
+  text-transform: uppercase;
+  font-weight: 900;
+}
+
+.card-head span {
+  color: #6b3a1e;
+  font-size: 16px;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+.category {
+  color: #1f5f73;
+  font-weight: bold;
+  font-size: 14px;
+  margin: 8px 0;
+  text-transform: uppercase;
+}
+
+.menu-card p {
+  color: #4b2a16;
+  font-size: 15px;
+  line-height: 1.35;
+  margin: 8px 0;
+}
+
+.tags {
+  color: #1f8a8a !important;
+  font-weight: bold;
+  font-size: 14px;
 }
 
 .form-card {
-  background: white;
-  border: 1px solid #b8d8f0;
-  border-radius: 6px;
+  background: #fffdf8;
+  border: 1px solid #b7a894;
+  border-radius: 0;
   padding: 32px;
   margin-bottom: 50px;
+}
+
+.form-card h2,
+.section-title {
+  color: #6b3a1e;
+  text-transform: uppercase;
 }
 
 .form-grid {
@@ -64,16 +164,18 @@ label {
   font-weight: bold;
   font-size: 14px;
   margin-bottom: 8px;
+  color: #4b2a16;
 }
 
 input,
 select,
 textarea {
-  border: 1px solid #b8d8f0;
+  border: 1px solid #b7a894;
   padding: 12px;
   font-size: 14px;
-  border-radius: 4px;
+  border-radius: 0;
   font-family: inherit;
+  background: white;
 }
 
 textarea {
@@ -81,25 +183,27 @@ textarea {
 }
 
 .save-btn,
-.category-btn.active,
-.category-btn:hover {
-  background: #0b66c3;
+.back-btn {
+  background: #1f5f73;
   color: white;
-}
-
-.save-btn {
   border: none;
   padding: 13px 30px;
   font-weight: bold;
   font-size: 15px;
-  border-radius: 4px;
+  border-radius: 0;
   cursor: pointer;
+  font-family: inherit;
+}
+
+.save-btn:hover,
+.back-btn:hover {
+  background: #164757;
 }
 
 .table-box {
   background: white;
-  border: 1px solid #b8d8f0;
-  border-radius: 5px;
+  border: 1px solid #b7a894;
+  border-radius: 0;
   overflow-x: auto;
 }
 
@@ -109,29 +213,32 @@ table {
 }
 
 th {
-  background: #dcecf8;
+  background: #1f5f73;
+  color: white;
   text-align: left;
   padding: 15px 18px;
   font-size: 14px;
+  text-transform: uppercase;
 }
 
 td {
   padding: 15px 18px;
-  border-top: 1px solid #cfe3f3;
+  border-top: 1px solid #d8cbbd;
   font-weight: bold;
+  color: #4b2a16;
 }
 
 .stock-btn {
   border: none;
   color: white;
   padding: 8px 16px;
-  border-radius: 20px;
+  border-radius: 0;
   font-weight: bold;
   cursor: pointer;
 }
 
 .in-stock {
-  background: #1f7a3a;
+  background: #1f5f73;
 }
 
 .out-stock {
@@ -139,17 +246,17 @@ td {
 }
 
 .delete-btn {
-  background: #c0392b;
+  background: #8b1e1e;
   color: white;
   border: none;
   padding: 8px 14px;
-  border-radius: 4px;
+  border-radius: 0;
   font-weight: bold;
   cursor: pointer;
 }
 
 .delete-btn:hover {
-  background: #922b21;
+  background: #5f1111;
 }
 
 .empty-text {
@@ -157,80 +264,24 @@ td {
   color: #777;
 }
 
-.menu-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-}
-
-.menu-card {
-  background: white;
-  border: 1px solid #b8d8f0;
-  border-radius: 6px;
-  padding: 24px;
-}
-
-.card-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-}
-
-.card-head h3 {
-  margin: 0;
-  color: #0b3d91;
-}
-
-.card-head span {
-  color: #0b66c3;
-  font-weight: bold;
-}
-
-.category {
-  font-weight: bold;
-  color: #2c5f88;
-}
-
-.tags {
-  color: #0b66c3;
-  font-weight: bold;
-}
-
-.back-btn {
-  background: #0b3d91;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.back-btn:hover {
-  background: #082f70;
-}
-
-.category-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 35px;
-}
-
-.category-btn {
-  background: white;
-  color: #0b3d91;
-  border: 1px solid #0b66c3;
-  padding: 10px 18px;
-  border-radius: 4px;
-  font-weight: bold;
-  cursor: pointer;
-  font-family: inherit;
-}
-
 @media (max-width: 900px) {
+  .container {
+    padding: 30px 24px;
+  }
+
   .form-grid,
   .menu-grid {
     grid-template-columns: 1fr;
+  }
+
+  .top-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .brand-title,
+  h1 {
+    font-size: 34px;
   }
 }
