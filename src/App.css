@@ -286,3 +286,17 @@ td {
     font-size: 34px;
   }
 }
+
+.unavailable-card {
+  opacity: 0.45;
+  filter: grayscale(100%);
+  pointer-events: none;
+  background: #eeeeee;
+}
+
+.unavailable-label {
+  color: #777;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-top: 12px;
+}

@@ -165,12 +165,8 @@ function App() {
 
   const visibleItems =
     selectedCategory === 'All'
-      ? menuItems.filter((item) => item.available !== false)
-      : menuItems.filter(
-          (item) =>
-            item.available !== false &&
-            item.category === selectedCategory
-        );
+      ? menuItems
+      : menuItems.filter((item) => item.category === selectedCategory);
 
   if (showAdmin) {
     return (
@@ -335,7 +331,12 @@ function App() {
 
         <div className="menu-grid">
           {visibleItems.map((item) => (
-            <div className="menu-card" key={item._id}>
+            <div
+              className={`menu-card ${
+                item.available === false ? 'unavailable-card' : ''
+              }`}
+              key={item._id}
+            >
               <div className="card-head">
                 <h3>{item.name}</h3>
                 <span>${Number(item.price).toFixed(2)}</span>
@@ -346,6 +347,10 @@ function App() {
 
               {Array.isArray(item.tags) && item.tags.length > 0 && (
                 <p className="tags">{item.tags.join(', ')}</p>
+              )}
+
+              {item.available === false && (
+                <p className="unavailable-label">Currently unavailable</p>
               )}
             </div>
           ))}
