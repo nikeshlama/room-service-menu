@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './App.css';
 
 const API_URL = 'https://pestos-backend.onrender.com/api/menu';
@@ -30,6 +30,8 @@ function App() {
   const [tags, setTags] = useState('');
   const [description, setDescription] = useState('');
 
+  const categoryRefs = useRef({});
+
   const categories = [
     'Featured',
     'Appetizers',
@@ -58,6 +60,18 @@ function App() {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${localStorage.getItem('admin_token')}`
   });
+
+  const centerCategory = (cat) => {
+    setSelectedCategory(cat);
+
+    setTimeout(() => {
+      categoryRefs.current[cat]?.scrollIntoView({
+        behavior: 'smooth',
+        inline: 'center',
+        block: 'nearest'
+      });
+    }, 50);
+  };
 
   const fetchMenu = async () => {
     try {
@@ -316,7 +330,7 @@ function App() {
         <div className="container">
           <div className="top-row">
             <div>
-              <h1>Pesto's Control Panel</h1>
+              <h1>Pesto&apos;s Control Panel</h1>
               <p className="subtitle">Database Live Dashboard</p>
             </div>
 
@@ -530,7 +544,7 @@ function App() {
     return (
       <div className="page">
         <div className="container">
-          <h1>Pesto's Checkout</h1>
+          <h1>Pesto&apos;s Checkout</h1>
           <p className="subtitle">Guest Information</p>
 
           <div className="gold-line"></div>
@@ -607,7 +621,7 @@ function App() {
       <div className="container">
         <div className="top-row">
           <div>
-            <h1 onClick={handleSecretClick}>Pesto's Eatery</h1>
+            <h1 onClick={handleSecretClick}>Pesto&apos;s Eatery</h1>
             <p className="subtitle">Fresh • Authentic • Delicious</p>
           </div>
         </div>
@@ -618,10 +632,13 @@ function App() {
           {categories.map((cat) => (
             <button
               key={cat}
+              ref={(el) => {
+                categoryRefs.current[cat] = el;
+              }}
               className={`category-btn ${
                 selectedCategory === cat ? 'active' : ''
               }`}
-              onClick={() => setSelectedCategory(cat)}
+              onClick={() => centerCategory(cat)}
             >
               {cat}
             </button>
