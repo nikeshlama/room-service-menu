@@ -1084,3 +1084,37 @@ td {
     box-shadow: none;
   }
 }
+
+.new-order-alert {
+  background: #155d73;
+  color: white;
+  padding: 16px 20px;
+  margin: 18px 0;
+  border-radius: 10px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+}
+
+.new-order-alert button {
+  background: white;
+  color: #155d73;
+  border: none;
+  padding: 8px 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .new-order-alert {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .new-order-alert button {
+    width: 100%;
+  }
+}

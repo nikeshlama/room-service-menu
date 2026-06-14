@@ -18,6 +18,8 @@ function App() {
   const [showReceipt, setShowReceipt] = useState(false);
   const [receiptData, setReceiptData] = useState(null);
 
+  const [newOrderAlert, setNewOrderAlert] = useState(false);
+
   const [clickCount, setClickCount] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('Featured');
   const [cart, setCart] = useState([]);
@@ -36,6 +38,8 @@ function App() {
   const [editingItemId, setEditingItemId] = useState(null);
 
   const categoryRefs = useRef({});
+  const lastOrderIdRef = useRef(null);
+  const ordersLoadedRef = useRef(false);
 
   const categories = [
     'Featured',
@@ -100,7 +104,7 @@ function App() {
     }
   };
 
-  const fetchOrders = async () => {
+  const fetchOrders = async (checkNew = false) => {
     try {
       const res = await fetch(ORDERS_URL, {
         headers: getAuthHeaders()
@@ -109,6 +113,29 @@ function App() {
       const data = await res.json();
 
       if (data.success) {
+        const newestOrder = data.orders[0];
+        const newestOrderId = newestOrder?._id;
+
+        if (
+          checkNew &&
+          ordersLoadedRef.current &&
+          newestOrderId &&
+          lastOrderIdRef.current &&
+          newestOrderId !== lastOrderIdRef.current
+        ) {
+          setNewOrderAlert(true);
+
+          const audio = new Audio('/notification.mp3');
+          audio.play().catch(() => {
+            console.log('Notification sound blocked by browser');
+          });
+        }
+
+        if (newestOrderId) {
+          lastOrderIdRef.current = newestOrderId;
+        }
+
+        ordersLoadedRef.current = true;
         setOrders(data.orders);
       }
     } catch (err) {
@@ -121,6 +148,18 @@ function App() {
     setShowAdmin(false);
     fetchMenu();
   }, []);
+
+  useEffect(() => {
+    if (showAdmin && adminPage === 'orders') {
+      fetchOrders(false);
+
+      const interval = setInterval(() => {
+        fetchOrders(true);
+      }, 5000);
+
+      return () => clearInterval(interval);
+    }
+  }, [showAdmin, adminPage]);
 
   const handleSecretClick = async () => {
     const newCount = clickCount + 1;
@@ -152,7 +191,7 @@ function App() {
       setShowAdmin(true);
       setAdminPage('orders');
       setClickCount(0);
-      fetchOrders();
+      fetchOrders(false);
     }
   };
 
@@ -369,6 +408,7 @@ function App() {
   const backToGuestView = () => {
     localStorage.removeItem('admin_token');
     setShowAdmin(false);
+    setNewOrderAlert(false);
   };
 
   const visibleItems = menuItems.filter(
@@ -478,7 +518,7 @@ function App() {
               }`}
               onClick={() => {
                 setAdminPage('orders');
-                fetchOrders();
+                fetchOrders(false);
               }}
             >
               Orders
@@ -633,6 +673,16 @@ function App() {
           {adminPage === 'orders' && (
             <>
               <h2 className="section-title">Guest Orders</h2>
+
+              {newOrderAlert && (
+                <div className="new-order-alert">
+                  <span>🔔 New order received!</span>
+
+                  <button onClick={() => setNewOrderAlert(false)}>
+                    Dismiss
+                  </button>
+                </div>
+              )}
 
               <div className="orders-list">
                 {orders.length === 0 && (
