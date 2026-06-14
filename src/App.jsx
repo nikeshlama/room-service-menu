@@ -19,6 +19,7 @@ function App() {
   const [selectedCategory, setSelectedCategory] = useState('Featured');
   const [cart, setCart] = useState([]);
   const [cartOpen, setCartOpen] = useState(false);
+  const [openDescriptions, setOpenDescriptions] = useState({});
 
   const [guestName, setGuestName] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
@@ -71,6 +72,13 @@ function App() {
         block: 'nearest'
       });
     }, 50);
+  };
+
+  const toggleDescription = (id) => {
+    setOpenDescriptions((current) => ({
+      ...current,
+      [id]: !current[id]
+    }));
   };
 
   const fetchMenu = async () => {
@@ -659,30 +667,64 @@ function App() {
 
             {visibleItems.map((item) => (
               <div
-                className={`menu-card ${
+                className={`menu-card compact-menu-card ${
                   item.available === false ? 'unavailable-card' : ''
                 }`}
                 key={item._id}
-                onClick={() => addToCart(item)}
               >
-                <div className="card-head">
-                  <h3>{item.name}</h3>
-                  <span>${Number(item.price).toFixed(2)}</span>
+                <div className="compact-menu-top">
+                  <div className="compact-menu-info">
+                    <h3>{item.name}</h3>
+                    <p className="compact-category">{item.category}</p>
+                  </div>
+
+                  <div className="compact-menu-actions">
+                    <span className="compact-price">
+                      ${Number(item.price).toFixed(2)}
+                    </span>
+
+                    {item.available !== false && (
+                      <button
+                        className="item-add-btn"
+                        onClick={() => addToCart(item)}
+                        type="button"
+                      >
+                        +
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                <p className="category">{item.category}</p>
-                <p>{item.description}</p>
-
                 {Array.isArray(item.tags) && item.tags.length > 0 && (
-                  <p className="tags">{item.tags.join(', ')}</p>
+                  <p className="tags compact-tags">
+                    {item.tags.join(', ')}
+                  </p>
                 )}
 
-                {item.available === false ? (
+                {item.description && (
+                  <>
+                    <button
+                      type="button"
+                      className="description-toggle"
+                      onClick={() => toggleDescription(item._id)}
+                    >
+                      {openDescriptions[item._id]
+                        ? 'Hide description ▲'
+                        : 'View description ▼'}
+                    </button>
+
+                    {openDescriptions[item._id] && (
+                      <p className="item-description">
+                        {item.description}
+                      </p>
+                    )}
+                  </>
+                )}
+
+                {item.available === false && (
                   <p className="unavailable-label">
                     Currently unavailable
                   </p>
-                ) : (
-                  <p className="add-hint">Click to add to cart</p>
                 )}
               </div>
             ))}
