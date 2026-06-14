@@ -30,6 +30,7 @@ function App() {
   const [category, setCategory] = useState('Featured');
   const [tags, setTags] = useState('');
   const [description, setDescription] = useState('');
+  const [editingItemId, setEditingItemId] = useState(null);
 
   const categoryRefs = useRef({});
 
@@ -145,26 +146,40 @@ function App() {
 
       localStorage.setItem('admin_token', data.token);
       setShowAdmin(true);
-      setAdminPage('inventory');
+      setAdminPage('orders');
       setClickCount(0);
       fetchOrders();
     }
   };
 
-  const addItem = async (e) => {
+  const clearForm = () => {
+    setName('');
+    setPrice('');
+    setCategory('Featured');
+    setTags('');
+    setDescription('');
+    setEditingItemId(null);
+  };
+
+  const saveItem = async (e) => {
     e.preventDefault();
 
-    const res = await fetch(API_URL, {
-      method: 'POST',
+    const itemData = {
+      name,
+      price: Number(price),
+      category,
+      tags,
+      description,
+      available: true
+    };
+
+    const url = editingItemId ? `${API_URL}/${editingItemId}` : API_URL;
+    const method = editingItemId ? 'PUT' : 'POST';
+
+    const res = await fetch(url, {
+      method,
       headers: getAuthHeaders(),
-      body: JSON.stringify({
-        name,
-        price: Number(price),
-        category,
-        tags,
-        description,
-        available: true
-      })
+      body: JSON.stringify(itemData)
     });
 
     const data = await res.json();
@@ -174,12 +189,23 @@ function App() {
       return;
     }
 
-    setName('');
-    setPrice('');
-    setCategory('Featured');
-    setTags('');
-    setDescription('');
+    clearForm();
     fetchMenu();
+  };
+
+  const startEditItem = (item) => {
+    setEditingItemId(item._id);
+    setName(item.name || '');
+    setPrice(item.price || '');
+    setCategory(item.category || 'Featured');
+    setTags(Array.isArray(item.tags) ? item.tags.join(', ') : item.tags || '');
+    setDescription(item.description || '');
+    setAdminPage('inventory');
+
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
 
   const toggleAvailability = async (item) => {
@@ -214,6 +240,10 @@ function App() {
     if (!res.ok || !data.success) {
       alert(data.message || 'Delete failed');
       return;
+    }
+
+    if (editingItemId === id) {
+      clearForm();
     }
 
     fetchMenu();
@@ -352,15 +382,6 @@ function App() {
           <div className="admin-nav">
             <button
               className={`admin-nav-btn ${
-                adminPage === 'inventory' ? 'active-admin' : ''
-              }`}
-              onClick={() => setAdminPage('inventory')}
-            >
-              Inventory
-            </button>
-
-            <button
-              className={`admin-nav-btn ${
                 adminPage === 'orders' ? 'active-admin' : ''
               }`}
               onClick={() => {
@@ -370,12 +391,25 @@ function App() {
             >
               Orders
             </button>
+
+            <button
+              className={`admin-nav-btn ${
+                adminPage === 'inventory' ? 'active-admin' : ''
+              }`}
+              onClick={() => setAdminPage('inventory')}
+            >
+              Inventory
+            </button>
           </div>
 
           {adminPage === 'inventory' && (
             <>
-              <form className="form-card" onSubmit={addItem}>
-                <h2>Add New Kitchen Dish Record</h2>
+              <form className="form-card" onSubmit={saveItem}>
+                <h2>
+                  {editingItemId
+                    ? 'Edit Kitchen Dish Record'
+                    : 'Add New Kitchen Dish Record'}
+                </h2>
 
                 <div className="form-grid">
                   <div className="form-group">
@@ -435,9 +469,21 @@ function App() {
                   />
                 </div>
 
-                <button className="save-btn" type="submit">
-                  SAVE TO CLOUD DATABASE
-                </button>
+                <div className="checkout-buttons">
+                  <button className="save-btn" type="submit">
+                    {editingItemId ? 'UPDATE ITEM' : 'SAVE TO CLOUD DATABASE'}
+                  </button>
+
+                  {editingItemId && (
+                    <button
+                      className="back-btn"
+                      type="button"
+                      onClick={clearForm}
+                    >
+                      CANCEL EDIT
+                    </button>
+                  )}
+                </div>
               </form>
 
               <h2 className="section-title">Live Inventory Control List</h2>
@@ -449,7 +495,8 @@ function App() {
                       <th>DISH NAME</th>
                       <th>CATEGORY</th>
                       <th>PRICE</th>
-                      <th>STOCK STATUS TOGGLE</th>
+                      <th>STOCK STATUS</th>
+                      <th>EDIT</th>
                       <th>DELETE</th>
                     </tr>
                   </thead>
@@ -473,6 +520,15 @@ function App() {
                             {item.available !== false
                               ? 'In Stock'
                               : 'Out of Stock'}
+                          </button>
+                        </td>
+
+                        <td>
+                          <button
+                            className="edit-btn"
+                            onClick={() => startEditItem(item)}
+                          >
+                            EDIT
                           </button>
                         </td>
 

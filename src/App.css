@@ -931,3 +931,16 @@ td {
     font-size: 12px;
   }
 }
+
+.edit-btn {
+  background: #155d73;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.edit-btn:hover {
+  background: #0f4658;
+}
