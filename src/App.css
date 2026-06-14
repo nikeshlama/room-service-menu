@@ -579,3 +579,231 @@ td {
   font-size: 16px;
   color: #555;
 }
+
+@media (max-width: 768px) {
+  .page {
+    padding: 12px;
+  }
+
+  .container {
+    width: 100%;
+    padding: 16px;
+  }
+
+  .top-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .category-nav {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding-bottom: 8px;
+    margin-bottom: 18px;
+  }
+
+  .category-btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+
+  .guest-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .menu-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .menu-card {
+    padding: 16px;
+  }
+
+  .card-head {
+    gap: 10px;
+  }
+
+  .card-head h3 {
+    font-size: 17px;
+  }
+
+  .card-head span {
+    font-size: 15px;
+  }
+
+  .cart-box {
+    position: static;
+    width: 100%;
+  }
+
+  .cart-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .cart-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .checkout-btn,
+  .save-btn,
+  .back-btn,
+  .delete-btn {
+    width: 100%;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-box {
+    overflow-x: auto;
+  }
+
+  table {
+    min-width: 650px;
+  }
+
+  .checkout-buttons {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .loading-page {
+    padding: 20px;
+    text-align: center;
+  }
+
+  .pestos-logo {
+    font-size: 34px;
+    padding: 14px 22px;
+  }
+}
+
+
+@media (max-width: 768px) {
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .page {
+    padding: 0;
+  }
+
+  .container {
+    border: none;
+    box-shadow: none;
+    padding: 12px;
+    border-radius: 0;
+  }
+
+  .gold-line {
+    margin: 18px 0;
+  }
+
+  .category-nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .category-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .category-btn {
+    min-width: fit-content;
+    font-size: 12px;
+    padding: 10px 14px;
+  }
+
+  .menu-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .menu-card {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .card-head h3 {
+    font-size: 16px;
+  }
+
+  .card-head span {
+    font-size: 15px;
+  }
+
+  .menu-card p {
+    font-size: 14px;
+  }
+
+  .cart-box {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    z-index: 999;
+    border-radius: 20px 20px 0 0;
+    padding: 16px;
+    max-height: 45vh;
+    overflow-y: auto;
+  }
+
+  .guest-layout {
+    padding-bottom: 280px;
+  }
+
+  .checkout-btn {
+    font-size: 16px;
+    padding: 16px;
+  }
+
+  .cart-total {
+    font-size: 18px;
+  }
+
+  .checkout-form {
+    padding: 18px;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  .order-card {
+    padding: 16px;
+  }
+
+  .order-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .order-total {
+    text-align: left;
+  }
+}
