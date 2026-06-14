@@ -9,6 +9,7 @@ const TAX_RATE = 0.13;
 function App() {
   const [menuItems, setMenuItems] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [showAdmin, setShowAdmin] = useState(false);
   const [adminPage, setAdminPage] = useState('inventory');
@@ -61,11 +62,17 @@ function App() {
 
   const fetchMenu = async () => {
     try {
+      setLoading(true);
+
       const res = await fetch(API_URL);
       const data = await res.json();
+
       setMenuItems(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('GET MENU ERROR:', err);
+      setMenuItems([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -297,6 +304,15 @@ function App() {
       ? menuItems
       : menuItems.filter((item) => item.category === selectedCategory);
 
+  if (loading && !showAdmin) {
+    return (
+      <div className="loading-page">
+        <div className="pestos-logo">PESTOS</div>
+        <p>Loading room service menu...</p>
+      </div>
+    );
+  }
+
   if (showAdmin) {
     return (
       <div className="page">
@@ -470,10 +486,7 @@ function App() {
                   <div className="order-card" key={order._id}>
                     <div className="order-header">
                       <h3>Order #{order.orderNumber}</h3>
-
-                      <span>
-                        {new Date(order.createdAt).toLocaleString()}
-                      </span>
+                      <span>{new Date(order.createdAt).toLocaleString()}</span>
                     </div>
 
                     <div className="order-info">
