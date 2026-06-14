@@ -19,6 +19,7 @@ function App() {
   const [receiptData, setReceiptData] = useState(null);
 
   const [newOrderAlert, setNewOrderAlert] = useState(false);
+  const [alarmEnabled, setAlarmEnabled] = useState(false);
 
   const [clickCount, setClickCount] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('Featured');
@@ -72,14 +73,35 @@ function App() {
     Authorization: `Bearer ${localStorage.getItem('admin_token')}`
   });
 
+  const enableAlarmSound = () => {
+    if (!alarmRef.current) {
+      alarmRef.current = new Audio('/notification.mp3');
+      alarmRef.current.loop = true;
+      alarmRef.current.volume = 1;
+    }
+
+    alarmRef.current
+      .play()
+      .then(() => {
+        alarmRef.current.pause();
+        alarmRef.current.currentTime = 0;
+        setAlarmEnabled(true);
+        alert('Alarm sound enabled successfully.');
+      })
+      .catch(() => {
+        alert('Please tap/click again to enable alarm sound.');
+      });
+  };
+
   const startAlarm = () => {
     if (!alarmRef.current) {
       alarmRef.current = new Audio('/notification.mp3');
       alarmRef.current.loop = true;
+      alarmRef.current.volume = 1;
     }
 
     alarmRef.current.play().catch(() => {
-      console.log('Alarm blocked until user interacts with page');
+      console.log('Alarm blocked until admin enables sound.');
     });
   };
 
@@ -690,6 +712,15 @@ function App() {
           {adminPage === 'orders' && (
             <>
               <h2 className="section-title">Guest Orders</h2>
+
+              <button
+                className="save-btn"
+                type="button"
+                onClick={enableAlarmSound}
+                style={{ marginBottom: '16px' }}
+              >
+                {alarmEnabled ? 'ALARM SOUND ENABLED' : 'ENABLE ALARM SOUND'}
+              </button>
 
               {newOrderAlert && (
                 <div className="new-order-alert alarm-alert">
