@@ -658,23 +658,44 @@ function App() {
               <small>{wordCount}/50 words</small>
             </div>
 
-            <div className="checkout-summary">
-              <h2>Order Summary</h2>
+            <div className="checkout-summary professional-summary">
+  <h2>Order Summary</h2>
 
-              {cart.map((item) => (
-                <p key={item._id}>
-                  {item.quantity} × {item.name} — $
-                  {(item.price * item.quantity).toFixed(2)}
-                </p>
-              ))}
+  <div className="summary-items">
+    {cart.map((item) => (
+      <div className="summary-item" key={item._id}>
+        <div>
+          <strong>{item.name}</strong>
+          <p>{item.quantity} × ${item.price.toFixed(2)}</p>
+        </div>
 
-              <hr />
+        <span>${(item.price * item.quantity).toFixed(2)}</span>
+      </div>
+    ))}
+  </div>
 
-              <p>Subtotal: ${subtotal.toFixed(2)}</p>
-              <p>Gratuity 18%: ${gratuity.toFixed(2)}</p>
-              <p>Tax 13%: ${tax.toFixed(2)}</p>
-              <h3>Total: ${total.toFixed(2)}</h3>
-            </div>
+  <div className="summary-divider"></div>
+
+  <div className="summary-row">
+    <span>Subtotal</span>
+    <strong>${subtotal.toFixed(2)}</strong>
+  </div>
+
+  <div className="summary-row">
+    <span>Gratuity 18%</span>
+    <strong>${gratuity.toFixed(2)}</strong>
+  </div>
+
+  <div className="summary-row">
+    <span>Tax 13%</span>
+    <strong>${tax.toFixed(2)}</strong>
+  </div>
+
+  <div className="summary-total-row">
+    <span>Total</span>
+    <strong>${total.toFixed(2)}</strong>
+  </div>
+</div>
 
             <div className="checkout-buttons">
               <button

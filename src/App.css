@@ -944,3 +944,85 @@ td {
 .edit-btn:hover {
   background: #0f4658;
 }
+
+/* ===== PROFESSIONAL CHECKOUT SUMMARY ===== */
+
+.professional-summary {
+  background: #fffdf8;
+  border: 1px solid #d8cab8;
+  padding: 26px;
+  margin: 26px 0;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+}
+
+.professional-summary h2 {
+  margin-top: 0;
+  color: #155d73;
+  font-size: 26px;
+}
+
+.summary-items {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid #e3dfd7;
+  padding-bottom: 12px;
+}
+
+.summary-item strong {
+  color: #2b2118;
+  font-size: 16px;
+}
+
+.summary-item p {
+  margin: 4px 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.summary-item span {
+  font-weight: bold;
+  color: #155d73;
+  white-space: nowrap;
+}
+
+.summary-divider {
+  border-top: 2px solid #155d73;
+  margin: 20px 0;
+}
+
+.summary-row,
+.summary-total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 17px;
+}
+
+.summary-total-row {
+  border-top: 1px solid #d8cab8;
+  padding-top: 16px;
+  margin-top: 16px;
+  font-size: 24px;
+  color: #155d73;
+}
+
+@media (max-width: 768px) {
+  .professional-summary {
+    padding: 18px;
+  }
+
+  .professional-summary h2 {
+    font-size: 22px;
+  }
+
+  .summary-total-row {
+    font-size: 21px;
+  }
+}
