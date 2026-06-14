@@ -1026,3 +1026,61 @@ td {
     font-size: 21px;
   }
 }
+
+.receipt-page {
+  max-width: 700px;
+}
+
+.receipt-box {
+  background: white;
+  border: 1px solid #d8cab8;
+  padding: 30px;
+  margin-top: 20px;
+}
+
+.receipt-item,
+.receipt-row,
+.receipt-total {
+  display: flex;
+  justify-content: space-between;
+  margin: 12px 0;
+}
+
+.receipt-total {
+  font-size: 24px;
+  color: #155d73;
+  font-weight: bold;
+  border-top: 2px solid #155d73;
+  padding-top: 15px;
+}
+
+.receipt-footer {
+  text-align: center;
+  margin-top: 30px;
+  color: #666;
+}
+
+.receipt-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+@media print {
+
+  .receipt-buttons,
+  .cart-box,
+  .category-nav {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+
+  .receipt-box {
+    border: none;
+    box-shadow: none;
+  }
+}

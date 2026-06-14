@@ -15,6 +15,8 @@ function App() {
   const [showAdmin, setShowAdmin] = useState(false);
   const [adminPage, setAdminPage] = useState('inventory');
   const [showCheckout, setShowCheckout] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
+  const [receiptData, setReceiptData] = useState(null);
 
   const [clickCount, setClickCount] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('Featured');
@@ -337,14 +339,31 @@ function App() {
       return;
     }
 
-    alert(`Order placed successfully! Order #${data.order.orderNumber}`);
+    setReceiptData({
+      orderNumber: data.order.orderNumber,
+      guestName,
+      roomNumber,
+      message: guestMessage,
+      items: cart,
+      subtotal,
+      gratuity,
+      tax,
+      total,
+      date: new Date().toLocaleString()
+    });
 
+    setShowReceipt(true);
+    setShowCheckout(false);
+  };
+
+  const resetAfterReceipt = () => {
+    setShowReceipt(false);
+    setReceiptData(null);
     setCart([]);
     setCartOpen(false);
     setGuestName('');
     setRoomNumber('');
     setGuestMessage('');
-    setShowCheckout(false);
   };
 
   const backToGuestView = () => {
@@ -361,6 +380,76 @@ function App() {
       <div className="loading-page">
         <div className="pestos-logo">PESTOS</div>
         <p>Loading room service menu...</p>
+      </div>
+    );
+  }
+
+  if (showReceipt && receiptData) {
+    return (
+      <div className="page">
+        <div className="container receipt-page">
+          <h1>Pesto&apos;s Eatery</h1>
+          <p className="subtitle">Room Service Receipt</p>
+
+          <div className="gold-line"></div>
+
+          <div className="receipt-box">
+            <h2>Order #{receiptData.orderNumber}</h2>
+
+            <p><strong>Date:</strong> {receiptData.date}</p>
+            <p><strong>Guest:</strong> {receiptData.guestName}</p>
+            <p><strong>Room:</strong> {receiptData.roomNumber}</p>
+
+            {receiptData.message && (
+              <p><strong>Message:</strong> {receiptData.message}</p>
+            )}
+
+            <hr />
+
+            {receiptData.items.map((item) => (
+              <div className="receipt-item" key={item._id}>
+                <span>{item.quantity} × {item.name}</span>
+                <strong>${(item.quantity * item.price).toFixed(2)}</strong>
+              </div>
+            ))}
+
+            <hr />
+
+            <div className="receipt-row">
+              <span>Subtotal</span>
+              <strong>${receiptData.subtotal.toFixed(2)}</strong>
+            </div>
+
+            <div className="receipt-row">
+              <span>Gratuity 18%</span>
+              <strong>${receiptData.gratuity.toFixed(2)}</strong>
+            </div>
+
+            <div className="receipt-row">
+              <span>Tax 13%</span>
+              <strong>${receiptData.tax.toFixed(2)}</strong>
+            </div>
+
+            <div className="receipt-total">
+              <span>Total</span>
+              <strong>${receiptData.total.toFixed(2)}</strong>
+            </div>
+
+            <p className="receipt-footer">
+              Thank you for dining with us. Please keep this receipt for your reference.
+            </p>
+
+            <div className="receipt-buttons">
+              <button className="save-btn" onClick={() => window.print()}>
+                PRINT RECEIPT
+              </button>
+
+              <button className="back-btn" onClick={resetAfterReceipt}>
+                RETURN TO MENU
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -419,7 +508,6 @@ function App() {
                     <label>DISH NAME *</label>
                     <input
                       type="text"
-                      placeholder="e.g. Garlic Gnocchi"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required
@@ -431,7 +519,6 @@ function App() {
                     <input
                       type="number"
                       step="0.01"
-                      placeholder="e.g. 24.99"
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
                       required
@@ -456,7 +543,6 @@ function App() {
                     <label>TAGS</label>
                     <input
                       type="text"
-                      placeholder="V, GF"
                       value={tags}
                       onChange={(e) => setTags(e.target.value)}
                     />
@@ -466,7 +552,6 @@ function App() {
                 <div className="form-group">
                   <label>MENU DESCRIPTION</label>
                   <textarea
-                    placeholder="Describe preparation elements..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                   />
@@ -478,11 +563,7 @@ function App() {
                   </button>
 
                   {editingItemId && (
-                    <button
-                      className="back-btn"
-                      type="button"
-                      onClick={clearForm}
-                    >
+                    <button className="back-btn" type="button" onClick={clearForm}>
                       CANCEL EDIT
                     </button>
                   )}
@@ -520,9 +601,7 @@ function App() {
                             }
                             onClick={() => toggleAvailability(item)}
                           >
-                            {item.available !== false
-                              ? 'In Stock'
-                              : 'Out of Stock'}
+                            {item.available !== false ? 'In Stock' : 'Out of Stock'}
                           </button>
                         </td>
 
@@ -564,24 +643,15 @@ function App() {
                   <div className="order-card" key={order._id}>
                     <div className="order-header">
                       <h3>Order #{order.orderNumber}</h3>
-                      <span>
-                        {new Date(order.createdAt).toLocaleString()}
-                      </span>
+                      <span>{new Date(order.createdAt).toLocaleString()}</span>
                     </div>
 
                     <div className="order-info">
-                      <p>
-                        <strong>Guest:</strong> {order.guestName}
-                      </p>
-
-                      <p>
-                        <strong>Room:</strong> {order.roomNumber}
-                      </p>
+                      <p><strong>Guest:</strong> {order.guestName}</p>
+                      <p><strong>Room:</strong> {order.roomNumber}</p>
 
                       {order.message && (
-                        <p>
-                          <strong>Message:</strong> {order.message}
-                        </p>
+                        <p><strong>Message:</strong> {order.message}</p>
                       )}
                     </div>
 
@@ -595,18 +665,10 @@ function App() {
                     </div>
 
                     <div className="order-total">
-                      <p>
-                        Subtotal: ${Number(order.subtotal || 0).toFixed(2)}
-                      </p>
-                      <p>
-                        Gratuity 18%: ${Number(order.gratuity || 0).toFixed(2)}
-                      </p>
-                      <p>
-                        Tax 13%: ${Number(order.tax || 0).toFixed(2)}
-                      </p>
-                      <strong>
-                        Total: ${Number(order.total || 0).toFixed(2)}
-                      </strong>
+                      <p>Subtotal: ${Number(order.subtotal || 0).toFixed(2)}</p>
+                      <p>Gratuity 18%: ${Number(order.gratuity || 0).toFixed(2)}</p>
+                      <p>Tax 13%: ${Number(order.tax || 0).toFixed(2)}</p>
+                      <strong>Total: ${Number(order.total || 0).toFixed(2)}</strong>
                     </div>
                   </div>
                 ))}
@@ -659,43 +721,43 @@ function App() {
             </div>
 
             <div className="checkout-summary professional-summary">
-  <h2>Order Summary</h2>
+              <h2>Order Summary</h2>
 
-  <div className="summary-items">
-    {cart.map((item) => (
-      <div className="summary-item" key={item._id}>
-        <div>
-          <strong>{item.name}</strong>
-          <p>{item.quantity} × ${item.price.toFixed(2)}</p>
-        </div>
+              <div className="summary-items">
+                {cart.map((item) => (
+                  <div className="summary-item" key={item._id}>
+                    <div>
+                      <strong>{item.name}</strong>
+                      <p>{item.quantity} × ${item.price.toFixed(2)}</p>
+                    </div>
 
-        <span>${(item.price * item.quantity).toFixed(2)}</span>
-      </div>
-    ))}
-  </div>
+                    <span>${(item.price * item.quantity).toFixed(2)}</span>
+                  </div>
+                ))}
+              </div>
 
-  <div className="summary-divider"></div>
+              <div className="summary-divider"></div>
 
-  <div className="summary-row">
-    <span>Subtotal</span>
-    <strong>${subtotal.toFixed(2)}</strong>
-  </div>
+              <div className="summary-row">
+                <span>Subtotal</span>
+                <strong>${subtotal.toFixed(2)}</strong>
+              </div>
 
-  <div className="summary-row">
-    <span>Gratuity 18%</span>
-    <strong>${gratuity.toFixed(2)}</strong>
-  </div>
+              <div className="summary-row">
+                <span>Gratuity 18%</span>
+                <strong>${gratuity.toFixed(2)}</strong>
+              </div>
 
-  <div className="summary-row">
-    <span>Tax 13%</span>
-    <strong>${tax.toFixed(2)}</strong>
-  </div>
+              <div className="summary-row">
+                <span>Tax 13%</span>
+                <strong>${tax.toFixed(2)}</strong>
+              </div>
 
-  <div className="summary-total-row">
-    <span>Total</span>
-    <strong>${total.toFixed(2)}</strong>
-  </div>
-</div>
+              <div className="summary-total-row">
+                <span>Total</span>
+                <strong>${total.toFixed(2)}</strong>
+              </div>
+            </div>
 
             <div className="checkout-buttons">
               <button
