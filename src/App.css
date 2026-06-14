@@ -1118,3 +1118,21 @@ td {
     width: 100%;
   }
 }
+
+.alarm-alert {
+  animation: alarmPulse 1s infinite;
+}
+
+@keyframes alarmPulse {
+  0% {
+    background: #155d73;
+  }
+
+  50% {
+    background: #b00020;
+  }
+
+  100% {
+    background: #155d73;
+  }
+}

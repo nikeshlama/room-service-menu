@@ -40,6 +40,7 @@ function App() {
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
   const ordersLoadedRef = useRef(false);
+  const alarmRef = useRef(null);
 
   const categories = [
     'Featured',
@@ -70,6 +71,26 @@ function App() {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${localStorage.getItem('admin_token')}`
   });
+
+  const startAlarm = () => {
+    if (!alarmRef.current) {
+      alarmRef.current = new Audio('/notification.mp3');
+      alarmRef.current.loop = true;
+    }
+
+    alarmRef.current.play().catch(() => {
+      console.log('Alarm blocked until user interacts with page');
+    });
+  };
+
+  const stopAlarm = () => {
+    if (alarmRef.current) {
+      alarmRef.current.pause();
+      alarmRef.current.currentTime = 0;
+    }
+
+    setNewOrderAlert(false);
+  };
 
   const centerCategory = (cat) => {
     setSelectedCategory(cat);
@@ -124,11 +145,7 @@ function App() {
           newestOrderId !== lastOrderIdRef.current
         ) {
           setNewOrderAlert(true);
-
-          const audio = new Audio('/notification.mp3');
-          audio.play().catch(() => {
-            console.log('Notification sound blocked by browser');
-          });
+          startAlarm();
         }
 
         if (newestOrderId) {
@@ -408,7 +425,7 @@ function App() {
   const backToGuestView = () => {
     localStorage.removeItem('admin_token');
     setShowAdmin(false);
-    setNewOrderAlert(false);
+    stopAlarm();
   };
 
   const visibleItems = menuItems.filter(
@@ -675,11 +692,11 @@ function App() {
               <h2 className="section-title">Guest Orders</h2>
 
               {newOrderAlert && (
-                <div className="new-order-alert">
-                  <span>🔔 New order received!</span>
+                <div className="new-order-alert alarm-alert">
+                  <span>🚨 New order received!</span>
 
-                  <button onClick={() => setNewOrderAlert(false)}>
-                    Dismiss
+                  <button onClick={stopAlarm}>
+                    Checked / Stop Alarm
                   </button>
                 </div>
               )}
