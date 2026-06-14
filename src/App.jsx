@@ -5,6 +5,7 @@ const API_URL = 'https://pestos-backend.onrender.com/api/menu';
 const LOGIN_URL = 'https://pestos-backend.onrender.com/api/login';
 const ORDERS_URL = 'https://pestos-backend.onrender.com/api/orders';
 const TAX_RATE = 0.13;
+const GRATUITY_RATE = 0.18;
 
 function App() {
   const [menuItems, setMenuItems] = useState([]);
@@ -50,8 +51,9 @@ function App() {
     0
   );
 
+  const gratuity = subtotal * GRATUITY_RATE;
   const tax = subtotal * TAX_RATE;
-  const total = subtotal + tax;
+  const total = subtotal + gratuity + tax;
 
   const wordCount = guestMessage
     .trim()
@@ -322,6 +324,7 @@ function App() {
         message: guestMessage,
         items: cart,
         subtotal,
+        gratuity,
         tax,
         total
       })
@@ -592,7 +595,18 @@ function App() {
                     </div>
 
                     <div className="order-total">
-                      Total: ${Number(order.total).toFixed(2)}
+                      <p>
+                        Subtotal: ${Number(order.subtotal || 0).toFixed(2)}
+                      </p>
+                      <p>
+                        Gratuity 18%: ${Number(order.gratuity || 0).toFixed(2)}
+                      </p>
+                      <p>
+                        Tax 13%: ${Number(order.tax || 0).toFixed(2)}
+                      </p>
+                      <strong>
+                        Total: ${Number(order.total || 0).toFixed(2)}
+                      </strong>
                     </div>
                   </div>
                 ))}
@@ -657,6 +671,7 @@ function App() {
               <hr />
 
               <p>Subtotal: ${subtotal.toFixed(2)}</p>
+              <p>Gratuity 18%: ${gratuity.toFixed(2)}</p>
               <p>Tax 13%: ${tax.toFixed(2)}</p>
               <h3>Total: ${total.toFixed(2)}</h3>
             </div>
@@ -842,6 +857,11 @@ function App() {
                     <div>
                       <span>Subtotal</span>
                       <strong>${subtotal.toFixed(2)}</strong>
+                    </div>
+
+                    <div>
+                      <span>Gratuity 18%</span>
+                      <strong>${gratuity.toFixed(2)}</strong>
                     </div>
 
                     <div>
