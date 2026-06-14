@@ -16,7 +16,7 @@ function App() {
   const [showCheckout, setShowCheckout] = useState(false);
 
   const [clickCount, setClickCount] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedCategory, setSelectedCategory] = useState('Featured');
   const [cart, setCart] = useState([]);
 
   const [guestName, setGuestName] = useState('');
@@ -28,9 +28,10 @@ function App() {
   const [category, setCategory] = useState('Appetizers');
   const [tags, setTags] = useState('');
   const [description, setDescription] = useState('');
+  const [featured, setFeatured] = useState(false);
 
   const categories = [
-    'All',
+    'Featured',
     'Appetizers',
     'Salads & Sandwiches',
     'Pasta',
@@ -40,7 +41,7 @@ function App() {
     'Beverages'
   ];
 
-  const adminCategories = categories.filter((cat) => cat !== 'All');
+  const adminCategories = categories.filter((cat) => cat !== 'Featured');
 
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -63,10 +64,8 @@ function App() {
   const fetchMenu = async () => {
     try {
       setLoading(true);
-
       const res = await fetch(API_URL);
       const data = await res.json();
-
       setMenuItems(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error('GET MENU ERROR:', err);
@@ -142,9 +141,13 @@ function App() {
         name,
         price: Number(price),
         category,
-        tags,
+        tags: tags
+          .split(',')
+          .map((tag) => tag.trim())
+          .filter(Boolean),
         description,
-        available: true
+        available: true,
+        featured
       })
     });
 
@@ -160,6 +163,7 @@ function App() {
     setCategory('Appetizers');
     setTags('');
     setDescription('');
+    setFeatured(false);
     fetchMenu();
   };
 
@@ -169,6 +173,25 @@ function App() {
       headers: getAuthHeaders(),
       body: JSON.stringify({
         available: item.available === false ? true : false
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      alert(data.message || 'Update failed');
+      return;
+    }
+
+    fetchMenu();
+  };
+
+  const toggleFeatured = async (item) => {
+    const res = await fetch(`${API_URL}/${item._id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        featured: item.featured === true ? false : true
       })
     });
 
@@ -231,9 +254,7 @@ function App() {
   const increaseQuantity = (id) => {
     setCart((currentCart) =>
       currentCart.map((item) =>
-        item._id === id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
+        item._id === id ? { ...item, quantity: item.quantity + 1 } : item
       )
     );
   };
@@ -242,9 +263,7 @@ function App() {
     setCart((currentCart) =>
       currentCart
         .map((item) =>
-          item._id === id
-            ? { ...item, quantity: item.quantity - 1 }
-            : item
+          item._id === id ? { ...item, quantity: item.quantity - 1 } : item
         )
         .filter((item) => item.quantity > 0)
     );
@@ -300,8 +319,8 @@ function App() {
   };
 
   const visibleItems =
-    selectedCategory === 'All'
-      ? menuItems
+    selectedCategory === 'Featured'
+      ? menuItems.filter((item) => item.featured === true)
       : menuItems.filter((item) => item.category === selectedCategory);
 
   if (loading && !showAdmin) {
@@ -416,6 +435,17 @@ function App() {
                   />
                 </div>
 
+                <div className="form-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={featured}
+                      onChange={(e) => setFeatured(e.target.checked)}
+                    />{' '}
+                    Mark as Featured / Today's Special
+                  </label>
+                </div>
+
                 <button className="save-btn" type="submit">
                   SAVE TO CLOUD DATABASE
                 </button>
@@ -430,7 +460,8 @@ function App() {
                       <th>DISH NAME</th>
                       <th>CATEGORY</th>
                       <th>PRICE</th>
-                      <th>STOCK STATUS TOGGLE</th>
+                      <th>FEATURED</th>
+                      <th>STOCK STATUS</th>
                       <th>DELETE</th>
                     </tr>
                   </thead>
@@ -441,6 +472,19 @@ function App() {
                         <td>{item.name}</td>
                         <td>{item.category}</td>
                         <td>${Number(item.price).toFixed(2)}</td>
+
+                        <td>
+                          <button
+                            className={
+                              item.featured === true
+                                ? 'stock-btn in-stock'
+                                : 'stock-btn out-stock'
+                            }
+                            onClick={() => toggleFeatured(item)}
+                          >
+                            {item.featured === true ? 'Featured' : 'Normal'}
+                          </button>
+                        </td>
 
                         <td>
                           <button
@@ -629,8 +673,18 @@ function App() {
           ))}
         </div>
 
+        {selectedCategory === 'Featured' && (
+          <h2 className="section-title">Today's Featured Specials</h2>
+        )}
+
         <div className="guest-layout">
           <div className="menu-grid">
+            {visibleItems.length === 0 && selectedCategory === 'Featured' && (
+              <p className="empty-cart">
+                No featured specials available right now.
+              </p>
+            )}
+
             {visibleItems.map((item) => (
               <div
                 className={`menu-card ${
@@ -649,6 +703,10 @@ function App() {
 
                 {Array.isArray(item.tags) && item.tags.length > 0 && (
                   <p className="tags">{item.tags.join(', ')}</p>
+                )}
+
+                {item.featured === true && (
+                  <p className="tags">Today&apos;s Special</p>
                 )}
 
                 {item.available === false ? (
