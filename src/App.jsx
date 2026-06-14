@@ -25,10 +25,9 @@ function App() {
 
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
-  const [category, setCategory] = useState('Appetizers');
+  const [category, setCategory] = useState('Featured');
   const [tags, setTags] = useState('');
   const [description, setDescription] = useState('');
-  const [featured, setFeatured] = useState(false);
 
   const categories = [
     'Featured',
@@ -40,8 +39,6 @@ function App() {
     'Desserts',
     'Beverages'
   ];
-
-  const adminCategories = categories.filter((cat) => cat !== 'Featured');
 
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -141,13 +138,9 @@ function App() {
         name,
         price: Number(price),
         category,
-        tags: tags
-          .split(',')
-          .map((tag) => tag.trim())
-          .filter(Boolean),
+        tags,
         description,
-        available: true,
-        featured
+        available: true
       })
     });
 
@@ -160,10 +153,9 @@ function App() {
 
     setName('');
     setPrice('');
-    setCategory('Appetizers');
+    setCategory('Featured');
     setTags('');
     setDescription('');
-    setFeatured(false);
     fetchMenu();
   };
 
@@ -173,25 +165,6 @@ function App() {
       headers: getAuthHeaders(),
       body: JSON.stringify({
         available: item.available === false ? true : false
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok || !data.success) {
-      alert(data.message || 'Update failed');
-      return;
-    }
-
-    fetchMenu();
-  };
-
-  const toggleFeatured = async (item) => {
-    const res = await fetch(`${API_URL}/${item._id}`, {
-      method: 'PUT',
-      headers: getAuthHeaders(),
-      body: JSON.stringify({
-        featured: item.featured === true ? false : true
       })
     });
 
@@ -254,7 +227,9 @@ function App() {
   const increaseQuantity = (id) => {
     setCart((currentCart) =>
       currentCart.map((item) =>
-        item._id === id ? { ...item, quantity: item.quantity + 1 } : item
+        item._id === id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
       )
     );
   };
@@ -263,7 +238,9 @@ function App() {
     setCart((currentCart) =>
       currentCart
         .map((item) =>
-          item._id === id ? { ...item, quantity: item.quantity - 1 } : item
+          item._id === id
+            ? { ...item, quantity: item.quantity - 1 }
+            : item
         )
         .filter((item) => item.quantity > 0)
     );
@@ -318,10 +295,9 @@ function App() {
     setShowAdmin(false);
   };
 
-  const visibleItems =
-    selectedCategory === 'Featured'
-      ? menuItems.filter((item) => item.featured === true)
-      : menuItems.filter((item) => item.category === selectedCategory);
+  const visibleItems = menuItems.filter(
+    (item) => item.category === selectedCategory
+  );
 
   if (loading && !showAdmin) {
     return (
@@ -407,7 +383,7 @@ function App() {
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
                     >
-                      {adminCategories.map((cat) => (
+                      {categories.map((cat) => (
                         <option key={cat} value={cat}>
                           {cat}
                         </option>
@@ -435,17 +411,6 @@ function App() {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={featured}
-                      onChange={(e) => setFeatured(e.target.checked)}
-                    />{' '}
-                    Mark as Featured / Today's Special
-                  </label>
-                </div>
-
                 <button className="save-btn" type="submit">
                   SAVE TO CLOUD DATABASE
                 </button>
@@ -460,8 +425,7 @@ function App() {
                       <th>DISH NAME</th>
                       <th>CATEGORY</th>
                       <th>PRICE</th>
-                      <th>FEATURED</th>
-                      <th>STOCK STATUS</th>
+                      <th>STOCK STATUS TOGGLE</th>
                       <th>DELETE</th>
                     </tr>
                   </thead>
@@ -472,19 +436,6 @@ function App() {
                         <td>{item.name}</td>
                         <td>{item.category}</td>
                         <td>${Number(item.price).toFixed(2)}</td>
-
-                        <td>
-                          <button
-                            className={
-                              item.featured === true
-                                ? 'stock-btn in-stock'
-                                : 'stock-btn out-stock'
-                            }
-                            onClick={() => toggleFeatured(item)}
-                          >
-                            {item.featured === true ? 'Featured' : 'Normal'}
-                          </button>
-                        </td>
 
                         <td>
                           <button
@@ -530,7 +481,10 @@ function App() {
                   <div className="order-card" key={order._id}>
                     <div className="order-header">
                       <h3>Order #{order.orderNumber}</h3>
-                      <span>{new Date(order.createdAt).toLocaleString()}</span>
+
+                      <span>
+                        {new Date(order.createdAt).toLocaleString()}
+                      </span>
                     </div>
 
                     <div className="order-info">
@@ -674,14 +628,14 @@ function App() {
         </div>
 
         {selectedCategory === 'Featured' && (
-          <h2 className="section-title">Today's Featured Specials</h2>
+          <h2 className="section-title">Today&apos;s Featured Specials</h2>
         )}
 
         <div className="guest-layout">
           <div className="menu-grid">
-            {visibleItems.length === 0 && selectedCategory === 'Featured' && (
+            {visibleItems.length === 0 && (
               <p className="empty-cart">
-                No featured specials available right now.
+                No items available in this category right now.
               </p>
             )}
 
@@ -703,10 +657,6 @@ function App() {
 
                 {Array.isArray(item.tags) && item.tags.length > 0 && (
                   <p className="tags">{item.tags.join(', ')}</p>
-                )}
-
-                {item.featured === true && (
-                  <p className="tags">Today&apos;s Special</p>
                 )}
 
                 {item.available === false ? (
