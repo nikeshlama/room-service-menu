@@ -18,6 +18,7 @@ function App() {
   const [clickCount, setClickCount] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('Featured');
   const [cart, setCart] = useState([]);
+  const [cartOpen, setCartOpen] = useState(false);
 
   const [guestName, setGuestName] = useState('');
   const [roomNumber, setRoomNumber] = useState('');
@@ -199,6 +200,8 @@ function App() {
   const addToCart = (item) => {
     if (item.available === false) return;
 
+    setCartOpen(true);
+
     setCart((currentCart) => {
       const existingItem = currentCart.find(
         (cartItem) => cartItem._id === item._id
@@ -284,6 +287,7 @@ function App() {
     alert(`Order placed successfully! Order #${data.order.orderNumber}`);
 
     setCart([]);
+    setCartOpen(false);
     setGuestName('');
     setRoomNumber('');
     setGuestMessage('');
@@ -481,7 +485,6 @@ function App() {
                   <div className="order-card" key={order._id}>
                     <div className="order-header">
                       <h3>Order #{order.orderNumber}</h3>
-
                       <span>
                         {new Date(order.createdAt).toLocaleString()}
                       </span>
@@ -670,69 +673,85 @@ function App() {
             ))}
           </div>
 
-          <div className="cart-box">
-            <h2>Your Order</h2>
-
-            {cart.length === 0 && (
-              <p className="empty-cart">No items added yet.</p>
-            )}
-
-            {cart.map((item) => (
-              <div className="cart-item" key={item._id}>
-                <div>
-                  <strong>{item.name}</strong>
-                  <p>
-                    ${item.price.toFixed(2)} × {item.quantity}
-                  </p>
-                </div>
-
-                <div className="cart-controls">
-                  <button onClick={() => decreaseQuantity(item._id)}>
-                    −
-                  </button>
-
-                  <span>{item.quantity}</span>
-
-                  <button onClick={() => increaseQuantity(item._id)}>
-                    +
-                  </button>
-
-                  <button
-                    className="remove-cart-btn"
-                    onClick={() => removeFromCart(item._id)}
-                  >
-                    ×
-                  </button>
-                </div>
+          {cart.length > 0 && (
+            <div className={`cart-box ${cartOpen ? 'cart-open' : 'cart-closed'}`}>
+              <div
+                className="cart-header"
+                onClick={() => setCartOpen(!cartOpen)}
+              >
+                <h2>Your Order</h2>
+                <span>{cartOpen ? '−' : '+'}</span>
               </div>
-            ))}
 
-            {cart.length > 0 && (
-              <div className="cart-summary">
-                <div>
-                  <span>Subtotal</span>
-                  <strong>${subtotal.toFixed(2)}</strong>
-                </div>
+              {!cartOpen && (
+                <p className="cart-mini-text">
+                  {cart.reduce((sum, item) => sum + item.quantity, 0)} item
+                  {cart.reduce((sum, item) => sum + item.quantity, 0) > 1
+                    ? 's'
+                    : ''}{' '}
+                  • Total ${total.toFixed(2)}
+                </p>
+              )}
 
-                <div>
-                  <span>Tax 13%</span>
-                  <strong>${tax.toFixed(2)}</strong>
-                </div>
+              {cartOpen && (
+                <>
+                  {cart.map((item) => (
+                    <div className="cart-item" key={item._id}>
+                      <div>
+                        <strong>{item.name}</strong>
+                        <p>
+                          ${item.price.toFixed(2)} × {item.quantity}
+                        </p>
+                      </div>
 
-                <div className="cart-total">
-                  <span>Total</span>
-                  <strong>${total.toFixed(2)}</strong>
-                </div>
+                      <div className="cart-controls">
+                        <button onClick={() => decreaseQuantity(item._id)}>
+                          −
+                        </button>
 
-                <button
-                  className="checkout-btn"
-                  onClick={() => setShowCheckout(true)}
-                >
-                  CHECKOUT
-                </button>
-              </div>
-            )}
-          </div>
+                        <span>{item.quantity}</span>
+
+                        <button onClick={() => increaseQuantity(item._id)}>
+                          +
+                        </button>
+
+                        <button
+                          className="remove-cart-btn"
+                          onClick={() => removeFromCart(item._id)}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  <div className="cart-summary">
+                    <div>
+                      <span>Subtotal</span>
+                      <strong>${subtotal.toFixed(2)}</strong>
+                    </div>
+
+                    <div>
+                      <span>Tax 13%</span>
+                      <strong>${tax.toFixed(2)}</strong>
+                    </div>
+
+                    <div className="cart-total">
+                      <span>Total</span>
+                      <strong>${total.toFixed(2)}</strong>
+                    </div>
+
+                    <button
+                      className="checkout-btn"
+                      onClick={() => setShowCheckout(true)}
+                    >
+                      CHECKOUT
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

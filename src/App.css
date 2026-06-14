@@ -891,3 +891,78 @@ td {
     width: 100%;
   }
 }
+
+/* ===== FLOATING MOBILE CART ===== */
+
+.cart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.cart-header h2 {
+  margin: 0;
+}
+
+.cart-header span {
+  font-size: 28px;
+  font-weight: bold;
+  color: #0b5d7a;
+}
+
+.cart-mini-text {
+  margin: 10px 0 0;
+  font-weight: bold;
+  color: #555;
+}
+
+@media (max-width: 768px) {
+  .guest-layout {
+    display: block;
+    padding-bottom: 90px;
+  }
+
+  .cart-box {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+    z-index: 9999;
+    background: white;
+    border: 1px solid #d9d4ca;
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.18);
+  }
+
+  .cart-closed {
+    max-height: 95px;
+    overflow: hidden;
+  }
+
+  .cart-open {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
+  .cart-box h2 {
+    font-size: 24px;
+  }
+
+  .cart-item {
+    padding: 12px 0;
+  }
+
+  .cart-controls {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .checkout-btn {
+    width: 100%;
+    padding: 15px;
+  }
+}
