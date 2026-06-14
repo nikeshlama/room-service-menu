@@ -807,3 +807,87 @@ td {
     text-align: left;
   }
 }
+
+/* ===== FINAL MOBILE FIX ===== */
+
+@media (max-width: 768px) {
+  .page {
+    padding: 10px;
+  }
+
+  .container {
+    padding: 16px;
+    width: 100%;
+    border: none;
+    box-shadow: none;
+  }
+
+  .brand-title,
+  h1 {
+    font-size: 30px;
+    line-height: 1.1;
+  }
+
+  .guest-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding-bottom: 0;
+  }
+
+  .cart-box {
+    position: static;
+    width: 100%;
+    max-height: none;
+    overflow: visible;
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+
+  .menu-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .category-nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-bottom: 20px;
+  }
+
+  .category-btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: 12px;
+    padding: 10px 14px;
+  }
+
+  .menu-card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .card-head h3 {
+    font-size: 16px;
+  }
+
+  .card-head span {
+    font-size: 15px;
+  }
+
+  .menu-card p {
+    font-size: 14px;
+  }
+
+  .checkout-buttons {
+    flex-direction: column;
+  }
+
+  .save-btn,
+  .back-btn,
+  .checkout-btn {
+    width: 100%;
+  }
+}
