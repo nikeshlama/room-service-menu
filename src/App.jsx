@@ -6,6 +6,7 @@ const LOGIN_URL = 'https://pestos-backend.onrender.com/api/login';
 const ORDERS_URL = 'https://pestos-backend.onrender.com/api/orders';
 const TAX_RATE = 0.13;
 const GRATUITY_RATE = 0.18;
+const NOTIFICATION_SOUND = `${import.meta.env.BASE_URL}notification.mp3`;
 
 function App() {
   const [menuItems, setMenuItems] = useState([]);
@@ -75,7 +76,7 @@ function App() {
 
   const enableAlarmSound = () => {
     if (!alarmRef.current) {
-      alarmRef.current = new Audio('/notification.mp3');
+      alarmRef.current = new Audio(NOTIFICATION_SOUND);
       alarmRef.current.loop = true;
       alarmRef.current.volume = 1;
     }
@@ -95,7 +96,7 @@ function App() {
 
   const startAlarm = () => {
     if (!alarmRef.current) {
-      alarmRef.current = new Audio('/notification.mp3');
+      alarmRef.current = new Audio(NOTIFICATION_SOUND);
       alarmRef.current.loop = true;
       alarmRef.current.volume = 1;
     }
