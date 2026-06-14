@@ -200,8 +200,6 @@ function App() {
   const addToCart = (item) => {
     if (item.available === false) return;
 
-    setCartOpen(true);
-
     setCart((currentCart) => {
       const existingItem = currentCart.find(
         (cartItem) => cartItem._id === item._id
