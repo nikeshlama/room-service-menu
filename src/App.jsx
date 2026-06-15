@@ -746,7 +746,7 @@ function App() {
 
               {newOrderAlert && (
                 <div className="new-order-alert alarm-alert">
-                  <span>🚨 New order received!</span>
+                  <span> New order received!</span>
 
                   <button onClick={stopAlarm}>
                     Checked / Stop Alarm
