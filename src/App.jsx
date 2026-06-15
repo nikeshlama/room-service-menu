@@ -894,18 +894,20 @@ function App() {
             </div>
 
             <div className="checkout-buttons">
-              <button
-                type="button"
-                className="back-btn"
-                onClick={() => setShowCheckout(false)}
-              >
-                ← Back to Order
-              </button>
 
-              <button type="submit" className="save-btn">
-                PLACE ORDER
-              </button>
-            </div>
+  <button type="submit" className="save-btn">
+    PLACE ORDER
+  </button>
+
+  <button
+    type="button"
+    className="back-btn"
+    onClick={() => setShowCheckout(false)}
+  >
+    ← BACK TO ORDER
+  </button>
+
+</div>
           </form>
         </div>
       </div>
