@@ -981,17 +981,15 @@ function App() {
                       )}
 
                       {item.description && (
-                        <>
-                          <button
-                            type="button"
-                            className="description-toggle"
-                            onClick={() => toggleDescription(item._id)}
-                          >
-                            {openDescriptions[item._id]
-                              ? 'Hide description ▲'
-                              : 'View description ▼'}
-                          </button>
-                        </>
+                        <button
+                          type="button"
+                          className="description-toggle"
+                          onClick={() => toggleDescription(item._id)}
+                        >
+                          {openDescriptions[item._id]
+                            ? 'Hide description ▲'
+                            : 'View description ▼'}
+                        </button>
                       )}
                     </div>
 
@@ -1009,14 +1007,6 @@ function App() {
                       <p className="item-description">
                         {item.description}
                       </p>
-
-                      {itemImage && (
-                        <img
-                          src={itemImage}
-                          alt={item.name}
-                          className="menu-food-image"
-                        />
-                      )}
                     </div>
                   )}
 
