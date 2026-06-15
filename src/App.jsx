@@ -9,19 +9,33 @@ const GRATUITY_RATE = 0.18;
 const NOTIFICATION_SOUND = `${import.meta.env.BASE_URL}notification.mp3`;
 
 const menuImages = {
-  'Arranchini ': 'menu-images/aranchini.png',
+  'Arrancini': 'menu-images/aranchini.png',
+
   'Classic Caesar Salad': 'menu-images/ceasersalad.png',
-  'Italian Cobb Salad': 'menu-images/cobbsalad.png',
+
+  'ItalianCobb Salad': 'menu-images/cobbsalad.png',
+
   'Tronchetto Di Mozzarella (Mozza Log)': 'menu-images/mozzalog.png',
+
   'Porchetta Slider Trio': 'menu-images/prochettaslidertrio.png',
+
   'Garlic Parm Rolls': 'menu-images/garlicparmrolls.png',
+
   'Chicken Marsala': 'menu-images/chickenmarsala.png',
+
   'Chicken Parmesan': 'menu-images/chickenparm.png',
-  'Paperdelle Primavera con aglio e olio': 'menu-images/primavera.png',
-  'Chicken & Sherry Cream Fettuccine': 'menu-images/shericreamfettuchini.png',
-  'Spaghetti & Meatballs': 'menu-images/spanmeatballs.png',
-  'Beef Tagliata Di Manzo': 'menu-images/steak.png',
-  'Chicken Wings & Fries': 'menu-images/wingsnfries.png'
+
+  'Primavera': 'menu-images/primavera.png',
+
+  'Sherry Cream Fettuccine':
+    'menu-images/shericreamfettuchini.png',
+
+  'Spaghetti & Meatballs':
+    'menu-images/spanmeatballs.png',
+
+  'Steak': 'menu-images/steak.png',
+
+  'Wings & Fries': 'menu-images/wingsnfries.png'
 };
 
 function App() {
@@ -954,7 +968,6 @@ function App() {
                       <div className="compact-menu-top">
                         <div className="compact-menu-info">
                           <h3>{item.name}</h3>
-                          <p className="compact-category">{item.category}</p>
                         </div>
 
                         <div className="compact-menu-actions">
