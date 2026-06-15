@@ -8,6 +8,22 @@ const TAX_RATE = 0.13;
 const GRATUITY_RATE = 0.18;
 const NOTIFICATION_SOUND = `${import.meta.env.BASE_URL}notification.mp3`;
 
+const menuImages = {
+  Arancini: 'menu-images/aranchini.png',
+  'Caesar Salad': 'menu-images/ceasersalad.png',
+  'Chicken Marsala': 'menu-images/chickenmarsala.png',
+  'Chicken Parmesan': 'menu-images/chickenparm.png',
+  'Cobb Salad': 'menu-images/cobbsalad.png',
+  'Garlic Parmesan Rolls': 'menu-images/garlicparmrolls.png',
+  'Mozza Log': 'menu-images/mozzalog.png',
+  Primavera: 'menu-images/primavera.png',
+  'Porchetta Slider Trio': 'menu-images/prochettaslidertrio.png',
+  'Sherry Cream Fettuccine': 'menu-images/shericreamfettuchini.png',
+  'Spaghetti & Meatballs': 'menu-images/spanmeatballs.png',
+  Steak: 'menu-images/steak.png',
+  'Wings & Fries': 'menu-images/wingsnfries.png'
+};
+
 function App() {
   const [menuItems, setMenuItems] = useState([]);
   const [orders, setOrders] = useState([]);
@@ -73,6 +89,11 @@ function App() {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${localStorage.getItem('admin_token')}`
   });
+
+  const getMenuImage = (itemName) => {
+    const imagePath = menuImages[itemName];
+    return imagePath ? `${import.meta.env.BASE_URL}${imagePath}` : null;
+  };
 
   const enableAlarmSound = () => {
     if (!alarmRef.current) {
@@ -918,69 +939,95 @@ function App() {
               </p>
             )}
 
-            {visibleItems.map((item) => (
-              <div
-                className={`menu-card compact-menu-card ${
-                  item.available === false ? 'unavailable-card' : ''
-                }`}
-                key={item._id}
-              >
-                <div className="compact-menu-top">
-                  <div className="compact-menu-info">
-                    <h3>{item.name}</h3>
-                    <p className="compact-category">{item.category}</p>
-                  </div>
+            {visibleItems.map((item) => {
+              const itemImage = getMenuImage(item.name);
 
-                  <div className="compact-menu-actions">
-                    <span className="compact-price">
-                      ${Number(item.price).toFixed(2)}
-                    </span>
+              return (
+                <div
+                  className={`menu-card compact-menu-card premium-menu-card ${
+                    item.available === false ? 'unavailable-card' : ''
+                  }`}
+                  key={item._id}
+                >
+                  <div className="premium-card-main">
+                    <div className="premium-card-info">
+                      <div className="compact-menu-top">
+                        <div className="compact-menu-info">
+                          <h3>{item.name}</h3>
+                          <p className="compact-category">{item.category}</p>
+                        </div>
 
-                    {item.available !== false && (
-                      <button
-                        className="item-add-btn"
-                        onClick={() => addToCart(item)}
-                        type="button"
-                      >
-                        +
-                      </button>
+                        <div className="compact-menu-actions">
+                          <span className="compact-price">
+                            ${Number(item.price).toFixed(2)}
+                          </span>
+
+                          {item.available !== false && (
+                            <button
+                              className="item-add-btn"
+                              onClick={() => addToCart(item)}
+                              type="button"
+                            >
+                              +
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {Array.isArray(item.tags) && item.tags.length > 0 && (
+                        <p className="tags compact-tags">
+                          {item.tags.join(', ')}
+                        </p>
+                      )}
+
+                      {item.description && (
+                        <>
+                          <button
+                            type="button"
+                            className="description-toggle"
+                            onClick={() => toggleDescription(item._id)}
+                          >
+                            {openDescriptions[item._id]
+                              ? 'Hide description ▲'
+                              : 'View description ▼'}
+                          </button>
+                        </>
+                      )}
+                    </div>
+
+                    {itemImage && (
+                      <img
+                        src={itemImage}
+                        alt={item.name}
+                        className="menu-thumbnail"
+                      />
                     )}
                   </div>
-                </div>
 
-                {Array.isArray(item.tags) && item.tags.length > 0 && (
-                  <p className="tags compact-tags">
-                    {item.tags.join(', ')}
-                  </p>
-                )}
-
-                {item.description && (
-                  <>
-                    <button
-                      type="button"
-                      className="description-toggle"
-                      onClick={() => toggleDescription(item._id)}
-                    >
-                      {openDescriptions[item._id]
-                        ? 'Hide description ▲'
-                        : 'View description ▼'}
-                    </button>
-
-                    {openDescriptions[item._id] && (
+                  {item.description && openDescriptions[item._id] && (
+                    <div className="description-section">
                       <p className="item-description">
                         {item.description}
                       </p>
-                    )}
-                  </>
-                )}
 
-                {item.available === false && (
-                  <p className="unavailable-label">
-                    Currently unavailable
-                  </p>
-                )}
-              </div>
-            ))}
+                      {itemImage && (
+                        <img
+                          src={itemImage}
+                          alt={item.name}
+                          className="menu-food-image"
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  {item.available === false && (
+                    <p className="unavailable-label">
+                      Currently unavailable
+                    </p>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           {cart.length > 0 && (
