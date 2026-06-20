@@ -4,6 +4,9 @@ import './App.css';
 const API_URL = 'https://pestos-backend.onrender.com/api/menu';
 const LOGIN_URL = 'https://pestos-backend.onrender.com/api/login';
 const ORDERS_URL = 'https://pestos-backend.onrender.com/api/orders';
+const GUESTS_URL = 'https://pestos-backend.onrender.com/api/guests';
+const GUEST_UPLOAD_URL = 'https://pestos-backend.onrender.com/api/guests/upload';
+
 const TAX_RATE = 0.13;
 const GRATUITY_RATE = 0.18;
 const NOTIFICATION_SOUND = `${import.meta.env.BASE_URL}notification.mp3`;
@@ -27,6 +30,10 @@ const menuImages = {
 function App() {
   const [menuItems, setMenuItems] = useState([]);
   const [orders, setOrders] = useState([]);
+  const [guests, setGuests] = useState([]);
+  const [guestUploadMessage, setGuestUploadMessage] = useState('');
+  const [guestUploading, setGuestUploading] = useState(false);
+
   const [loading, setLoading] = useState(true);
 
   const [showAdmin, setShowAdmin] = useState(false);
@@ -91,7 +98,7 @@ function App() {
   });
 
   const getMenuImage = (itemName) => {
-    const imagePath = menuImages[itemName];
+    const imagePath = menuImages[itemName] || menuImages[itemName?.trim()];
     return imagePath ? `${import.meta.env.BASE_URL}${imagePath}` : null;
   };
 
@@ -201,6 +208,60 @@ function App() {
       }
     } catch (err) {
       console.error('GET ORDERS ERROR:', err);
+    }
+  };
+
+  const fetchGuests = async () => {
+    try {
+      const res = await fetch(GUESTS_URL, {
+        headers: getAuthHeaders()
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setGuests(data.guests);
+      }
+    } catch (err) {
+      console.error('GET GUESTS ERROR:', err);
+    }
+  };
+
+  const uploadGuestExcel = async (e) => {
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    setGuestUploading(true);
+    setGuestUploadMessage('Uploading guest list...');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch(GUEST_UPLOAD_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('admin_token')}`
+        },
+        body: formData
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setGuestUploadMessage(data.message || 'Guest upload failed.');
+        return;
+      }
+
+      setGuestUploadMessage(data.message || 'Guest list uploaded successfully.');
+      fetchGuests();
+    } catch (err) {
+      console.error('UPLOAD GUEST ERROR:', err);
+      setGuestUploadMessage('Guest upload failed.');
+    } finally {
+      setGuestUploading(false);
+      e.target.value = '';
     }
   };
 
@@ -435,7 +496,10 @@ function App() {
     const data = await res.json();
 
     if (!res.ok || !data.success) {
-      alert(data.message || 'Order failed');
+      alert(
+        data.message ||
+          'Guest name and room number do not match our check-in records. Please enter the correct room number and the exact name used during hotel check-in.'
+      );
       return;
     }
 
@@ -593,6 +657,18 @@ function App() {
             >
               Inventory
             </button>
+
+            <button
+              className={`admin-nav-btn ${
+                adminPage === 'guests' ? 'active-admin' : ''
+              }`}
+              onClick={() => {
+                setAdminPage('guests');
+                fetchGuests();
+              }}
+            >
+              Guest Info
+            </button>
           </div>
 
           {adminPage === 'inventory' && (
@@ -746,7 +822,7 @@ function App() {
 
               {newOrderAlert && (
                 <div className="new-order-alert alarm-alert">
-                  <span> New order received!</span>
+                  <span>New order received!</span>
 
                   <button onClick={stopAlarm}>
                     Checked / Stop Alarm
@@ -795,6 +871,61 @@ function App() {
               </div>
             </>
           )}
+
+          {adminPage === 'guests' && (
+            <>
+              <h2 className="section-title">Guest Verification List</h2>
+
+              <div className="form-card">
+                <h2>Upload Guest Excel Sheet</h2>
+
+                <p>
+                  Upload an Excel file with columns named <strong>Room No</strong> and{' '}
+                  <strong>Guest Name</strong>. This list will be used to verify room
+                  service orders before checkout is successful.
+                </p>
+
+                <input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={uploadGuestExcel}
+                  disabled={guestUploading}
+                />
+
+                {guestUploadMessage && (
+                  <p className="add-hint">{guestUploadMessage}</p>
+                )}
+              </div>
+
+              <h2 className="section-title">Uploaded Guest List</h2>
+
+              <div className="table-box">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Room No</th>
+                      <th>Guest Name</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {guests.length === 0 && (
+                      <tr>
+                        <td colSpan="2">No guest list uploaded yet.</td>
+                      </tr>
+                    )}
+
+                    {guests.map((guest) => (
+                      <tr key={guest._id}>
+                        <td>{guest.roomNumber}</td>
+                        <td>{guest.guestName}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
@@ -811,11 +942,12 @@ function App() {
 
           <form className="checkout-form" onSubmit={placeOrder}>
             <div className="form-group">
-              <label>FULL NAME *</label>
+              <label>FULL NAME USED DURING CHECK-IN *</label>
               <input
                 type="text"
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
+                placeholder="Example: Matt Zaruk"
                 required
               />
             </div>
@@ -826,6 +958,7 @@ function App() {
                 type="text"
                 value={roomNumber}
                 onChange={(e) => setRoomNumber(e.target.value)}
+                placeholder="Example: 118"
                 required
               />
             </div>
@@ -880,20 +1013,18 @@ function App() {
             </div>
 
             <div className="checkout-buttons">
+              <button type="submit" className="save-btn">
+                PLACE ORDER
+              </button>
 
-  <button type="submit" className="save-btn">
-    PLACE ORDER
-  </button>
-
-  <button
-    type="button"
-    className="back-btn"
-    onClick={() => setShowCheckout(false)}
-  >
-    ← BACK TO ORDER
-  </button>
-
-</div>
+              <button
+                type="button"
+                className="back-btn"
+                onClick={() => setShowCheckout(false)}
+              >
+                ← BACK TO ORDER
+              </button>
+            </div>
           </form>
         </div>
       </div>
