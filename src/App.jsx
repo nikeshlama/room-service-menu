@@ -12,13 +12,6 @@ const GRATUITY_RATE = 0.18;
 const NOTIFICATION_SOUND = `${import.meta.env.BASE_URL}notification.mp3`;
 const REPORTS_URL = 'https://pestos-backend.onrender.com/api/reports';
 
-const [reportType, setReportType] = useState('day');
-const [reportDate, setReportDate] = useState('');
-const [reportMonth, setReportMonth] = useState('');
-const [reportItems, setReportItems] = useState([]);
-const [reportGrandTotal, setReportGrandTotal] = useState(0);
-const [reportOrderCount, setReportOrderCount] = useState(0);
-
 const menuImages = {
   'Arranchini ': 'menu-images/aranchini.png',
   'Classic Caesar Salad': 'menu-images/ceasersalad.png',
@@ -41,6 +34,14 @@ function App() {
   const [guests, setGuests] = useState([]);
   const [guestUploadMessage, setGuestUploadMessage] = useState('');
   const [guestUploading, setGuestUploading] = useState(false);
+
+  const [reportType, setReportType] = useState('day');
+  const [reportDate, setReportDate] = useState('');
+  const [reportMonth, setReportMonth] = useState('');
+  const [reportItems, setReportItems] = useState([]);
+  const [reportGrandTotal, setReportGrandTotal] = useState(0);
+  const [reportOrderCount, setReportOrderCount] = useState(0);
+
 
   const [loading, setLoading] = useState(true);
 
