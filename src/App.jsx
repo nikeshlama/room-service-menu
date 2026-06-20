@@ -976,13 +976,6 @@ function App() {
 
               <div className="form-card">
                 <h2>Upload Guest Excel Sheet</h2>
-
-                <p>
-                  Upload an Excel file with columns named <strong>Room No</strong> and{' '}
-                  <strong>Guest Name</strong>. This list will be used to verify room
-                  service orders before checkout is successful.
-                </p>
-
                 <input
                   type="file"
                   accept=".xlsx,.xls"
