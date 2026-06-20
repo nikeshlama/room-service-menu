@@ -246,6 +246,60 @@ function App() {
   }
 };
 
+  const downloadReportCSV = () => {
+  if (reportItems.length === 0) {
+    alert('Please generate a report first.');
+    return;
+  }
+
+  const title =
+    reportType === 'day'
+      ? `Daily Report - ${reportDate}`
+      : `Monthly Report - ${reportMonth}`;
+
+  const rows = [
+    [title],
+    [],
+    ['Item Name', 'Price', 'Quantity Sold', 'Total'],
+    ...reportItems.map((item) => [
+      item.itemName,
+      Number(item.price).toFixed(2),
+      item.quantitySold,
+      Number(item.total).toFixed(2)
+    ]),
+    [],
+    ['Total Orders', reportOrderCount],
+    ['Grand Total', Number(reportGrandTotal).toFixed(2)]
+  ];
+
+  const csvContent = rows
+    .map((row) =>
+      row
+        .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
+        .join(',')
+    )
+    .join('\n');
+
+  const blob = new Blob([csvContent], {
+    type: 'text/csv;charset=utf-8;'
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.download =
+    reportType === 'day'
+      ? `pestos-daily-report-${reportDate}.csv`
+      : `pestos-monthly-report-${reportMonth}.csv`;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  URL.revokeObjectURL(url);
+};
+
   const fetchGuests = async () => {
     try {
       const res = await fetch(GUESTS_URL, {
@@ -1020,6 +1074,14 @@ function App() {
             onClick={fetchReport}
           >
             GENERATE REPORT
+          </button>
+          <button
+            className="back-btn"
+            type="button"
+            onClick={downloadReportCSV}
+            style={{ marginTop: '10px' }}
+        >
+            DOWNLOAD REPORT
           </button>
         </div>
       </div>
