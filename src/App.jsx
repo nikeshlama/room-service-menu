@@ -10,6 +10,14 @@ const GUEST_UPLOAD_URL = 'https://pestos-backend.onrender.com/api/guests/upload'
 const TAX_RATE = 0.13;
 const GRATUITY_RATE = 0.18;
 const NOTIFICATION_SOUND = `${import.meta.env.BASE_URL}notification.mp3`;
+const REPORTS_URL = 'https://pestos-backend.onrender.com/api/reports';
+
+const [reportType, setReportType] = useState('day');
+const [reportDate, setReportDate] = useState('');
+const [reportMonth, setReportMonth] = useState('');
+const [reportItems, setReportItems] = useState([]);
+const [reportGrandTotal, setReportGrandTotal] = useState(0);
+const [reportOrderCount, setReportOrderCount] = useState(0);
 
 const menuImages = {
   'Arranchini ': 'menu-images/aranchini.png',
@@ -210,6 +218,32 @@ function App() {
       console.error('GET ORDERS ERROR:', err);
     }
   };
+
+  const fetchReport = async () => {
+  try {
+    const query =
+      reportType === 'day'
+        ? `type=day&date=${reportDate}`
+        : `type=month&month=${reportMonth}`;
+
+    const res = await fetch(`${REPORTS_URL}?${query}`, {
+      headers: getAuthHeaders()
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      alert(data.message || 'Report failed');
+      return;
+    }
+
+    setReportItems(data.reportItems);
+    setReportGrandTotal(data.grandTotal);
+    setReportOrderCount(data.orderCount);
+  } catch (err) {
+    console.error('REPORT ERROR:', err);
+  }
+};
 
   const fetchGuests = async () => {
     try {
@@ -669,6 +703,16 @@ function App() {
             >
               Guest Info
             </button>
+
+            <button
+  className={`admin-nav-btn ${
+    adminPage === 'reports' ? 'active-admin' : ''
+  }`}
+  onClick={() => setAdminPage('reports')}
+>
+  Reports
+</button>
+
           </div>
 
           {adminPage === 'inventory' && (
@@ -926,6 +970,105 @@ function App() {
               </div>
             </>
           )}
+
+
+          {adminPage === 'reports' && (
+  <>
+    <h2 className="section-title">Sales Reports</h2>
+
+    <div className="form-card">
+      <div className="form-grid">
+        <div className="form-group">
+          <label>REPORT TYPE</label>
+          <select
+            value={reportType}
+            onChange={(e) => setReportType(e.target.value)}
+          >
+            <option value="day">Day by Day Report</option>
+            <option value="month">Monthly Report</option>
+          </select>
+        </div>
+
+        {reportType === 'day' && (
+          <div className="form-group">
+            <label>SELECT DATE</label>
+            <input
+              type="date"
+              value={reportDate}
+              onChange={(e) => setReportDate(e.target.value)}
+            />
+          </div>
+        )}
+
+        {reportType === 'month' && (
+          <div className="form-group">
+            <label>SELECT MONTH</label>
+            <input
+              type="month"
+              value={reportMonth}
+              onChange={(e) => setReportMonth(e.target.value)}
+            />
+          </div>
+        )}
+
+        <div className="form-group">
+          <label>&nbsp;</label>
+          <button
+            className="save-btn"
+            type="button"
+            onClick={fetchReport}
+          >
+            GENERATE REPORT
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div className="table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>Item Name</th>
+            <th>Price</th>
+            <th>Quantity Sold</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {reportItems.length === 0 && (
+            <tr>
+              <td colSpan="4">No report data available.</td>
+            </tr>
+          )}
+
+          {reportItems.map((item) => (
+            <tr key={item.itemName}>
+              <td>{item.itemName}</td>
+              <td>${Number(item.price).toFixed(2)}</td>
+              <td>{item.quantitySold}</td>
+              <td>${Number(item.total).toFixed(2)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    <div className="checkout-summary professional-summary">
+      <h2>Report Summary</h2>
+
+      <div className="summary-row">
+        <span>Total Orders</span>
+        <strong>{reportOrderCount}</strong>
+      </div>
+
+      <div className="summary-total-row">
+        <span>Grand Total</span>
+        <strong>${Number(reportGrandTotal).toFixed(2)}</strong>
+      </div>
+    </div>
+  </>
+)}
         </div>
       </div>
     );
