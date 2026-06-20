@@ -947,7 +947,7 @@ function App() {
                 type="text"
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
-                placeholder="Example: Matt Zaruk"
+                placeholder="Please enter the full name used during hotel check-in"
                 required
               />
             </div>
@@ -958,7 +958,7 @@ function App() {
                 type="text"
                 value={roomNumber}
                 onChange={(e) => setRoomNumber(e.target.value)}
-                placeholder="Example: 118"
+                placeholder="Please enter your room number"
                 required
               />
             </div>
