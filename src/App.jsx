@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './App.css';
+import * as XLSX from 'xlsx';
 
 const API_URL = 'https://pestos-backend.onrender.com/api/menu';
 const LOGIN_URL = 'https://pestos-backend.onrender.com/api/login';
@@ -246,58 +247,47 @@ function App() {
   }
 };
 
-  const downloadReportCSV = () => {
+  const downloadReportExcel = () => {
   if (reportItems.length === 0) {
     alert('Please generate a report first.');
     return;
   }
 
-  const title =
-    reportType === 'day'
-      ? `Daily Report - ${reportDate}`
-      : `Monthly Report - ${reportMonth}`;
+  const excelData = reportItems.map(item => ({
+    'Item Name': item.itemName,
+    Price: Number(item.price).toFixed(2),
+    'Quantity Sold': item.quantitySold,
+    Total: Number(item.total).toFixed(2)
+  }));
 
-  const rows = [
-    [title],
-    [],
-    ['Item Name', 'Price', 'Quantity Sold', 'Total'],
-    ...reportItems.map((item) => [
-      item.itemName,
-      Number(item.price).toFixed(2),
-      item.quantitySold,
-      Number(item.total).toFixed(2)
-    ]),
-    [],
-    ['Total Orders', reportOrderCount],
-    ['Grand Total', Number(reportGrandTotal).toFixed(2)]
-  ];
+  excelData.push({});
 
-  const csvContent = rows
-    .map((row) =>
-      row
-        .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
-        .join(',')
-    )
-    .join('\n');
-
-  const blob = new Blob([csvContent], {
-    type: 'text/csv;charset=utf-8;'
+  excelData.push({
+    'Item Name': 'TOTAL ORDERS',
+    Price: reportOrderCount
   });
 
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
+  excelData.push({
+    'Item Name': 'GRAND TOTAL',
+    Price: `$${Number(reportGrandTotal).toFixed(2)}`
+  });
 
-  link.href = url;
-  link.download =
+  const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+  const workbook = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    worksheet,
+    'Sales Report'
+  );
+
+  const fileName =
     reportType === 'day'
-      ? `pestos-daily-report-${reportDate}.csv`
-      : `pestos-monthly-report-${reportMonth}.csv`;
+      ? `Pestos_Daily_Report_${reportDate}.xlsx`
+      : `Pestos_Monthly_Report_${reportMonth}.xlsx`;
 
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-
-  URL.revokeObjectURL(url);
+  XLSX.writeFile(workbook, fileName);
 };
 
   const fetchGuests = async () => {
@@ -1087,10 +1077,10 @@ function App() {
           <button
             className="back-btn"
             type="button"
-            onClick={downloadReportCSV}
+            onClick={downloadReportExcel}
             style={{ marginTop: '10px' }}
         >
-            DOWNLOAD REPORT
+            DOWNLOAD EXCEL REPORT
           </button>
         </div>
       </div>
