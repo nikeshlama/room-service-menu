@@ -779,7 +779,7 @@ function App() {
                     : 'Add New Kitchen Dish Record'}
                 </h2>
 
-                <div className="form-grid">
+                <div className="form-grid reports-grid">
                   <div className="form-group">
                     <label>DISH NAME *</label>
                     <input

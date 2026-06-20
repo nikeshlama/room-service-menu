@@ -1282,3 +1282,55 @@ td {
     gap: 10px;
   }
 }
+
+/* REPORTS MOBILE FIX */
+
+@media (max-width: 768px) {
+
+  .admin-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .admin-nav-btn {
+    flex: 1 1 calc(50% - 10px);
+    min-width: 120px;
+  }
+
+  .form-card {
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .form-grid {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-group {
+    width: 100%;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .table-box {
+    overflow-x: auto;
+  }
+
+  .checkout-summary {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+.reports-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 15px;
+}
