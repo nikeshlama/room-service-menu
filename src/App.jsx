@@ -12,6 +12,7 @@ const TAX_RATE = 0.13;
 const GRATUITY_RATE = 0.18;
 const NOTIFICATION_SOUND = `${import.meta.env.BASE_URL}notification.mp3`;
 const REPORTS_URL = 'https://pestos-backend.onrender.com/api/reports';
+const OUT_OF_STOCK_URL ='https://pestos-backend.onrender.com/api/out-of-stock';
 
 const menuImages = {
   'Arranchini ': 'menu-images/aranchini.png',
@@ -71,6 +72,12 @@ function App() {
   const [tags, setTags] = useState('');
   const [description, setDescription] = useState('');
   const [editingItemId, setEditingItemId] = useState(null);
+
+  const [outOfStockName, setOutOfStockName] = useState('');
+  const [outOfStockItems, setOutOfStockItems] = useState([]);
+
+  const [stockStartDate, setStockStartDate] = useState('');
+  const [stockEndDate, setStockEndDate] = useState('');
 
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
@@ -305,6 +312,89 @@ function App() {
       console.error('GET GUESTS ERROR:', err);
     }
   };
+
+  const fetchOutOfStockItems = async () => {
+    try {
+      const res = await fetch(OUT_OF_STOCK_URL, {
+        headers: getAuthHeaders()
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+      setOutOfStockItems(data.items);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+};
+
+const addOutOfStockItem = async () => {
+  if (!outOfStockName.trim()) {
+    alert('Enter item name');
+    return;
+  }
+
+  const res = await fetch(OUT_OF_STOCK_URL, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      itemName: outOfStockName
+    })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok || !data.success) {
+    alert(data.message || 'Failed');
+    return;
+  }
+
+  setOutOfStockName('');
+  fetchOutOfStockItems();
+};
+
+const downloadOutOfStockExcel = async () => {
+  if (!stockStartDate || !stockEndDate) {
+    alert('Select start and end date');
+    return;
+  }
+
+  const res = await fetch(
+    `${OUT_OF_STOCK_URL}/report?startDate=${stockStartDate}&endDate=${stockEndDate}`,
+    {
+      headers: getAuthHeaders()
+    }
+  );
+
+  const data = await res.json();
+
+  if (!data.success) {
+    alert('Report failed');
+    return;
+  }
+
+  const rows = data.items.map(item => ({
+    Item: item.itemName,
+    Date: new Date(item.createdAt).toLocaleDateString(),
+    Time: new Date(item.createdAt).toLocaleTimeString()
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+
+  const workbook = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    worksheet,
+    'Out Of Stock'
+  );
+
+  XLSX.writeFile(
+    workbook,
+    `OutOfStock_${stockStartDate}_to_${stockEndDate}.xlsx`
+  );
+};
 
   const uploadGuestExcel = async (e) => {
     const file = e.target.files[0];
@@ -748,6 +838,7 @@ function App() {
             >
               Guest Info
             </button>
+            
 
             <button
   className={`admin-nav-btn ${
@@ -759,6 +850,101 @@ function App() {
 </button>
 
           </div>
+
+          {adminPage === 'kitchen' && (
+  <>
+    <h2 className="section-title">
+      Kitchen Inventory
+    </h2>
+
+    <div className="form-card">
+
+      <div className="form-group">
+        <label>OUT OF STOCK ITEM</label>
+
+        <input
+          type="text"
+          value={outOfStockName}
+          onChange={(e) =>
+            setOutOfStockName(e.target.value)
+          }
+          placeholder="Example: Coke"
+        />
+      </div>
+
+      <button
+        className="save-btn"
+        type="button"
+        onClick={addOutOfStockItem}
+      >
+        ADD OUT OF STOCK ITEM
+      </button>
+    </div>
+
+    <div className="form-card">
+      <h3>Generate Excel Report</h3>
+
+      <div className="form-grid">
+        <div className="form-group">
+          <label>START DATE</label>
+
+          <input
+            type="date"
+            value={stockStartDate}
+            onChange={(e) =>
+              setStockStartDate(e.target.value)
+            }
+          />
+        </div>
+
+        <div className="form-group">
+          <label>END DATE</label>
+
+          <input
+            type="date"
+            value={stockEndDate}
+            onChange={(e) =>
+              setStockEndDate(e.target.value)
+            }
+          />
+        </div>
+      </div>
+
+      <button
+        className="back-btn"
+        type="button"
+        onClick={downloadOutOfStockExcel}
+      >
+        DOWNLOAD EXCEL REPORT
+      </button>
+    </div>
+
+    <div className="table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>Item Name</th>
+            <th>Date & Time Reported</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {outOfStockItems.map(item => (
+            <tr key={item._id}>
+              <td>{item.itemName}</td>
+
+              <td>
+                {new Date(
+                  item.createdAt
+                ).toLocaleString()}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </>
+)}
 
           {adminPage === 'inventory' && (
             <>
