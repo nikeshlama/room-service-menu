@@ -938,7 +938,16 @@ function App() {
                   <div className="order-card" key={order._id}>
                     <div className="order-header">
                       <h3>Order #{order.orderNumber}</h3>
-                      <span>{new Date(order.createdAt).toLocaleString()}</span>
+                      <span>
+                       {new Date(order.createdAt).toLocaleString('en-CA', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true
+                      })}
+                      </span>
                     </div>
 
                     <div className="order-info">
