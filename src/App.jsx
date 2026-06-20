@@ -1147,12 +1147,12 @@ function App() {
 
           <form className="checkout-form" onSubmit={placeOrder}>
             <div className="form-group">
-              <label>FULL NAME USED DURING CHECK-IN *</label>
+              <label>FULL NAME *</label>
               <input
                 type="text"
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
-                placeholder="Please enter the full name used during hotel check-in"
+                placeholder="Please enter your full name"
                 required
               />
             </div>
