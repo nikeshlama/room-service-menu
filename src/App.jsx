@@ -849,6 +849,18 @@ const downloadOutOfStockExcel = async () => {
   Reports
 </button>
 
+<button
+  className={`admin-nav-btn ${
+    adminPage === 'kitchen' ? 'active-admin' : ''
+  }`}
+  onClick={() => {
+    setAdminPage('kitchen');
+    fetchOutOfStockItems();
+  }}
+>
+  Kitchen Inventory
+</button>
+
           </div>
 
           {adminPage === 'kitchen' && (
