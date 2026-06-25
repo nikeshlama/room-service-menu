@@ -90,6 +90,15 @@ function App() {
   const [showSecondPoundModal, setShowSecondPoundModal] = useState(false);
   const [secondPound, setSecondPound] = useState(false);
 
+  const [showSandwichSideModal, setShowSandwichSideModal] = useState(false);
+  const [showFriesUpgradeModal, setShowFriesUpgradeModal] = useState(false);
+  const [showSaladUpgradeModal, setShowSaladUpgradeModal] = useState(false);
+  const [showDressingModal, setShowDressingModal] = useState(false);
+
+  const [selectedSide, setSelectedSide] = useState('');
+  const [sideUpgrade, setSideUpgrade] = useState('');
+  const [dressing, setDressing] = useState('');
+
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
   const ordersLoadedRef = useRef(false);
@@ -98,7 +107,8 @@ function App() {
   const categories = [
     'Featured',
     'Appetizers',
-    'Salads & Sandwiches',
+    'Salads',
+    'Sandwiches',
     'Pasta',
     'Pizza',
     'Kids Menu',
@@ -619,6 +629,15 @@ const downloadOutOfStockExcel = async () => {
     return;
   }
 
+  if (item.category === 'Sandwiches') {
+  setSelectedMenuItem(item);
+  setSelectedSide('');
+  setSideUpgrade('');
+  setDressing('');
+  setShowSandwichSideModal(true);
+  return;
+}
+
   if (
     item.name === 'Poutine Platter' ||
     item.name === 'Spinach & Artichoke Dip') {
@@ -651,6 +670,42 @@ const downloadOutOfStockExcel = async () => {
       }
     ];
   });
+};
+
+const addSandwichToCart = (finalSide, finalUpgrade = '', finalDressing = '') => {
+  if (!selectedMenuItem || !finalSide) return;
+
+  const item = selectedMenuItem;
+
+  const extraPrice =
+    finalUpgrade === 'Poutine Upgrade' ||
+    finalUpgrade === 'Small Caesar Salad Upgrade'
+      ? 3.99
+      : 0;
+
+  const cartItem = {
+    _id: item._id,
+    cartKey: `${item._id}-${finalSide}-${finalUpgrade}-${finalDressing}-${Date.now()}`,
+    menuItemId: item._id,
+    name: item.name,
+    price: Number(item.price) + extraPrice,
+    quantity: 1,
+    side: finalSide,
+    sideUpgrade: finalUpgrade,
+    dressing: finalDressing
+  };
+
+  setCart((currentCart) => [...currentCart, cartItem]);
+
+  setShowSandwichSideModal(false);
+  setShowFriesUpgradeModal(false);
+  setShowSaladUpgradeModal(false);
+  setShowDressingModal(false);
+
+  setSelectedMenuItem(null);
+  setSelectedSide('');
+  setSideUpgrade('');
+  setDressing('');
 };
 
 const addPoutineToCart = () => {
@@ -753,9 +808,14 @@ const addWingsToCart = () => {
         name: item.name,
         price: item.price,
         quantity: item.quantity,
+
         glutenFree: item.glutenFree || false,
         sauce: item.sauce || '',
-        secondPound: item.secondPound || false })),
+        secondPound: item.secondPound || false,
+
+        side: item.side || '',
+        sideUpgrade: item.sideUpgrade || '',
+        dressing: item.dressing || ''})),
         subtotal,
         gratuity,
         tax,
@@ -1648,6 +1708,154 @@ return (
   </div>
 )}
 
+{showSandwichSideModal && selectedMenuItem && (
+  <div className="modal-overlay">
+    <div className="option-modal">
+      <h2>{selectedMenuItem.name}</h2>
+      <p>Choose your side</p>
+
+      <button
+        className="save-btn"
+        type="button"
+        onClick={() => {
+          setSelectedSide('Fries');
+          setShowSandwichSideModal(false);
+          setShowFriesUpgradeModal(true);
+        }}
+      >
+        Fries
+      </button>
+
+      <button
+        className="save-btn"
+        type="button"
+        onClick={() => {
+          setSelectedSide('Garden Salad');
+          setShowSandwichSideModal(false);
+          setShowSaladUpgradeModal(true);
+        }}
+      >
+        Salad
+      </button>
+
+      <button
+        className="back-btn"
+        type="button"
+        onClick={() => {
+          setShowSandwichSideModal(false);
+          setSelectedMenuItem(null);
+          setSelectedSide('');
+          setSideUpgrade('');
+          setDressing('');
+        }}
+      >
+        CANCEL
+      </button>
+    </div>
+  </div>
+)}
+
+{showFriesUpgradeModal && selectedMenuItem && (
+  <div className="modal-overlay">
+    <div className="option-modal">
+      <h2>{selectedMenuItem.name}</h2>
+      <p>Upgrade fries to poutine for $3.99?</p>
+
+      <button
+  className="save-btn"
+  type="button"
+  onClick={() =>
+    addSandwichToCart('Fries', 'Poutine Upgrade')
+  }
+>
+  Yes, upgrade to poutine
+</button>
+
+<button
+  className="back-btn"
+  type="button"
+  onClick={() =>
+    addSandwichToCart('Fries')
+  }
+>
+  No, keep fries
+</button>
+    </div>
+  </div>
+)}
+
+{showSaladUpgradeModal && selectedMenuItem && (
+  <div className="modal-overlay">
+    <div className="option-modal">
+      <h2>{selectedMenuItem.name}</h2>
+      <p>Upgrade garden salad to small Caesar salad for $3.99?</p>
+
+      <button
+        className="save-btn"
+        type="button"
+        onClick={() =>
+  addSandwichToCart(
+    'Small Caesar Salad',
+    'Small Caesar Salad Upgrade'
+  )
+}
+      >
+        Yes, Caesar upgrade
+      </button>
+
+      <button
+        className="back-btn"
+        type="button"
+        onClick={() => {
+          setSelectedSide('Garden Salad');
+          setSideUpgrade('');
+          setShowSaladUpgradeModal(false);
+          setShowDressingModal(true);
+        }}
+      >
+        No, garden salad
+      </button>
+    </div>
+  </div>
+)}
+
+{showDressingModal && selectedMenuItem && (
+  <div className="modal-overlay">
+    <div className="option-modal">
+      <h2>{selectedMenuItem.name}</h2>
+      <p>Choose one dressing</p>
+
+      {['Balsamic', 'Ranch', 'Italian', 'French'].map((option) => (
+        <button
+          key={option}
+          className="save-btn"
+          type="button"
+          onClick={() =>
+  addSandwichToCart(
+    'Garden Salad',
+    '',
+    option
+  )
+}
+        >
+          {option}
+        </button>
+      ))}
+
+      <button
+        className="back-btn"
+        type="button"
+        onClick={() => {
+          setShowDressingModal(false);
+          setShowSaladUpgradeModal(true);
+        }}
+      >
+        BACK
+      </button>
+    </div>
+  </div>
+)}
+
 {showSecondPoundModal && selectedMenuItem && (
   <div className="modal-overlay">
     <div className="option-modal">
@@ -1906,6 +2114,24 @@ return (
 {item.secondPound && (
   <p className="option-text checkout-option">
     + 2nd Pound Wings
+  </p>
+)}
+
+{item.side && (
+  <p className="option-text checkout-option">
+    Side: {item.side}
+  </p>
+)}
+
+{item.sideUpgrade && (
+  <p className="option-text checkout-option">
+    Upgrade: {item.sideUpgrade}
+  </p>
+)}
+
+{item.dressing && (
+  <p className="option-text checkout-option">
+    Dressing: {item.dressing}
   </p>
 )}
 
