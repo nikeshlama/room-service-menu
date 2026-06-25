@@ -1519,19 +1519,23 @@ const addWingsToCart = () => {
         <div>
           <strong>{item.name}</strong>
 
-          {item.glutenFree && (
-          <p className="option-text">
-           Gluten Free
-          </p>
-         )}
+{item.glutenFree && (
+  <p className="option-text">
+    Gluten Free
+  </p>
+)}
 
-         <p className="option-text checkout-option">
-          Sauce: {item.sauce}
-         </p>
+{item.sauce && (
+  <p className="option-text checkout-option">
+    Sauce: {item.sauce}
+  </p>
+)}
 
-         <p className="option-text checkout-option">
-          + 2nd Pound Wings
-         </p>
+{item.secondPound && (
+  <p className="option-text checkout-option">
+    + 2nd Pound Wings
+  </p>
+)}
 <p>
   {item.quantity} × ${item.price.toFixed(2)}
 </p>
