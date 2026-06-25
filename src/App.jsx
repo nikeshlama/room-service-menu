@@ -13,6 +13,7 @@ const GRATUITY_RATE = 0.18;
 const NOTIFICATION_SOUND = `${import.meta.env.BASE_URL}notification.mp3`;
 const REPORTS_URL = 'https://pestos-backend.onrender.com/api/reports';
 const OUT_OF_STOCK_URL ='https://pestos-backend.onrender.com/api/out-of-stock';
+const WING_SAUCES_URL = 'https://pestos-backend.onrender.com/api/wing-sauces';
 
 const menuImages = {
   'Arranchini ': 'menu-images/aranchini.png',
@@ -82,6 +83,12 @@ function App() {
   const [showOptionModal, setShowOptionModal] = useState(false);
   const [selectedMenuItem, setSelectedMenuItem] = useState(null);
   const [glutenFree, setGlutenFree] = useState(false);
+
+  const [wingSauces, setWingSauces] = useState([]);
+  const [selectedSauce, setSelectedSauce] = useState('');
+  const [showWingSauceModal, setShowWingSauceModal] = useState(false);
+  const [showSecondPoundModal, setShowSecondPoundModal] = useState(false);
+  const [secondPound, setSecondPound] = useState(false);
 
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
@@ -196,6 +203,19 @@ function App() {
       setLoading(false);
     }
   };
+
+  const fetchWingSauces = async () => {
+  try {
+    const res = await fetch(WING_SAUCES_URL);
+    const data = await res.json();
+
+    if (data.success) {
+      setWingSauces(data.sauces);
+    }
+  } catch (err) {
+    console.error('GET WING SAUCES ERROR:', err);
+  }
+ };
 
   const fetchOrders = async (checkNew = false) => {
     try {
@@ -439,10 +459,11 @@ const downloadOutOfStockExcel = async () => {
   };
 
   useEffect(() => {
-    localStorage.removeItem('admin_token');
-    setShowAdmin(false);
-    fetchMenu();
-  }, []);
+  localStorage.removeItem('admin_token');
+  setShowAdmin(false);
+  fetchMenu();
+  fetchWingSauces();
+}, []);
 
   useEffect(() => {
     if (showAdmin && adminPage === 'orders') {
@@ -590,6 +611,14 @@ const downloadOutOfStockExcel = async () => {
   const addToCart = (item) => {
   if (item.available === false) return;
 
+  if (item.name === 'Chicken Wings & Fries') {
+    setSelectedMenuItem(item);
+    setSelectedSauce('');
+    setSecondPound(false);
+    setShowWingSauceModal(true);
+    return;
+  }
+
   if (
     item.name === 'Poutine Platter' ||
     item.name === 'Spinach & Artichoke Dip') {
@@ -644,6 +673,34 @@ const addPoutineToCart = () => {
   setShowOptionModal(false);
   setSelectedMenuItem(null);
   setGlutenFree(false);
+};
+
+const addWingsToCart = () => {
+  if (!selectedMenuItem || !selectedSauce) {
+    alert('Please choose one sauce.');
+    return;
+  }
+
+  const item = selectedMenuItem;
+  const extraPrice = secondPound ? 10 : 0;
+
+  const cartItem = {
+    _id: item._id,
+    cartKey: `${item._id}-${selectedSauce}-${secondPound ? 'second-pound' : 'regular'}-${Date.now()}`,
+    menuItemId: item._id,
+    name: item.name,
+    price: Number(item.price) + extraPrice,
+    quantity: 1,
+    sauce: selectedSauce,
+    secondPound
+  };
+
+  setCart((currentCart) => [...currentCart, cartItem]);
+
+  setShowSecondPoundModal(false);
+  setSelectedMenuItem(null);
+  setSelectedSauce('');
+  setSecondPound(false);
 };
 
   const increaseQuantity = (id) => {
@@ -1490,6 +1547,106 @@ const addPoutineToCart = () => {
 
 return (
   <div className="page">
+
+    {showWingSauceModal && selectedMenuItem && (
+  <div className="modal-overlay">
+    <div className="option-modal">
+      <h2>{selectedMenuItem.name}</h2>
+
+      <p>Choose one sauce</p>
+
+      {wingSauces
+        .filter((sauce) => sauce.available)
+        .map((sauce) => (
+          <label key={sauce._id}>
+            <input
+              type="radio"
+              name="wingSauce"
+              checked={selectedSauce === sauce.name}
+              onChange={() => setSelectedSauce(sauce.name)}
+            />
+            {sauce.name}
+          </label>
+        ))}
+
+      <button
+        className="save-btn"
+        type="button"
+        onClick={() => {
+          if (!selectedSauce) {
+            alert('Please choose one sauce.');
+            return;
+          }
+
+          setShowWingSauceModal(false);
+          setShowSecondPoundModal(true);
+        }}
+      >
+        NEXT
+      </button>
+
+      <button
+        className="back-btn"
+        type="button"
+        onClick={() => {
+          setShowWingSauceModal(false);
+          setSelectedMenuItem(null);
+          setSelectedSauce('');
+          setSecondPound(false);
+        }}
+      >
+        CANCEL
+      </button>
+    </div>
+  </div>
+)}
+
+{showSecondPoundModal && selectedMenuItem && (
+  <div className="modal-overlay">
+    <div className="option-modal">
+      <h2>{selectedMenuItem.name}</h2>
+
+      <p>Add 2nd pound wings for only $10?</p>
+
+      <label>
+        <input
+          type="radio"
+          checked={!secondPound}
+          onChange={() => setSecondPound(false)}
+        />
+        No
+      </label>
+
+      <label>
+        <input
+          type="radio"
+          checked={secondPound}
+          onChange={() => setSecondPound(true)}
+        />
+        Yes (+$10)
+      </label>
+
+      <button
+        className="save-btn"
+        type="button"
+        onClick={addWingsToCart}
+      >
+        ADD TO CART
+      </button>
+
+      <button
+        className="back-btn"
+        type="button"
+        onClick={() => {
+          setShowSecondPoundModal(false);
+          setShowWingSauceModal(true);
+        }}
+      >
+        BACK
+      </button>
+    </div>
+  </div>
+)}
 
     {showOptionModal && selectedMenuItem && (
       <div className="modal-overlay">
