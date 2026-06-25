@@ -751,9 +751,9 @@ const addWingsToCart = () => {
         name: item.name,
         price: item.price,
         quantity: item.quantity,
-        glutenFree: item.glutenFree || false
-      })),
-
+        glutenFree: item.glutenFree || false,
+        sauce: item.sauce || '',
+        secondPound: item.secondPound || false })),
         subtotal,
         gratuity,
         tax,
@@ -841,7 +841,29 @@ const addWingsToCart = () => {
 
             {receiptData.items.map((item) => (
               <div className="receipt-item" key={item._id}>
-                <span>{item.quantity} × {item.name}</span>
+                <div>
+  <span>
+    {item.quantity} × {item.name}
+  </span>
+
+  {item.glutenFree && (
+    <div className="option-text">
+      Gluten Free
+    </div>
+  )}
+
+  {item.sauce && (
+    <div className="option-text">
+      Sauce: {item.sauce}
+    </div>
+  )}
+
+  {item.secondPound && (
+    <div className="option-text">
+      + 2nd Pound Wings
+    </div>
+  )}
+</div>
                 <strong>${(item.quantity * item.price).toFixed(2)}</strong>
               </div>
             ))}
@@ -1259,6 +1281,18 @@ const addWingsToCart = () => {
       Gluten Free
     </p>
   )}
+
+  {item.sauce && (
+  <p className="option-text">
+    Sauce: {item.sauce}
+  </p>
+)}
+
+{item.secondPound && (
+  <p className="option-text">
+    + 2nd Pound Wings
+  </p>
+)}
 </div>
                       ))}
                     </div>
