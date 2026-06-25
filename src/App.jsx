@@ -1519,6 +1519,10 @@ const addWingsToCart = () => {
         <div>
           <strong>{item.name}</strong>
 
+<pre style={{ fontSize: '10px' }}>
+  {JSON.stringify(item, null, 2)}
+</pre>
+
           {item.glutenFree && (
           <p className="option-text">
            Gluten Free
