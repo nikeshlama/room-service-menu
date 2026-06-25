@@ -1182,10 +1182,18 @@ const addPoutineToCart = () => {
 
                     <div className="order-items">
                       {order.items.map((item, index) => (
-                        <p key={index}>
-                          {item.quantity} × {item.name} — $
-                          {(item.price * item.quantity).toFixed(2)}
-                        </p>
+                        <div key={index}>
+  <p>
+    {item.quantity} × {item.name} — $
+    {(item.price * item.quantity).toFixed(2)}
+  </p>
+
+  {item.glutenFree && (
+    <p className="option-text">
+      Gluten Free
+    </p>
+  )}
+</div>
                       ))}
                     </div>
 
@@ -1410,7 +1418,14 @@ const addPoutineToCart = () => {
                   <div className="summary-item" key={item._id}>
                     <div>
                       <strong>{item.name}</strong>
-                      <p>{item.quantity} × ${item.price.toFixed(2)}</p>
+
+{item.glutenFree && (
+  <p className="option-text">
+    Gluten Free
+  </p>
+)}
+
+<p>{item.quantity} × ${item.price.toFixed(2)}</p>
                     </div>
 
                     <span>${(item.price * item.quantity).toFixed(2)}</span>
