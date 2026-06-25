@@ -105,6 +105,8 @@ function App() {
 
   const [showFettuccineShrimpModal, setShowFettuccineShrimpModal] = useState(false);
 
+  const [showSteakDonenessModal, setShowSteakDonenessModal] = useState(false);
+
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
   const ordersLoadedRef = useRef(false);
@@ -627,6 +629,12 @@ const downloadOutOfStockExcel = async () => {
   const addToCart = (item) => {
   if (item.available === false) return;
 
+  if (item.name === 'Beef Tagliata Di Manzo') {
+  setSelectedMenuItem(item);
+  setShowSteakDonenessModal(true);
+  return;
+}
+
   if (item.name === 'Chicken Wings & Fries') {
     setSelectedMenuItem(item);
     setSelectedSauce('');
@@ -667,7 +675,10 @@ if (
   item.name === 'Poutine Platter' ||
   item.name === 'Spinach & Artichoke Dip' ||
   item.name === 'Paperdelle Primavera con aglio e olio' ||
-  item.name === 'Chicken & Sherry Cream Fettuccine'
+  item.name === 'Chicken & Sherry Cream Fettuccine' ||
+  item.name === 'Signature Porchetta' ||
+  item.name === 'Chicken Marsala' ||
+  item.name === 'Beef Tagliata di Manzo' 
 ) {
   setSelectedMenuItem(item);
   setGlutenFree(false);
@@ -835,6 +846,25 @@ const addFettuccineToCart = (addShrimp = false) => {
   setGlutenFree(false);
 };
 
+const addSteakToCart = (doneness) => {
+  if (!selectedMenuItem || !doneness) return;
+
+  const cartItem = {
+    _id: selectedMenuItem._id,
+    cartKey: `${selectedMenuItem._id}-${doneness}-${Date.now()}`,
+    menuItemId: selectedMenuItem._id,
+    name: selectedMenuItem.name,
+    price: Number(selectedMenuItem.price),
+    quantity: 1,
+    doneness
+  };
+
+  setCart((currentCart) => [...currentCart, cartItem]);
+
+  setShowSteakDonenessModal(false);
+  setSelectedMenuItem(null);
+};
+
 const addWingsToCart = () => {
   if (!selectedMenuItem || !selectedSauce) {
     alert('Please choose one sauce.');
@@ -921,7 +951,8 @@ const addWingsToCart = () => {
         side: item.side || '',
         sideUpgrade: item.sideUpgrade || '',
         dressing: item.dressing || '',
-        saladProtein: item.saladProtein || ''})),
+        saladProtein: item.saladProtein || '',
+        doneness: item.doneness || '',})),
         subtotal,
         gratuity,
         tax,
@@ -1056,6 +1087,11 @@ const addWingsToCart = () => {
   </div>
 )}
 
+{item.doneness && (
+  <div className="option-text">
+    Steak: {item.doneness}
+  </div>
+)}
 
 </div>
                 <strong>${(item.quantity * item.price).toFixed(2)}</strong>
@@ -1512,6 +1548,11 @@ const addWingsToCart = () => {
   </p>
 )}
 
+{item.doneness && (
+  <p className="option-text">
+    Steak: {item.doneness}
+  </p>
+)}
 
 </div>
                       ))}
@@ -1778,6 +1819,12 @@ const addWingsToCart = () => {
 {item.saladProtein && (
   <p className="option-text checkout-option">
     Add-on: {item.saladProtein}
+  </p>
+)}
+
+{item.doneness && (
+  <p className="option-text checkout-option">
+    Steak: {item.doneness}
   </p>
 )}
 
@@ -2134,6 +2181,43 @@ return (
   </div>
 )}
 
+{showSteakDonenessModal && selectedMenuItem && (
+  <div className="modal-overlay">
+    <div className="option-modal">
+      <h2>{selectedMenuItem.name}</h2>
+
+      <p>Select steak doneness</p>
+
+      {[
+        'Rare',
+        'Medium Rare',
+        'Medium',
+        'Medium Well',
+        'Well Done'
+      ].map((option) => (
+        <button
+          key={option}
+          className="save-btn"
+          type="button"
+          onClick={() => addSteakToCart(option)}
+        >
+          {option}
+        </button>
+      ))}
+
+      <button
+        className="back-btn"
+        type="button"
+        onClick={() => {
+          setShowSteakDonenessModal(false);
+          setSelectedMenuItem(null);
+        }}
+      >
+        CANCEL
+      </button>
+    </div>
+  </div>
+)}
 
 {showSecondPoundModal && selectedMenuItem && (
   <div className="modal-overlay">
@@ -2419,6 +2503,13 @@ return (
     Add-on: {item.saladProtein}
   </p>
 )}
+
+{item.doneness && (
+  <p className="option-text checkout-option">
+    Steak: {item.doneness}
+  </p>
+)}
+
 
 <p>
   ${item.price.toFixed(2)} × {item.quantity}
