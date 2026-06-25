@@ -590,7 +590,9 @@ const downloadOutOfStockExcel = async () => {
   const addToCart = (item) => {
   if (item.available === false) return;
 
-  if (item.name === 'Poutine Platter') {
+  if (
+    item.name === 'Poutine Platter' ||
+    item.name === 'Spinach & Artichoke Dip') {
     setSelectedMenuItem(item);
     setGlutenFree(false);
     setShowOptionModal(true);
@@ -1418,27 +1420,31 @@ const addPoutineToCart = () => {
             </div>
 
             <div className="checkout-summary professional-summary">
-              <h2>Order Summary</h2>
+  <h2>Order Summary</h2>
 
-              <div className="summary-items">
-                {cart.map((item) => (
-                  <div className="summary-item" key={item._id}>
-                    <div>
-                      <strong>{item.name}</strong>
+  <div className="summary-items">
+    {cart.map((item) => (
+      <div className="summary-item" key={item._id}>
+        <div>
+          <strong>{item.name}</strong>
 
-{item.glutenFree && (
-  <p className="option-text">
-    Gluten Free
-  </p>
-)}
+          {item.glutenFree && (
+            <p className="option-text">
+              Gluten Free
+            </p>
+          )}
 
-<p>{item.quantity} × ${item.price.toFixed(2)}</p>
-                    </div>
+          <p>
+            {item.quantity} × ${item.price.toFixed(2)}
+          </p>
+        </div>
 
-                    <span>${(item.price * item.quantity).toFixed(2)}</span>
-                  </div>
-                ))}
-              </div>
+        <span>
+          ${(item.price * item.quantity).toFixed(2)}
+        </span>
+      </div>
+    ))}
+  </div>
 
               <div className="summary-divider"></div>
 
@@ -1491,6 +1497,10 @@ return (
           <h2>{selectedMenuItem.name}</h2>
 
           <p>Choose your option</p>
+
+          <p style={{ color: '#666', marginBottom: '15px' }}>
+             Gluten Free available
+          </p>
 
           <label>
             <input
