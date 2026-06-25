@@ -103,6 +103,8 @@ function App() {
 
   const [showCaesarProteinModal, setShowCaesarProteinModal] = useState(false);
 
+  const [showFettuccineShrimpModal, setShowFettuccineShrimpModal] = useState(false);
+
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
   const ordersLoadedRef = useRef(false);
@@ -661,10 +663,11 @@ if (
   return;
 }
 
-  if (
+if (
   item.name === 'Poutine Platter' ||
   item.name === 'Spinach & Artichoke Dip' ||
-  item.name === 'Paperdelle Primavera con aglio e olio'
+  item.name === 'Paperdelle Primavera con aglio e olio' ||
+  item.name === 'Chicken & Sherry Cream Fettuccine'
 ) {
   setSelectedMenuItem(item);
   setGlutenFree(false);
@@ -782,25 +785,52 @@ const addCaesarSaladToCart = (protein = '', extraPrice = 0) => {
   setSelectedMenuItem(null);
 };
 
-
 const addPoutineToCart = () => {
+  if (
+    selectedMenuItem?.name === 'Chicken & Sherry Cream Fettuccine'
+  ) {
+    setShowOptionModal(false);
+    setShowFettuccineShrimpModal(true);
+    return;
+  }
+
   if (!selectedMenuItem) return;
 
   const item = selectedMenuItem;
 
   const cartItem = {
-  _id: item._id,
-  cartKey: `${item._id}-${glutenFree ? 'gf' : 'regular'}-${Date.now()}`,
-  menuItemId: item._id,
-  name: item.name,
-  price: Number(item.price),
-  quantity: 1,
-  glutenFree
-};
+    _id: item._id,
+    cartKey: `${item._id}-${glutenFree ? 'gf' : 'regular'}-${Date.now()}`,
+    menuItemId: item._id,
+    name: item.name,
+    price: Number(item.price),
+    quantity: 1,
+    glutenFree
+  };
 
   setCart((currentCart) => [...currentCart, cartItem]);
 
   setShowOptionModal(false);
+  setSelectedMenuItem(null);
+  setGlutenFree(false);
+};
+
+const addFettuccineToCart = (addShrimp = false) => {
+  if (!selectedMenuItem) return;
+
+  const cartItem = {
+    _id: selectedMenuItem._id,
+    cartKey: `${selectedMenuItem._id}-${glutenFree}-${addShrimp}-${Date.now()}`,
+    name: selectedMenuItem.name,
+    price: Number(selectedMenuItem.price) + (addShrimp ? 7 : 0),
+    quantity: 1,
+    glutenFree,
+    saladProtein: addShrimp ? 'Garlic Shrimp' : ''
+  };
+
+  setCart((currentCart) => [...currentCart, cartItem]);
+
+  setShowFettuccineShrimpModal(false);
   setSelectedMenuItem(null);
   setGlutenFree(false);
 };
@@ -2041,6 +2071,31 @@ return (
   </div>
 )}
 
+{showFettuccineShrimpModal && selectedMenuItem && (
+  <div className="modal-overlay">
+    <div className="option-modal">
+      <h2>{selectedMenuItem.name}</h2>
+
+      <p>Add Garlic Shrimp for $7?</p>
+
+      <button
+        className="save-btn"
+        type="button"
+        onClick={() => addFettuccineToCart(true)}
+      >
+        Add Garlic Shrimp (+$7)
+      </button>
+
+      <button
+        className="back-btn"
+        type="button"
+        onClick={() => addFettuccineToCart(false)}
+      >
+        No Thanks
+      </button>
+    </div>
+  </div>
+)}
 
 {showCaesarProteinModal && selectedMenuItem && (
   <div className="modal-overlay">
