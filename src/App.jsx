@@ -662,13 +662,15 @@ if (
 }
 
   if (
-    item.name === 'Poutine Platter' ||
-    item.name === 'Spinach & Artichoke Dip') {
-    setSelectedMenuItem(item);
-    setGlutenFree(false);
-    setShowOptionModal(true);
-    return;
-  }
+  item.name === 'Poutine Platter' ||
+  item.name === 'Spinach & Artichoke Dip' ||
+  item.name === 'Paperdelle Primavera con aglio e olio'
+) {
+  setSelectedMenuItem(item);
+  setGlutenFree(false);
+  setShowOptionModal(true);
+  return;
+}
 
   setCart((currentCart) => {
     const existingItem = currentCart.find(
