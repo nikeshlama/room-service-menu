@@ -101,6 +101,8 @@ function App() {
 
   const [showSaladDressingModal, setShowSaladDressingModal] = useState(false);
 
+  const [showCaesarProteinModal, setShowCaesarProteinModal] = useState(false);
+
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
   const ordersLoadedRef = useRef(false);
@@ -650,6 +652,15 @@ if (
   return;
 }
 
+if (
+  item.category === 'Salads' &&
+  item.name === 'Classic Caesar Salad'
+) {
+  setSelectedMenuItem(item);
+  setShowCaesarProteinModal(true);
+  return;
+}
+
   if (
     item.name === 'Poutine Platter' ||
     item.name === 'Spinach & Artichoke Dip') {
@@ -746,6 +757,29 @@ const addSaladToCart = (finalDressing) => {
   setSelectedMenuItem(null);
   setDressing('');
 };
+
+
+const addCaesarSaladToCart = (protein = '', extraPrice = 0) => {
+  if (!selectedMenuItem) return;
+
+  const item = selectedMenuItem;
+
+  const cartItem = {
+    _id: item._id,
+    cartKey: `${item._id}-caesar-${protein || 'none'}-${Date.now()}`,
+    menuItemId: item._id,
+    name: item.name,
+    price: Number(item.price) + extraPrice,
+    quantity: 1,
+    saladProtein: protein
+  };
+
+  setCart((currentCart) => [...currentCart, cartItem]);
+
+  setShowCaesarProteinModal(false);
+  setSelectedMenuItem(null);
+};
+
 
 const addPoutineToCart = () => {
   if (!selectedMenuItem) return;
@@ -854,7 +888,8 @@ const addWingsToCart = () => {
 
         side: item.side || '',
         sideUpgrade: item.sideUpgrade || '',
-        dressing: item.dressing || ''})),
+        dressing: item.dressing || '',
+        saladProtein: item.saladProtein || ''})),
         subtotal,
         gratuity,
         tax,
@@ -964,6 +999,32 @@ const addWingsToCart = () => {
       + 2nd Pound Wings
     </div>
   )}
+
+  {item.side && (
+  <div className="option-text">
+    Side: {item.side}
+  </div>
+)}
+
+{item.sideUpgrade && (
+  <div className="option-text">
+    Upgrade: {item.sideUpgrade}
+  </div>
+)}
+
+{item.dressing && (
+  <div className="option-text">
+    Dressing: {item.dressing}
+  </div>
+)}
+
+{item.saladProtein && (
+  <div className="option-text">
+    Add-on: {item.saladProtein}
+  </div>
+)}
+
+
 </div>
                 <strong>${(item.quantity * item.price).toFixed(2)}</strong>
               </div>
@@ -1394,6 +1455,32 @@ const addWingsToCart = () => {
     + 2nd Pound Wings
   </p>
 )}
+
+{item.side && (
+  <p className="option-text">
+    Side: {item.side}
+  </p>
+)}
+
+{item.sideUpgrade && (
+  <p className="option-text">
+    Upgrade: {item.sideUpgrade}
+  </p>
+)}
+
+{item.dressing && (
+  <p className="option-text">
+    Dressing: {item.dressing}
+  </p>
+)}
+
+{item.saladProtein && (
+  <p className="option-text">
+    Add-on: {item.saladProtein}
+  </p>
+)}
+
+
 </div>
                       ))}
                     </div>
@@ -1637,6 +1724,31 @@ const addWingsToCart = () => {
     + 2nd Pound Wings
   </p>
 )}
+
+{item.side && (
+  <p className="option-text checkout-option">
+    Side: {item.side}
+  </p>
+)}
+
+{item.sideUpgrade && (
+  <p className="option-text checkout-option">
+    Upgrade: {item.sideUpgrade}
+  </p>
+)}
+
+{item.dressing && (
+  <p className="option-text checkout-option">
+    Dressing: {item.dressing}
+  </p>
+)}
+
+{item.saladProtein && (
+  <p className="option-text checkout-option">
+    Add-on: {item.saladProtein}
+  </p>
+)}
+
 <p>
   {item.quantity} × ${item.price.toFixed(2)}
 </p>
@@ -1927,6 +2039,45 @@ return (
   </div>
 )}
 
+
+{showCaesarProteinModal && selectedMenuItem && (
+  <div className="modal-overlay">
+    <div className="option-modal">
+      <h2>{selectedMenuItem.name}</h2>
+      <p>Add protein?</p>
+
+      <button
+        className="save-btn"
+        type="button"
+        onClick={() =>
+          addCaesarSaladToCart('Seasoned Chicken Breast', 8)
+        }
+      >
+        Add Seasoned Chicken Breast (+$8)
+      </button>
+
+      <button
+        className="save-btn"
+        type="button"
+        onClick={() =>
+          addCaesarSaladToCart('Garlic Shrimp', 7)
+        }
+      >
+        Add Garlic Shrimp (+$7)
+      </button>
+
+      <button
+        className="back-btn"
+        type="button"
+        onClick={() => addCaesarSaladToCart()}
+      >
+        No protein
+      </button>
+    </div>
+  </div>
+)}
+
+
 {showSecondPoundModal && selectedMenuItem && (
   <div className="modal-overlay">
     <div className="option-modal">
@@ -2203,6 +2354,12 @@ return (
 {item.dressing && (
   <p className="option-text checkout-option">
     Dressing: {item.dressing}
+  </p>
+)}
+
+{item.saladProtein && (
+  <p className="option-text checkout-option">
+    Add-on: {item.saladProtein}
   </p>
 )}
 
