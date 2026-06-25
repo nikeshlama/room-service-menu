@@ -110,6 +110,7 @@ function App() {
   const [showBurgerCheeseModal, setShowBurgerCheeseModal] = useState(false);
   const [showBurgerToppingsModal, setShowBurgerToppingsModal] = useState(false);
   const [burgerCheese, setBurgerCheese] = useState(false);
+  const [burgerToppings, setBurgerToppings] = useState([]);
 
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
@@ -876,26 +877,46 @@ const addSteakToCart = (doneness) => {
   setSelectedMenuItem(null);
 };
 
-const addBurgerToCart = (toppingChoice) => {
+const addBurgerToCart = (finalSide, finalUpgrade = '', finalDressing = '') => {
   if (!selectedMenuItem) return;
+
+  const removedToppings = burgerToppings.length > 0
+    ? burgerToppings.join(', ')
+    : 'Keep All Toppings';
+
+  const extraPrice =
+    (burgerCheese ? 3 : 0) +
+    (finalUpgrade === 'Poutine Upgrade' ||
+    finalUpgrade === 'Small Caesar Salad Upgrade'
+      ? 3.99
+      : 0);
 
   const cartItem = {
     _id: selectedMenuItem._id,
-    cartKey: `${selectedMenuItem._id}-${burgerCheese ? 'cheese' : 'no-cheese'}-${toppingChoice}-${Date.now()}`,
+    cartKey: `${selectedMenuItem._id}-${burgerCheese}-${removedToppings}-${finalSide}-${finalUpgrade}-${finalDressing}-${Date.now()}`,
     menuItemId: selectedMenuItem._id,
     name: selectedMenuItem.name,
-    price: Number(selectedMenuItem.price) + (burgerCheese ? 3 : 0),
+    price: Number(selectedMenuItem.price) + extraPrice,
     quantity: 1,
     burgerCheese,
-    burgerToppings: toppingChoice
+    burgerToppings: removedToppings,
+    side: finalSide,
+    sideUpgrade: finalUpgrade,
+    dressing: finalDressing
   };
 
   setCart((currentCart) => [...currentCart, cartItem]);
 
   setShowBurgerCheeseModal(false);
   setShowBurgerToppingsModal(false);
+  setShowSandwichSideModal(false);
+  setShowFriesUpgradeModal(false);
+  setShowSaladUpgradeModal(false);
+  setShowDressingModal(false);
+
   setSelectedMenuItem(null);
   setBurgerCheese(false);
+  setBurgerToppings([]);
 };
 
 const addWingsToCart = () => {
@@ -2047,35 +2068,34 @@ return (
   <div className="modal-overlay">
     <div className="option-modal">
       <h2>{selectedMenuItem.name}</h2>
+      <p>Choose toppings to remove</p>
 
-      <p>Choose toppings</p>
-
-      {[
-        'Keep All Toppings',
-        'No Onion',
-        'No Tomato',
-        'No Lettuce',
-        'No Pickle'
-      ].map((option) => (
-        <button
-          key={option}
-          className="save-btn"
-          type="button"
-          onClick={() => addBurgerToCart(option)}
-        >
+      {['No Onion', 'No Tomato', 'No Lettuce', 'No Pickle'].map((option) => (
+        <label key={option}>
+          <input
+            type="checkbox"
+            checked={burgerToppings.includes(option)}
+            onChange={() => {
+              setBurgerToppings((current) =>
+                current.includes(option)
+                  ? current.filter((item) => item !== option)
+                  : [...current, option]
+              );
+            }}
+          />
           {option}
-        </button>
+        </label>
       ))}
 
       <button
-        className="back-btn"
+        className="save-btn"
         type="button"
         onClick={() => {
           setShowBurgerToppingsModal(false);
-          setShowBurgerCheeseModal(true);
+          setShowSandwichSideModal(true);
         }}
       >
-        BACK
+        NEXT
       </button>
     </div>
   </div>
@@ -2138,7 +2158,9 @@ return (
   className="save-btn"
   type="button"
   onClick={() =>
-    addSandwichToCart('Fries', 'Poutine Upgrade')
+    selectedMenuItem.name === 'Classic Burger'
+      ? addBurgerToCart('Fries', 'Poutine Upgrade')
+      : addSandwichToCart('Fries', 'Poutine Upgrade')
   }
 >
   Yes, upgrade to poutine
@@ -2148,7 +2170,9 @@ return (
   className="back-btn"
   type="button"
   onClick={() =>
-    addSandwichToCart('Fries')
+    selectedMenuItem.name === 'Classic Burger'
+      ? addBurgerToCart('Fries')
+      : addSandwichToCart('Fries')
   }
 >
   No, keep fries
@@ -2167,10 +2191,15 @@ return (
         className="save-btn"
         type="button"
         onClick={() =>
-  addSandwichToCart(
-    'Small Caesar Salad',
-    'Small Caesar Salad Upgrade'
-  )
+  selectedMenuItem.name === 'Classic Burger'
+    ? addBurgerToCart(
+        'Small Caesar Salad',
+        'Small Caesar Salad Upgrade'
+      )
+    : addSandwichToCart(
+        'Small Caesar Salad',
+        'Small Caesar Salad Upgrade'
+      )
 }
       >
         Yes, Caesar upgrade
@@ -2204,11 +2233,17 @@ return (
           className="save-btn"
           type="button"
           onClick={() =>
-  addSandwichToCart(
-    'Garden Salad',
-    '',
-    option
-  )
+  selectedMenuItem.name === 'Classic Burger'
+    ? addBurgerToCart(
+        'Garden Salad',
+        '',
+        option
+      )
+    : addSandwichToCart(
+        'Garden Salad',
+        '',
+        option
+      )
 }
         >
           {option}
