@@ -703,33 +703,35 @@ const addWingsToCart = () => {
   setSecondPound(false);
 };
 
-  const increaseQuantity = (id) => {
-    setCart((currentCart) =>
-      currentCart.map((item) =>
-        item._id === id
-          ? { ...item, quantity: item.quantity + 1 }
+  const increaseQuantity = (cartKey) => {
+  setCart((currentCart) =>
+    currentCart.map((item) =>
+      (item.cartKey || item._id) === cartKey
+        ? { ...item, quantity: item.quantity + 1 }
+        : item
+    )
+  );
+};
+
+ const decreaseQuantity = (cartKey) => {
+  setCart((currentCart) =>
+    currentCart
+      .map((item) =>
+        (item.cartKey || item._id) === cartKey
+          ? { ...item, quantity: item.quantity - 1 }
           : item
       )
-    );
-  };
+      .filter((item) => item.quantity > 0)
+  );
+};
 
-  const decreaseQuantity = (id) => {
-    setCart((currentCart) =>
-      currentCart
-        .map((item) =>
-          item._id === id
-            ? { ...item, quantity: item.quantity - 1 }
-            : item
-        )
-        .filter((item) => item.quantity > 0)
-    );
-  };
-
-  const removeFromCart = (id) => {
-    setCart((currentCart) =>
-      currentCart.filter((item) => item._id !== id)
-    );
-  };
+ const removeFromCart = (cartKey) => {
+  setCart((currentCart) =>
+    currentCart.filter(
+      (item) => (item.cartKey || item._id) !== cartKey
+    )
+  );
+};
 
   const placeOrder = async (e) => {
     e.preventDefault();
@@ -1913,22 +1915,32 @@ return (
                     </div>
 
                     <div className="cart-controls">
-                      <button onClick={() => decreaseQuantity(item._id)}>
-                        −
-                      </button>
-
-                      <span>{item.quantity}</span>
-
-                      <button onClick={() => increaseQuantity(item._id)}>
-                        +
-                      </button>
-
                       <button
-                        className="remove-cart-btn"
-                        onClick={() => removeFromCart(item._id)}
-                      >
-                        ×
-                      </button>
+  onClick={() =>
+    decreaseQuantity(item.cartKey || item._id)
+  }
+>
+  −
+</button>
+
+<span>{item.quantity}</span>
+
+<button
+  onClick={() =>
+    increaseQuantity(item.cartKey || item._id)
+  }
+>
+  +
+</button>
+
+<button
+  className="remove-cart-btn"
+  onClick={() =>
+    removeFromCart(item.cartKey || item._id)
+  }
+>
+  ×
+</button>
                     </div>
                   </div>
                 ))}
