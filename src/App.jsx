@@ -1515,7 +1515,7 @@ const addWingsToCart = () => {
 
   <div className="summary-items">
     {cart.map((item) => (
-      <div className="summary-item" key={item._id}>
+      <div className="summary-item" key={item.cartKey || item._id}>
         <div>
           <strong>{item.name}</strong>
 
