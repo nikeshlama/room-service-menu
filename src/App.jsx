@@ -79,6 +79,10 @@ function App() {
   const [stockStartDate, setStockStartDate] = useState('');
   const [stockEndDate, setStockEndDate] = useState('');
 
+  const [showOptionModal, setShowOptionModal] = useState(false);
+  const [selectedMenuItem, setSelectedMenuItem] = useState(null);
+  const [glutenFree, setGlutenFree] = useState(false);
+
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
   const ordersLoadedRef = useRef(false);
@@ -584,32 +588,60 @@ const downloadOutOfStockExcel = async () => {
   };
 
   const addToCart = (item) => {
-    if (item.available === false) return;
+  if (item.available === false) return;
 
-    setCart((currentCart) => {
-      const existingItem = currentCart.find(
-        (cartItem) => cartItem._id === item._id
+  if (item.name === 'Poutine Platter') {
+    setSelectedMenuItem(item);
+    setGlutenFree(false);
+    setShowOptionModal(true);
+    return;
+  }
+
+  setCart((currentCart) => {
+    const existingItem = currentCart.find(
+      (cartItem) => cartItem._id === item._id
+    );
+
+    if (existingItem) {
+      return currentCart.map((cartItem) =>
+        cartItem._id === item._id
+          ? { ...cartItem, quantity: cartItem.quantity + 1 }
+          : cartItem
       );
+    }
 
-      if (existingItem) {
-        return currentCart.map((cartItem) =>
-          cartItem._id === item._id
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
-        );
+    return [
+      ...currentCart,
+      {
+        _id: item._id,
+        name: item.name,
+        price: Number(item.price),
+        quantity: 1
       }
+    ];
+  });
+};
 
-      return [
-        ...currentCart,
-        {
-          _id: item._id,
-          name: item.name,
-          price: Number(item.price),
-          quantity: 1
-        }
-      ];
-    });
+const addPoutineToCart = () => {
+  if (!selectedMenuItem) return;
+
+  const item = selectedMenuItem;
+
+  const cartItem = {
+    _id: `${item._id}-${Date.now()}`,
+    menuItemId: item._id,
+    name: item.name,
+    price: Number(item.price),
+    quantity: 1,
+    glutenFree
   };
+
+  setCart((currentCart) => [...currentCart, cartItem]);
+
+  setShowOptionModal(false);
+  setSelectedMenuItem(null);
+  setGlutenFree(false);
+};
 
   const increaseQuantity = (id) => {
     setCart((currentCart) =>
@@ -1426,7 +1458,59 @@ const downloadOutOfStockExcel = async () => {
       </div>
     );
   }
+return (
+  <div className="page">
 
+    {showOptionModal && selectedMenuItem && (
+      <div className="modal-overlay">
+        <div className="option-modal">
+
+          <h2>{selectedMenuItem.name}</h2>
+
+          <p>Choose your option</p>
+
+          <label>
+            <input
+              type="radio"
+              checked={!glutenFree}
+              onChange={() => setGlutenFree(false)}
+            />
+            Regular
+          </label>
+
+          <label>
+            <input
+              type="radio"
+              checked={glutenFree}
+              onChange={() => setGlutenFree(true)}
+            />
+            Gluten Free
+          </label>
+
+          <button
+            className="save-btn"
+            onClick={addPoutineToCart}
+          >
+            ADD TO CART
+          </button>
+
+          <button
+            className="back-btn"
+            onClick={() => {
+              setShowOptionModal(false);
+              setSelectedMenuItem(null);
+              setGlutenFree(false);
+            }}
+          >
+            CANCEL
+          </button>
+
+        </div>
+      </div>
+    )}
+
+    <div className="container"></div>
+  
   return (
     <div className="page">
       <div className="container">

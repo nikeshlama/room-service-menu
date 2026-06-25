@@ -1334,3 +1334,31 @@ td {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 15px;
 }
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.option-modal {
+  background: #fffdf8;
+  border: 1px solid #d8cab8;
+  padding: 28px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+}
+
+.option-modal label {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 14px;
+  font-size: 16px;
+}
