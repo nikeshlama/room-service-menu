@@ -687,7 +687,14 @@ const addPoutineToCart = () => {
         guestName,
         roomNumber,
         message: guestMessage,
-        items: cart,
+        items: cart.map((item) => ({
+        _id: item._id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        glutenFree: item.glutenFree || false
+      })),
+
         subtotal,
         gratuity,
         tax,
