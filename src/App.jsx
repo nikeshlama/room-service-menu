@@ -99,6 +99,8 @@ function App() {
   const [sideUpgrade, setSideUpgrade] = useState('');
   const [dressing, setDressing] = useState('');
 
+  const [showSaladDressingModal, setShowSaladDressingModal] = useState(false);
+
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
   const ordersLoadedRef = useRef(false);
@@ -638,6 +640,16 @@ const downloadOutOfStockExcel = async () => {
   return;
 }
 
+if (
+  item.category === 'Salads' &&
+  item.name !== 'Classic Caesar Salad'
+) {
+  setSelectedMenuItem(item);
+  setDressing('');
+  setShowSaladDressingModal(true);
+  return;
+}
+
   if (
     item.name === 'Poutine Platter' ||
     item.name === 'Spinach & Artichoke Dip') {
@@ -712,6 +724,29 @@ const addSandwichToCart = (
   setSideUpgrade('');
   setDressing('');
 };
+
+const addSaladToCart = (finalDressing) => {
+  if (!selectedMenuItem || !finalDressing) return;
+
+  const item = selectedMenuItem;
+
+  const cartItem = {
+    _id: item._id,
+    cartKey: `${item._id}-salad-${finalDressing}-${Date.now()}`,
+    menuItemId: item._id,
+    name: item.name,
+    price: Number(item.price),
+    quantity: 1,
+    dressing: finalDressing
+  };
+
+  setCart((currentCart) => [...currentCart, cartItem]);
+
+  setShowSaladDressingModal(false);
+  setSelectedMenuItem(null);
+  setDressing('');
+};
+
 const addPoutineToCart = () => {
   if (!selectedMenuItem) return;
 
@@ -1855,6 +1890,38 @@ return (
         }}
       >
         BACK
+      </button>
+    </div>
+  </div>
+)}
+
+{showSaladDressingModal && selectedMenuItem && (
+  <div className="modal-overlay">
+    <div className="option-modal">
+      <h2>{selectedMenuItem.name}</h2>
+      <p>Choose one dressing</p>
+
+      {['Balsamic', 'Ranch', 'Italian', 'French'].map((option) => (
+        <button
+          key={option}
+          className="save-btn"
+          type="button"
+          onClick={() => addSaladToCart(option)}
+        >
+          {option}
+        </button>
+      ))}
+
+      <button
+        className="back-btn"
+        type="button"
+        onClick={() => {
+          setShowSaladDressingModal(false);
+          setSelectedMenuItem(null);
+          setDressing('');
+        }}
+      >
+        CANCEL
       </button>
     </div>
   </div>
