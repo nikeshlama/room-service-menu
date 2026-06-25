@@ -1458,13 +1458,13 @@ const addPoutineToCart = () => {
       </div>
     );
   }
+
 return (
   <div className="page">
 
     {showOptionModal && selectedMenuItem && (
       <div className="modal-overlay">
         <div className="option-modal">
-
           <h2>{selectedMenuItem.name}</h2>
 
           <p>Choose your option</p>
@@ -1504,222 +1504,223 @@ return (
           >
             CANCEL
           </button>
-
         </div>
       </div>
     )}
 
-    <div className="container"></div>
-  
-  return (
-    <div className="page">
-      <div className="container">
-        <div className="top-row">
-          <div>
-            <h1 onClick={handleSecretClick}>Pesto&apos;s Eatery</h1>
-            <p className="subtitle">Fresh • Authentic • Delicious</p>
-          </div>
+    <div className="container">
+      <div className="top-row">
+        <div>
+          <h1 onClick={handleSecretClick}>Pesto&apos;s Eatery</h1>
+          <p className="subtitle">Fresh • Authentic • Delicious</p>
         </div>
+      </div>
 
-        <div className="gold-line"></div>
+      <div className="gold-line"></div>
 
-        <div className="category-nav">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              ref={(el) => {
-                categoryRefs.current[cat] = el;
-              }}
-              className={`category-btn ${
-                selectedCategory === cat ? 'active' : ''
-              }`}
-              onClick={() => centerCategory(cat)}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+      <div className="category-nav">
+        {categories.map((cat) => (
+          <button
+            key={cat}
+            ref={(el) => {
+              categoryRefs.current[cat] = el;
+            }}
+            className={`category-btn ${
+              selectedCategory === cat ? 'active' : ''
+            }`}
+            onClick={() => centerCategory(cat)}
+          >
+            {cat}
+          </button>
+        ))}
+      </div>
 
-        {selectedCategory === 'Featured' && (
-          <h2 className="section-title">Today&apos;s Featured Specials</h2>
-        )}
+      {selectedCategory === 'Featured' && (
+        <h2 className="section-title">Today&apos;s Featured Specials</h2>
+      )}
 
-        <div className="guest-layout">
-          <div className="menu-grid">
-            {visibleItems.length === 0 && (
-              <p className="empty-cart">
-                No items available in this category right now.
-              </p>
-            )}
+      <div className="guest-layout">
+        <div className="menu-grid">
+          {visibleItems.length === 0 && (
+            <p className="empty-cart">
+              No items available in this category right now.
+            </p>
+          )}
 
-            {visibleItems.map((item) => {
-              const itemImage = getMenuImage(item.name);
+          {visibleItems.map((item) => {
+            const itemImage = getMenuImage(item.name);
 
-              return (
-                <div
-                  className={`menu-card compact-menu-card premium-menu-card ${
-                    item.available === false ? 'unavailable-card' : ''
-                  }`}
-                  key={item._id}
-                >
-                  <div className="premium-card-main">
-                    <div className="premium-card-info">
-                      <div className="compact-menu-top">
-                        <div className="compact-menu-info">
-                          <h3>{item.name}</h3>
-                        </div>
-
-                        <div className="compact-menu-actions">
-                          <span className="compact-price">
-                            ${Number(item.price).toFixed(2)}
-                          </span>
-
-                          {item.available !== false && (
-                            <button
-                              className="item-add-btn"
-                              onClick={() => addToCart(item)}
-                              type="button"
-                            >
-                              +
-                            </button>
-                          )}
-                        </div>
+            return (
+              <div
+                className={`menu-card compact-menu-card premium-menu-card ${
+                  item.available === false ? 'unavailable-card' : ''
+                }`}
+                key={item._id}
+              >
+                <div className="premium-card-main">
+                  <div className="premium-card-info">
+                    <div className="compact-menu-top">
+                      <div className="compact-menu-info">
+                        <h3>{item.name}</h3>
                       </div>
 
-                      {Array.isArray(item.tags) && item.tags.length > 0 && (
-                        <p className="tags compact-tags">
-                          {item.tags.join(', ')}
-                        </p>
-                      )}
+                      <div className="compact-menu-actions">
+                        <span className="compact-price">
+                          ${Number(item.price).toFixed(2)}
+                        </span>
 
-                      {item.description && (
-                        <button
-                          type="button"
-                          className="description-toggle"
-                          onClick={() => toggleDescription(item._id)}
-                        >
-                          {openDescriptions[item._id]
-                            ? 'Hide description ▲'
-                            : 'View description ▼'}
-                        </button>
-                      )}
+                        {item.available !== false && (
+                          <button
+                            className="item-add-btn"
+                            onClick={() => addToCart(item)}
+                            type="button"
+                          >
+                            +
+                          </button>
+                        )}
+                      </div>
                     </div>
 
-                    {itemImage && (
-                      <img
-                        src={itemImage}
-                        alt={item.name}
-                        className="menu-thumbnail"
-                      />
+                    {Array.isArray(item.tags) && item.tags.length > 0 && (
+                      <p className="tags compact-tags">
+                        {item.tags.join(', ')}
+                      </p>
+                    )}
+
+                    {item.description && (
+                      <button
+                        type="button"
+                        className="description-toggle"
+                        onClick={() => toggleDescription(item._id)}
+                      >
+                        {openDescriptions[item._id]
+                          ? 'Hide description ▲'
+                          : 'View description ▼'}
+                      </button>
                     )}
                   </div>
 
-                  {item.description && openDescriptions[item._id] && (
-                    <div className="description-section">
-                      <p className="item-description">
-                        {item.description}
-                      </p>
-                    </div>
-                  )}
-
-                  {item.available === false && (
-                    <p className="unavailable-label">
-                      Currently unavailable
-                    </p>
+                  {itemImage && (
+                    <img
+                      src={itemImage}
+                      alt={item.name}
+                      className="menu-thumbnail"
+                    />
                   )}
                 </div>
-              );
-            })}
-          </div>
 
-          {cart.length > 0 && (
-            <div className={`cart-box ${cartOpen ? 'cart-open' : 'cart-closed'}`}>
-              <div
-                className="cart-header"
-                onClick={() => setCartOpen(!cartOpen)}
-              >
-                <h2>Your Order</h2>
-                <span>{cartOpen ? '−' : '+'}</span>
-              </div>
-
-              {!cartOpen && (
-                <p className="cart-mini-text">
-                  {cart.reduce((sum, item) => sum + item.quantity, 0)} item
-                  {cart.reduce((sum, item) => sum + item.quantity, 0) > 1
-                    ? 's'
-                    : ''}{' '}
-                  • Total ${total.toFixed(2)}
-                </p>
-              )}
-
-              {cartOpen && (
-                <>
-                  {cart.map((item) => (
-                    <div className="cart-item" key={item._id}>
-                      <div>
-                        <strong>{item.name}</strong>
-                        <p>
-                          ${item.price.toFixed(2)} × {item.quantity}
-                        </p>
-                      </div>
-
-                      <div className="cart-controls">
-                        <button onClick={() => decreaseQuantity(item._id)}>
-                          −
-                        </button>
-
-                        <span>{item.quantity}</span>
-
-                        <button onClick={() => increaseQuantity(item._id)}>
-                          +
-                        </button>
-
-                        <button
-                          className="remove-cart-btn"
-                          onClick={() => removeFromCart(item._id)}
-                        >
-                          ×
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-
-                  <div className="cart-summary">
-                    <div>
-                      <span>Subtotal</span>
-                      <strong>${subtotal.toFixed(2)}</strong>
-                    </div>
-
-                    <div>
-                      <span>Gratuity 18%</span>
-                      <strong>${gratuity.toFixed(2)}</strong>
-                    </div>
-
-                    <div>
-                      <span>Tax 13%</span>
-                      <strong>${tax.toFixed(2)}</strong>
-                    </div>
-
-                    <div className="cart-total">
-                      <span>Total</span>
-                      <strong>${total.toFixed(2)}</strong>
-                    </div>
-
-                    <button
-                      className="checkout-btn"
-                      onClick={() => setShowCheckout(true)}
-                    >
-                      CHECKOUT
-                    </button>
+                {item.description && openDescriptions[item._id] && (
+                  <div className="description-section">
+                    <p className="item-description">
+                      {item.description}
+                    </p>
                   </div>
-                </>
-              )}
-            </div>
-          )}
+                )}
+
+                {item.available === false && (
+                  <p className="unavailable-label">
+                    Currently unavailable
+                  </p>
+                )}
+              </div>
+            );
+          })}
         </div>
+
+        {cart.length > 0 && (
+          <div className={`cart-box ${cartOpen ? 'cart-open' : 'cart-closed'}`}>
+            <div
+              className="cart-header"
+              onClick={() => setCartOpen(!cartOpen)}
+            >
+              <h2>Your Order</h2>
+              <span>{cartOpen ? '−' : '+'}</span>
+            </div>
+
+            {!cartOpen && (
+              <p className="cart-mini-text">
+                {cart.reduce((sum, item) => sum + item.quantity, 0)} item
+                {cart.reduce((sum, item) => sum + item.quantity, 0) > 1
+                  ? 's'
+                  : ''}{' '}
+                • Total ${total.toFixed(2)}
+              </p>
+            )}
+
+            {cartOpen && (
+              <>
+                {cart.map((item) => (
+                  <div className="cart-item" key={item._id}>
+                    <div>
+                      <strong>{item.name}</strong>
+
+                      {item.glutenFree && (
+                        <p className="option-text">
+                          Gluten Free
+                        </p>
+                      )}
+
+                      <p>
+                        ${item.price.toFixed(2)} × {item.quantity}
+                      </p>
+                    </div>
+
+                    <div className="cart-controls">
+                      <button onClick={() => decreaseQuantity(item._id)}>
+                        −
+                      </button>
+
+                      <span>{item.quantity}</span>
+
+                      <button onClick={() => increaseQuantity(item._id)}>
+                        +
+                      </button>
+
+                      <button
+                        className="remove-cart-btn"
+                        onClick={() => removeFromCart(item._id)}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                ))}
+
+                <div className="cart-summary">
+                  <div>
+                    <span>Subtotal</span>
+                    <strong>${subtotal.toFixed(2)}</strong>
+                  </div>
+
+                  <div>
+                    <span>Gratuity 18%</span>
+                    <strong>${gratuity.toFixed(2)}</strong>
+                  </div>
+
+                  <div>
+                    <span>Tax 13%</span>
+                    <strong>${tax.toFixed(2)}</strong>
+                  </div>
+
+                  <div className="cart-total">
+                    <span>Total</span>
+                    <strong>${total.toFixed(2)}</strong>
+                  </div>
+
+                  <button
+                    className="checkout-btn"
+                    onClick={() => setShowCheckout(true)}
+                  >
+                    CHECKOUT
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
-  );
+  </div>
+);
 }
-
 export default App;
