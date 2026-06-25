@@ -107,6 +107,10 @@ function App() {
 
   const [showSteakDonenessModal, setShowSteakDonenessModal] = useState(false);
 
+  const [showBurgerCheeseModal, setShowBurgerCheeseModal] = useState(false);
+  const [showBurgerToppingsModal, setShowBurgerToppingsModal] = useState(false);
+  const [burgerCheese, setBurgerCheese] = useState(false);
+
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
   const ordersLoadedRef = useRef(false);
@@ -629,6 +633,13 @@ const downloadOutOfStockExcel = async () => {
   const addToCart = (item) => {
   if (item.available === false) return;
 
+  if (item.name === 'Classic Burger') {
+  setSelectedMenuItem(item);
+  setBurgerCheese(false);
+  setShowBurgerCheeseModal(true);
+  return;
+}
+
   if (item.name === 'Beef Tagliata Di Manzo') {
   setSelectedMenuItem(item);
   setShowSteakDonenessModal(true);
@@ -865,6 +876,28 @@ const addSteakToCart = (doneness) => {
   setSelectedMenuItem(null);
 };
 
+const addBurgerToCart = (toppingChoice) => {
+  if (!selectedMenuItem) return;
+
+  const cartItem = {
+    _id: selectedMenuItem._id,
+    cartKey: `${selectedMenuItem._id}-${burgerCheese ? 'cheese' : 'no-cheese'}-${toppingChoice}-${Date.now()}`,
+    menuItemId: selectedMenuItem._id,
+    name: selectedMenuItem.name,
+    price: Number(selectedMenuItem.price) + (burgerCheese ? 3 : 0),
+    quantity: 1,
+    burgerCheese,
+    burgerToppings: toppingChoice
+  };
+
+  setCart((currentCart) => [...currentCart, cartItem]);
+
+  setShowBurgerCheeseModal(false);
+  setShowBurgerToppingsModal(false);
+  setSelectedMenuItem(null);
+  setBurgerCheese(false);
+};
+
 const addWingsToCart = () => {
   if (!selectedMenuItem || !selectedSauce) {
     alert('Please choose one sauce.');
@@ -952,7 +985,9 @@ const addWingsToCart = () => {
         sideUpgrade: item.sideUpgrade || '',
         dressing: item.dressing || '',
         saladProtein: item.saladProtein || '',
-        doneness: item.doneness || '',})),
+        doneness: item.doneness || '',
+        burgerCheese: item.burgerCheese || false,
+        burgerToppings: item.burgerToppings || ''})),
         subtotal,
         gratuity,
         tax,
@@ -1091,6 +1126,18 @@ const addWingsToCart = () => {
   <div className="option-text">
     Steak: {item.doneness}
   </div>
+)}
+
+{item.burgerCheese && (
+  <p className="option-text checkout-option">
+    Add Cheese
+  </p>
+)}
+
+{item.burgerToppings && (
+  <p className="option-text checkout-option">
+    Toppings: {item.burgerToppings}
+  </p>
 )}
 
 </div>
@@ -1554,6 +1601,18 @@ const addWingsToCart = () => {
   </p>
 )}
 
+{item.burgerCheese && (
+  <p className="option-text checkout-option">
+    Add Cheese
+  </p>
+)}
+
+{item.burgerToppings && (
+  <p className="option-text checkout-option">
+    Toppings: {item.burgerToppings}
+  </p>
+)}
+
 </div>
                       ))}
                     </div>
@@ -1828,6 +1887,18 @@ const addWingsToCart = () => {
   </p>
 )}
 
+{item.burgerCheese && (
+  <p className="option-text checkout-option">
+    Add Cheese
+  </p>
+)}
+
+{item.burgerToppings && (
+  <p className="option-text checkout-option">
+    Toppings: {item.burgerToppings}
+  </p>
+)}
+
 <p>
   {item.quantity} × ${item.price.toFixed(2)}
 </p>
@@ -1933,6 +2004,78 @@ return (
         }}
       >
         CANCEL
+      </button>
+    </div>
+  </div>
+)}
+
+{showBurgerCheeseModal && selectedMenuItem && (
+  <div className="modal-overlay">
+    <div className="option-modal">
+      <h2>{selectedMenuItem.name}</h2>
+
+      <p>Add cheese for $3?</p>
+
+      <button
+        className="save-btn"
+        type="button"
+        onClick={() => {
+          setBurgerCheese(true);
+          setShowBurgerCheeseModal(false);
+          setShowBurgerToppingsModal(true);
+        }}
+      >
+        Add Cheese (+$3)
+      </button>
+
+      <button
+        className="back-btn"
+        type="button"
+        onClick={() => {
+          setBurgerCheese(false);
+          setShowBurgerCheeseModal(false);
+          setShowBurgerToppingsModal(true);
+        }}
+      >
+        No Cheese
+      </button>
+    </div>
+  </div>
+)}
+
+{showBurgerToppingsModal && selectedMenuItem && (
+  <div className="modal-overlay">
+    <div className="option-modal">
+      <h2>{selectedMenuItem.name}</h2>
+
+      <p>Choose toppings</p>
+
+      {[
+        'Keep All Toppings',
+        'No Onion',
+        'No Tomato',
+        'No Lettuce',
+        'No Pickle'
+      ].map((option) => (
+        <button
+          key={option}
+          className="save-btn"
+          type="button"
+          onClick={() => addBurgerToCart(option)}
+        >
+          {option}
+        </button>
+      ))}
+
+      <button
+        className="back-btn"
+        type="button"
+        onClick={() => {
+          setShowBurgerToppingsModal(false);
+          setShowBurgerCheeseModal(true);
+        }}
+      >
+        BACK
       </button>
     </div>
   </div>
@@ -2510,6 +2653,17 @@ return (
   </p>
 )}
 
+{item.burgerCheese && (
+  <p className="option-text checkout-option">
+    Add Cheese
+  </p>
+)}
+
+{item.burgerToppings && (
+  <p className="option-text checkout-option">
+    Toppings: {item.burgerToppings}
+  </p>
+)}
 
 <p>
   ${item.price.toFixed(2)} × {item.quantity}
