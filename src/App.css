@@ -1362,3 +1362,13 @@ td {
   margin-bottom: 14px;
   font-size: 16px;
 }
+.checkout-option {
+  color: #0b5e75;
+  font-weight: 700;
+  font-size: 15px;
+  margin-top: 4px;
+}
+.checkout-option {
+  color: green;
+  font-weight: bold;
+}
