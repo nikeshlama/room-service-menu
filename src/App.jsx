@@ -1890,14 +1890,26 @@ return (
                       <strong>{item.name}</strong>
 
                       {item.glutenFree && (
-                        <p className="option-text">
-                          Gluten Free
-                        </p>
-                      )}
+  <p className="option-text">
+    Gluten Free
+  </p>
+)}
 
-                      <p>
-                        ${item.price.toFixed(2)} × {item.quantity}
-                      </p>
+{item.sauce && (
+  <p className="option-text checkout-option">
+    Sauce: {item.sauce}
+  </p>
+)}
+
+{item.secondPound && (
+  <p className="option-text checkout-option">
+    + 2nd Pound Wings
+  </p>
+)}
+
+<p>
+  ${item.price.toFixed(2)} × {item.quantity}
+</p>
                     </div>
 
                     <div className="cart-controls">
