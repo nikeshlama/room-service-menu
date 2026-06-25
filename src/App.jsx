@@ -628,13 +628,14 @@ const addPoutineToCart = () => {
   const item = selectedMenuItem;
 
   const cartItem = {
-    _id: `${item._id}-${Date.now()}`,
-    menuItemId: item._id,
-    name: item.name,
-    price: Number(item.price),
-    quantity: 1,
-    glutenFree
-  };
+  _id: item._id,
+  cartKey: `${item._id}-${glutenFree ? 'gf' : 'regular'}-${Date.now()}`,
+  menuItemId: item._id,
+  name: item.name,
+  price: Number(item.price),
+  quantity: 1,
+  glutenFree
+};
 
   setCart((currentCart) => [...currentCart, cartItem]);
 
@@ -1650,7 +1651,7 @@ return (
             {cartOpen && (
               <>
                 {cart.map((item) => (
-                  <div className="cart-item" key={item._id}>
+                  <div className="cart-item" key={item.cartKey || item._id}>
                     <div>
                       <strong>{item.name}</strong>
 
