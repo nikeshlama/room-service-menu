@@ -672,7 +672,11 @@ const downloadOutOfStockExcel = async () => {
   });
 };
 
-const addSandwichToCart = (finalSide, finalUpgrade = '', finalDressing = '') => {
+const addSandwichToCart = (
+  finalSide,
+  finalUpgrade = '',
+  finalDressing = ''
+) => {
   if (!selectedMenuItem || !finalSide) return;
 
   const item = selectedMenuItem;
@@ -690,6 +694,7 @@ const addSandwichToCart = (finalSide, finalUpgrade = '', finalDressing = '') => 
     name: item.name,
     price: Number(item.price) + extraPrice,
     quantity: 1,
+
     side: finalSide,
     sideUpgrade: finalUpgrade,
     dressing: finalDressing
@@ -707,7 +712,6 @@ const addSandwichToCart = (finalSide, finalUpgrade = '', finalDressing = '') => 
   setSideUpgrade('');
   setDressing('');
 };
-
 const addPoutineToCart = () => {
   if (!selectedMenuItem) return;
 
