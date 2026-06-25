@@ -1520,14 +1520,26 @@ const addWingsToCart = () => {
           <strong>{item.name}</strong>
 
           {item.glutenFree && (
-            <p className="option-text">
-              Gluten Free
-            </p>
+          <p className="option-text">
+           Gluten Free
+          </p>
+         )}
+
+         {item.sauce && (
+         <p className="option-text">
+          Sauce: {item.sauce}
+         </p>
+   )}
+
+         {item.secondPound && (
+         <p className="option-text">
+          + 2nd Pound Wings
+         </p>
           )}
 
-          <p>
-            {item.quantity} × ${item.price.toFixed(2)}
-          </p>
+<p>
+  {item.quantity} × ${item.price.toFixed(2)}
+</p>
         </div>
 
         <span>
