@@ -1451,3 +1451,17 @@ td {
   cursor: not-allowed;
   opacity: 0.6;
 }
+.edit-cart-btn {
+  background: #f7f2e8;
+  color: #5a3b13;
+  border: 1px solid #d6b56d;
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.edit-cart-btn:hover {
+  background: #ead8aa;
+}

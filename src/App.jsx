@@ -15,6 +15,7 @@ const REPORTS_URL = 'https://pestos-backend.onrender.com/api/reports';
 const OUT_OF_STOCK_URL ='https://pestos-backend.onrender.com/api/out-of-stock';
 const WING_SAUCES_URL = 'https://pestos-backend.onrender.com/api/wing-sauces';
 const ROOM_SERVICE_STATUS_URL ='https://pestos-backend.onrender.com/api/room-service-status';
+const ADDONS_URL = 'https://pestos-backend.onrender.com/api/addons';
 
 const menuImages = {
   'Arranchini ': 'menu-images/aranchini.png',
@@ -120,6 +121,8 @@ function App() {
 
   const [roomServiceLive, setRoomServiceLive] = useState(true);
 
+  const [addons, setAddons] = useState([]);
+
 
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
@@ -157,15 +160,23 @@ function App() {
     Authorization: `Bearer ${localStorage.getItem('admin_token')}`
   });
 
+  const isAddonAvailable = (addonName) => {
+  const addon = addons.find((item) => item.name === addonName);
+  return addon ? addon.available !== false : true;
+};
+
   const getMenuImage = (itemName) => {
     const imagePath = menuImages[itemName] || menuImages[itemName?.trim()];
     return imagePath ? `${import.meta.env.BASE_URL}${imagePath}` : null;
   };
 
+  const toastTimerRef = useRef(null);
   const showToast = (message) => {
   setToastMessage(message);
 
-  setTimeout(() => {
+  clearTimeout(toastTimerRef.current);
+
+  toastTimerRef.current = setTimeout(() => {
     setToastMessage('');
   }, 3000);
 };
@@ -326,6 +337,19 @@ const updateRoomServiceStatus = async (isLive) => {
     console.error('GET WING SAUCES ERROR:', err);
   }
  };
+
+ const fetchAddons = async () => {
+  try {
+    const res = await fetch(ADDONS_URL);
+    const data = await res.json();
+
+    if (data.success) {
+      setAddons(data.addons);
+    }
+  } catch (err) {
+    console.error('GET ADDONS ERROR:', err);
+  }
+};
 
   const fetchOrders = async (checkNew = false) => {
     try {
@@ -573,13 +597,22 @@ const downloadOutOfStockExcel = async () => {
   setShowAdmin(false);
   fetchMenu();
   fetchWingSauces();
+  fetchAddons();
   fetchRoomServiceStatus();
 }, []);
 
 useEffect(() => {
   const interval = setInterval(() => {
+    fetchAddons();
+  }, 2000);
+
+  return () => clearInterval(interval);
+}, []);
+
+useEffect(() => {
+  const interval = setInterval(() => {
     fetchRoomServiceStatus();
-  }, 1000);
+  }, 2000);
 
   return () => clearInterval(interval);
 }, []);
@@ -590,7 +623,7 @@ useEffect(() => {
 
       const interval = setInterval(() => {
         fetchOrders(true);
-      }, 5000);
+      }, 2000);
 
       return () => clearInterval(interval);
     }
@@ -704,6 +737,29 @@ useEffect(() => {
 
     fetchMenu();
   };
+
+  const toggleAddonAvailability = async (addon) => {
+  try {
+    const res = await fetch(`${ADDONS_URL}/${addon._id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        available: addon.available === false ? true : false
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      alert(data.message || 'Failed to update add-on');
+      return;
+    }
+
+    fetchAddons();
+  } catch (err) {
+    console.error('UPDATE ADDON ERROR:', err);
+  }
+};
 
   const deleteItem = async (id) => {
     if (!window.confirm('Delete this menu item?')) return;
@@ -1037,7 +1093,8 @@ const addWingsToCart = () => {
 
   const cartItem = {
     _id: item._id,
-    cartKey: `${item._id}-${selectedSauce}-${secondPound ? 'second-pound' : 'regular'}-${Date.now()}`,
+    cartKey:selectedMenuItem.editingCartKey ||
+  `${item._id}-${selectedSauce}-${secondPound ? 'second-pound' : 'regular'}-${Date.now()}`,
     menuItemId: item._id,
     name: item.name,
     price: Number(item.price) + extraPrice,
@@ -1046,8 +1103,22 @@ const addWingsToCart = () => {
     secondPound
   };
 
+  if (selectedMenuItem.editingCartKey) {
+  setCart((currentCart) =>
+    currentCart.map((item) =>
+      (item.cartKey || item._id) === selectedMenuItem.editingCartKey
+        ? cartItem
+        : item
+    )
+  );
+} else {
   setCart((currentCart) => [...currentCart, cartItem]);
-  showToast(`${cartItem.name} added to cart`);
+}
+  showToast(
+  selectedMenuItem.editingCartKey
+    ? 'Wing sauce updated'
+    : `${cartItem.name} added to cart`
+);
   setShowSecondPoundModal(false);
   setSelectedMenuItem(null);
   setSelectedSauce('');
@@ -1076,12 +1147,123 @@ const addWingsToCart = () => {
   );
 };
 
+const editWingSauce = (cartKey) => {
+  const cartItem = cart.find(
+    (item) => (item.cartKey || item._id) === cartKey
+  );
+
+  if (!cartItem) return;
+
+  setSelectedMenuItem({
+    ...cartItem,
+    editingCartKey: cartKey
+  });
+
+  setSelectedSauce(cartItem.sauce || '');
+  setSecondPound(cartItem.secondPound || false);
+  setSauceError('');
+
+  setShowWingSauceModal(true);
+};
+
  const removeFromCart = (cartKey) => {
   setCart((currentCart) =>
     currentCart.filter(
       (item) => (item.cartKey || item._id) !== cartKey
     )
   );
+};
+
+const removeUnavailableAddonsFromCart = (latestAddons) => {
+  const unavailableAddons = latestAddons
+    .filter((addon) => addon.available === false)
+    .map((addon) => addon.name);
+
+  if (unavailableAddons.length === 0) {
+    return false;
+  }
+
+  let removedItems = [];
+
+  setCart((currentCart) =>
+    currentCart.map((item) => {
+      if (
+        item.saladProtein &&
+        unavailableAddons.includes(item.saladProtein)
+      ) {
+        removedItems.push(item.saladProtein);
+
+        return {
+          ...item,
+          price:
+            item.saladProtein === 'Garlic Shrimp'
+              ? item.price - 7
+              : item.price - 8,
+          saladProtein: ''
+        };
+      }
+
+      return item;
+    })
+  );
+
+  if (removedItems.length > 0) {
+    const uniqueRemoved = [...new Set(removedItems)];
+
+    setCheckoutError(
+      `${uniqueRemoved.join(
+        ', '
+      )} is currently out of stock and has been removed from your cart. Please review your updated total and place the order again.`
+    );
+
+    return true;
+  }
+
+  return false;
+};
+
+const removeUnavailableSaucesFromCart = (latestSauces) => {
+  const unavailableSauces = latestSauces
+    .filter((sauce) => sauce.available === false)
+    .map((sauce) => sauce.name);
+
+  if (unavailableSauces.length === 0) {
+    return false;
+  }
+
+  let removedSauces = [];
+
+  setCart((currentCart) =>
+    currentCart.map((item) => {
+      if (
+        item.sauce &&
+        unavailableSauces.includes(item.sauce)
+      ) {
+        removedSauces.push(item.sauce);
+
+        return {
+          ...item,
+          sauce: ''
+        };
+      }
+
+      return item;
+    })
+  );
+
+  if (removedSauces.length > 0) {
+    const uniqueRemoved = [...new Set(removedSauces)];
+
+    setCheckoutError(
+      `${uniqueRemoved.join(
+        ', '
+      )} sauce is currently out of stock and has been removed from your wings. Please use the Edit Sauce button in your cart to select another sauce.`
+    );
+
+    return true;
+  }
+
+  return false;
 };
 
   const placeOrder = async (e) => {
@@ -1092,8 +1274,49 @@ const addWingsToCart = () => {
   const statusRes = await fetch(ROOM_SERVICE_STATUS_URL);
   const statusData = await statusRes.json();
   if (!statusData.isLive) {
-    setCheckoutError(
+  setCheckoutError(
     'Room service hours have ended for the night.'
+  );
+  return;
+}
+
+const addonRes = await fetch(ADDONS_URL);
+const addonData = await addonRes.json();
+
+if (addonData.success) {
+  setAddons(addonData.addons);
+
+  const removedUnavailableAddons =
+    removeUnavailableAddonsFromCart(addonData.addons);
+
+  if (removedUnavailableAddons) {
+    return;
+  }
+}
+
+const sauceRes = await fetch(WING_SAUCES_URL);
+const sauceData = await sauceRes.json();
+
+if (sauceData.success) {
+  setWingSauces(sauceData.sauces);
+
+  const removedUnavailableSauces =
+    removeUnavailableSaucesFromCart(sauceData.sauces);
+
+  if (removedUnavailableSauces) {
+    return;
+  }
+}
+
+const wingsWithoutSauce = cart.some(
+  (item) =>
+    item.name === 'Chicken Wings & Fries' &&
+    !item.sauce
+);
+
+if (wingsWithoutSauce) {
+  setCheckoutError(
+    'One or more wing orders require a sauce selection. Please edit your cart and choose a sauce.'
   );
   return;
 }
@@ -1426,6 +1649,18 @@ const addWingsToCart = () => {
   Kitchen Inventory
 </button>
 
+<button
+  className={`admin-nav-btn ${
+    adminPage === 'addons' ? 'active-admin' : ''
+  }`}
+  onClick={() => {
+    setAdminPage('addons');
+    fetchAddons();
+  }}
+>
+  Add-on Inventory
+</button>
+
           </div>
 
           {adminPage === 'kitchen' && (
@@ -1514,6 +1749,46 @@ const addWingsToCart = () => {
                 {new Date(
                   item.createdAt
                 ).toLocaleString()}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </>
+)}
+
+{adminPage === 'addons' && (
+  <>
+    <h2 className="section-title">Add-on Inventory</h2>
+
+    <div className="table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>Add-on Name</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {addons.map((addon) => (
+            <tr key={addon._id}>
+              <td>{addon.name}</td>
+
+              <td>
+                <button
+                  className={
+                    addon.available !== false
+                      ? 'stock-btn in-stock'
+                      : 'stock-btn out-stock'
+                  }
+                  onClick={() => toggleAddonAvailability(addon)}
+                >
+                  {addon.available !== false
+                    ? 'In Stock'
+                    : 'Out of Stock'}
+                </button>
               </td>
             </tr>
           ))}
@@ -2023,6 +2298,13 @@ const addWingsToCart = () => {
   </p>
 )}
 
+{item.name === 'Chicken Wings & Fries' &&
+  item.sauce === '' && (
+    <p className="field-error">
+      ⚠ Sauce selection required
+    </p>
+)}
+
 {item.secondPound && (
   <p className="option-text checkout-option">
     + 2nd Pound Wings
@@ -2470,13 +2752,15 @@ return (
 
       <p>Add Garlic Shrimp for $7?</p>
 
-      <button
-        className="save-btn"
-        type="button"
-        onClick={() => addFettuccineToCart(true)}
-      >
-        Add Garlic Shrimp (+$7)
-      </button>
+      {isAddonAvailable('Garlic Shrimp') && (
+  <button
+    className="save-btn"
+    type="button"
+    onClick={() => addFettuccineToCart(true)}
+  >
+    Add Garlic Shrimp (+$7)
+  </button>
+)}
 
       <button
         className="back-btn"
@@ -2495,25 +2779,29 @@ return (
       <h2>{selectedMenuItem.name}</h2>
       <p>Add protein?</p>
 
-      <button
-        className="save-btn"
-        type="button"
-        onClick={() =>
-          addCaesarSaladToCart('Seasoned Chicken Breast', 8)
-        }
-      >
-        Add Seasoned Chicken Breast (+$8)
-      </button>
+      {isAddonAvailable('Seasoned Chicken Breast') && (
+  <button
+    className="save-btn"
+    type="button"
+    onClick={() =>
+      addCaesarSaladToCart('Seasoned Chicken Breast', 8)
+    }
+  >
+    Add Seasoned Chicken Breast (+$8)
+  </button>
+)}
 
-      <button
-        className="save-btn"
-        type="button"
-        onClick={() =>
-          addCaesarSaladToCart('Garlic Shrimp', 7)
-        }
-      >
-        Add Garlic Shrimp (+$7)
-      </button>
+{isAddonAvailable('Garlic Shrimp') && (
+  <button
+    className="save-btn"
+    type="button"
+    onClick={() =>
+      addCaesarSaladToCart('Garlic Shrimp', 7)
+    }
+  >
+    Add Garlic Shrimp (+$7)
+  </button>
+)}
 
       <button
         className="back-btn"
@@ -2841,6 +3129,13 @@ return (
   </p>
 )}
 
+{item.name === 'Chicken Wings & Fries' &&
+  item.sauce === '' && (
+    <p className="field-error">
+      ⚠ Sauce selection required
+    </p>
+)}
+
 {item.secondPound && (
   <p className="option-text checkout-option">
     + 2nd Pound Wings
@@ -2912,6 +3207,18 @@ return (
 >
   +
 </button>
+
+{item.sauce && (
+  <button
+    className="edit-cart-btn"
+    type="button"
+    onClick={() =>
+      editWingSauce(item.cartKey || item._id)
+    }
+  >
+    Edit Sauce
+  </button>
+)}
 
 <button
   className="remove-cart-btn"
