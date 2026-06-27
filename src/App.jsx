@@ -2638,7 +2638,7 @@ return (
 
         {toastMessage && (
           <p className="cart-header-toast">
-            ✓ Added to cart
+            {toastMessage}
           </p>
         )}
       </div>
