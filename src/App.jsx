@@ -112,6 +112,8 @@ function App() {
   const [burgerCheese, setBurgerCheese] = useState(false);
   const [burgerToppings, setBurgerToppings] = useState([]);
 
+  const [toastMessage, setToastMessage] = useState('');
+
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
   const ordersLoadedRef = useRef(false);
@@ -152,6 +154,14 @@ function App() {
     const imagePath = menuImages[itemName] || menuImages[itemName?.trim()];
     return imagePath ? `${import.meta.env.BASE_URL}${imagePath}` : null;
   };
+
+  const showToast = (message) => {
+  setToastMessage(message);
+
+  setTimeout(() => {
+    setToastMessage('');
+  }, 3000);
+};
 
   const enableAlarmSound = () => {
     if (!alarmRef.current) {
@@ -721,6 +731,7 @@ if (
       }
     ];
   });
+  showToast(`${item.name} has been added to cart`);
 };
 
 const addSandwichToCart = (
@@ -752,6 +763,7 @@ const addSandwichToCart = (
   };
 
   setCart((currentCart) => [...currentCart, cartItem]);
+  showToast(`${cartItem.name} has been added to cart`);
 
   setShowSandwichSideModal(false);
   setShowFriesUpgradeModal(false);
@@ -780,6 +792,7 @@ const addSaladToCart = (finalDressing) => {
   };
 
   setCart((currentCart) => [...currentCart, cartItem]);
+  showToast(`${cartItem.name} has been added to cart`);
 
   setShowSaladDressingModal(false);
   setSelectedMenuItem(null);
@@ -803,6 +816,7 @@ const addCaesarSaladToCart = (protein = '', extraPrice = 0) => {
   };
 
   setCart((currentCart) => [...currentCart, cartItem]);
+  showToast(`${cartItem.name} has been added to cart`);
 
   setShowCaesarProteinModal(false);
   setSelectedMenuItem(null);
@@ -832,7 +846,7 @@ const addPoutineToCart = () => {
   };
 
   setCart((currentCart) => [...currentCart, cartItem]);
-
+  showToast(`${cartItem.name} has been added to cart`);
   setShowOptionModal(false);
   setSelectedMenuItem(null);
   setGlutenFree(false);
@@ -852,7 +866,7 @@ const addFettuccineToCart = (addShrimp = false) => {
   };
 
   setCart((currentCart) => [...currentCart, cartItem]);
-
+  showToast(`${cartItem.name} has been added to cart`);
   setShowFettuccineShrimpModal(false);
   setSelectedMenuItem(null);
   setGlutenFree(false);
@@ -872,7 +886,7 @@ const addSteakToCart = (doneness) => {
   };
 
   setCart((currentCart) => [...currentCart, cartItem]);
-
+  showToast(`${cartItem.name} has been added to cart`);
   setShowSteakDonenessModal(false);
   setSelectedMenuItem(null);
 };
@@ -906,7 +920,7 @@ const addBurgerToCart = (finalSide, finalUpgrade = '', finalDressing = '') => {
   };
 
   setCart((currentCart) => [...currentCart, cartItem]);
-
+  showToast(`${cartItem.name} has been added to cart`);
   setShowBurgerCheeseModal(false);
   setShowBurgerToppingsModal(false);
   setShowSandwichSideModal(false);
@@ -940,7 +954,7 @@ const addWingsToCart = () => {
   };
 
   setCart((currentCart) => [...currentCart, cartItem]);
-
+  showToast(`${cartItem.name} has been added to cart`);
   setShowSecondPoundModal(false);
   setSelectedMenuItem(null);
   setSelectedSauce('');
@@ -1976,6 +1990,12 @@ const addWingsToCart = () => {
 
 return (
   <div className="page">
+
+  {toastMessage && (
+  <div className="toast">
+    {toastMessage}
+  </div>
+)}
 
     {showWingSauceModal && selectedMenuItem && (
   <div className="modal-overlay">
