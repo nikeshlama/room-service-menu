@@ -686,7 +686,8 @@ const downloadOutOfStockExcel = async () => {
   const addToCart = (item) => {
   if (item.available === false) return;
 
-  if (item.name === 'Classic Burger') {
+  if (item.name === 'Classic Burger' ||
+  item.name === 'Kids Burger & Fries') {
   setSelectedMenuItem(item);
   setBurgerCheese(false);
   setShowBurgerCheeseModal(true);
@@ -942,11 +943,11 @@ const addBurgerToCart = (finalSide, finalUpgrade = '', finalDressing = '') => {
     : 'Keep All Toppings';
 
   const extraPrice =
-    (burgerCheese ? 3 : 0) +
-    (finalUpgrade === 'Poutine Upgrade' ||
-    finalUpgrade === 'Small Caesar Salad Upgrade'
-      ? 3.99
-      : 0);
+  (burgerCheese ? 2 : 0) +
+  (finalUpgrade === 'Poutine Upgrade' ||
+  finalUpgrade === 'Small Caesar Salad Upgrade'
+    ? 3.99
+    : 0);
 
   const cartItem = {
     _id: selectedMenuItem._id,
@@ -2107,7 +2108,7 @@ return (
     <div className="option-modal">
       <h2>{selectedMenuItem.name}</h2>
 
-      <p>Add cheese for $3?</p>
+      <p>Add cheese for $2?</p>
 
       <button
         className="save-btn"
@@ -2115,10 +2116,14 @@ return (
         onClick={() => {
           setBurgerCheese(true);
           setShowBurgerCheeseModal(false);
-          setShowBurgerToppingsModal(true);
-        }}
+          if (selectedMenuItem.name === 'Kids Burger & Fries') {
+            addBurgerToCart('', '', '');
+          } else {
+             setShowBurgerToppingsModal(true);
+            }
+          }}
       >
-        Add Cheese (+$3)
+        Add Cheese (+$2)
       </button>
 
       <button
@@ -2127,7 +2132,11 @@ return (
         onClick={() => {
           setBurgerCheese(false);
           setShowBurgerCheeseModal(false);
-          setShowBurgerToppingsModal(true);
+          if (selectedMenuItem.name === 'Kids Burger & Fries') {
+            addBurgerToCart('', '', '');
+          } else {
+            setShowBurgerToppingsModal(true);
+          }
         }}
       >
         No Cheese
