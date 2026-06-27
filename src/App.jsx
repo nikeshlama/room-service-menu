@@ -163,6 +163,40 @@ function App() {
   }, 3000);
 };
 
+ // ===== BACK BUTTON HANDLER =====
+
+ useEffect(() => {
+  window.history.pushState({ app: true }, '', window.location.href);
+
+  const handleBackButton = () => {
+    if (showReceipt) {
+      setShowReceipt(false);
+      window.history.pushState({ app: true }, '', window.location.href);
+      return;
+    }
+
+    if (showCheckout) {
+      setShowCheckout(false);
+      window.history.pushState({ app: true }, '', window.location.href);
+      return;
+    }
+
+    if (cartOpen) {
+      setCartOpen(false);
+      window.history.pushState({ app: true }, '', window.location.href);
+      return;
+    }
+
+    window.history.pushState({ app: true }, '', window.location.href);
+  };
+
+  window.addEventListener('popstate', handleBackButton);
+
+  return () => {
+    window.removeEventListener('popstate', handleBackButton);
+  };
+}, [showReceipt, showCheckout, cartOpen]);
+  
   const enableAlarmSound = () => {
     if (!alarmRef.current) {
       alarmRef.current = new Audio(NOTIFICATION_SOUND);
