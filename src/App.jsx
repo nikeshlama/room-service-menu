@@ -2677,7 +2677,8 @@ return (
 
       {!roomServiceLive && (
         <div className="room-service-closed-banner">
-          Room Service Hours Have Ended For The Night
+          Room Service Hours Have Ended!!!
+          Opening Hours: 5:00 P.M. - 10:00 P.M.
           {toastMessage && (
             <div className="room-service-message">
               {toastMessage}
@@ -2685,7 +2686,7 @@ return (
           )}
         </div>
       )}
-      
+
       <div className="guest-layout">
         <div className="menu-grid">
           {visibleItems.length === 0 && (
