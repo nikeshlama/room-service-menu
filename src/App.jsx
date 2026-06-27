@@ -1238,10 +1238,10 @@ const removeUnavailableAddonsFromCart = (latestAddons) => {
     const uniqueRemoved = [...new Set(removedItems)];
 
     setCheckoutError(
-      `${uniqueRemoved.join(
-        ', '
-      )} is currently out of stock and has been removed from your cart. Please review your updated total and place the order again.`
-    );
+  `Sorry, we just ran out of ${uniqueRemoved.join(
+    ', '
+  )}. We removed it from your order and updated your final total. Please review your new total before placing the order.`
+);
 
     return true;
   }
