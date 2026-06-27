@@ -2410,9 +2410,15 @@ if (wingsWithoutSauce) {
 
 {item.name === 'Chicken Wings & Fries' &&
   item.sauce === '' && (
-    <p className="field-error">
-      ⚠ Sauce selection required
-    </p>
+    <button
+      type="button"
+      className="sauce-required-btn"
+      onClick={() =>
+        editWingSauce(item.cartKey || item._id)
+      }
+    >
+      ⚠ Sauce selection required — tap to choose sauce
+    </button>
 )}
 
 {item.secondPound && (

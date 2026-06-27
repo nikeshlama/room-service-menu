@@ -1465,3 +1465,20 @@ td {
 .edit-cart-btn:hover {
   background: #ead8aa;
 }
+.sauce-required-btn {
+  background: #fff3f3;
+  color: #b00020;
+  border: 1px solid #ffb3b3;
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.sauce-required-btn:hover {
+  background: #ffe1e1;
+}
