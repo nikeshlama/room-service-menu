@@ -576,6 +576,14 @@ const downloadOutOfStockExcel = async () => {
   fetchRoomServiceStatus();
 }, []);
 
+useEffect(() => {
+  const interval = setInterval(() => {
+    fetchRoomServiceStatus();
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, []);
+
   useEffect(() => {
     if (showAdmin && adminPage === 'orders') {
       fetchOrders(false);
@@ -1080,6 +1088,15 @@ const addWingsToCart = () => {
     e.preventDefault();
 
     setCheckoutError('');
+
+  const statusRes = await fetch(ROOM_SERVICE_STATUS_URL);
+  const statusData = await statusRes.json();
+  if (!statusData.isLive) {
+    setCheckoutError(
+    'Room service hours have ended for the night.'
+  );
+  return;
+}
 
     if (wordCount > 50) {
       setCheckoutError('Message must be 50 words or less.');
