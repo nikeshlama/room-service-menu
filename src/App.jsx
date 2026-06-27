@@ -166,28 +166,33 @@ function App() {
  // ===== BACK BUTTON HANDLER =====
 
  useEffect(() => {
-  window.history.pushState({ app: true }, '', window.location.href);
+  const pushAppHistory = () => {
+    window.history.pushState({ app: true }, '', window.location.href);
+  };
+
+  pushAppHistory();
+  pushAppHistory();
 
   const handleBackButton = () => {
     if (showReceipt) {
       setShowReceipt(false);
-      window.history.pushState({ app: true }, '', window.location.href);
+      pushAppHistory();
       return;
     }
 
     if (showCheckout) {
       setShowCheckout(false);
-      window.history.pushState({ app: true }, '', window.location.href);
+      pushAppHistory();
       return;
     }
 
     if (cartOpen) {
       setCartOpen(false);
-      window.history.pushState({ app: true }, '', window.location.href);
+      pushAppHistory();
       return;
     }
 
-    window.history.pushState({ app: true }, '', window.location.href);
+    pushAppHistory();
   };
 
   window.addEventListener('popstate', handleBackButton);
