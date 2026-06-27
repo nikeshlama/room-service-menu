@@ -761,6 +761,29 @@ useEffect(() => {
   }
 };
 
+const toggleSauceAvailability = async (sauce) => {
+  try {
+    const res = await fetch(`${WING_SAUCES_URL}/${sauce._id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        available: sauce.available === false ? true : false
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      alert(data.message || 'Failed to update sauce');
+      return;
+    }
+
+    fetchWingSauces();
+  } catch (err) {
+    console.error('UPDATE SAUCE ERROR:', err);
+  }
+};
+
   const deleteItem = async (id) => {
     if (!window.confirm('Delete this menu item?')) return;
 
@@ -1661,6 +1684,18 @@ if (wingsWithoutSauce) {
   Add-on Inventory
 </button>
 
+<button
+  className={`admin-nav-btn ${
+    adminPage === 'sauces' ? 'active-admin' : ''
+  }`}
+  onClick={() => {
+    setAdminPage('sauces');
+    fetchWingSauces();
+  }}
+>
+  Sauce Inventory
+</button>
+
           </div>
 
           {adminPage === 'kitchen' && (
@@ -1788,6 +1823,50 @@ if (wingsWithoutSauce) {
                   {addon.available !== false
                     ? 'In Stock'
                     : 'Out of Stock'}
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </>
+)}
+
+{adminPage === 'sauces' && (
+  <>
+    <h2 className="section-title">
+      Wing Sauce Inventory
+    </h2>
+
+    <div className="table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>Sauce Name</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {wingSauces.map((sauce) => (
+            <tr key={sauce._id}>
+              <td>{sauce.name}</td>
+
+              <td>
+                <button
+                  className={
+                    sauce.available !== false
+                      ? 'stock-btn in-stock'
+                      : 'stock-btn out-stock'
+                  }
+                  onClick={() =>
+                    toggleSauceAvailability(sauce)
+                  }
+                >
+                  {sauce.available !== false
+                    ? 'In Stock'
+                    : 'Out Of Stock'}
                 </button>
               </td>
             </tr>
