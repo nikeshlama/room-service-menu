@@ -1090,7 +1090,7 @@ const addWingsToCart = () => {
     return (
       <div className="page">
         <div className="container receipt-page">
-          <h1>Pesto&apos;s Eatery</h1>
+          <h1>Pesto&apos;s Restaurant</h1>
           <p className="subtitle">Room Service Receipt</p>
 
           <div className="gold-line"></div>
@@ -1991,12 +1991,6 @@ const addWingsToCart = () => {
 return (
   <div className="page">
 
-  {toastMessage && (
-  <div className="toast">
-    {toastMessage}
-  </div>
-)}
-
     {showWingSauceModal && selectedMenuItem && (
   <div className="modal-overlay">
     <div className="option-modal">
@@ -2517,7 +2511,7 @@ return (
     <div className="container">
       <div className="top-row">
         <div>
-          <h1 onClick={handleSecretClick}>Pesto&apos;s Eatery</h1>
+          <h1 onClick={handleSecretClick}>Pesto&apos;s Restaurant</h1>
           <p className="subtitle">Fresh • Authentic • Delicious</p>
         </div>
       </div>
@@ -2635,6 +2629,11 @@ return (
 
         {cart.length > 0 && (
           <div className={`cart-box ${cartOpen ? 'cart-open' : 'cart-closed'}`}>
+             {toastMessage && (
+      <div className="cart-toast">
+        {toastMessage}
+      </div>
+    )}
             <div
               className="cart-header"
               onClick={() => setCartOpen(!cartOpen)}

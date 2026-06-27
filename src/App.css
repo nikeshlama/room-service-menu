@@ -1373,12 +1373,15 @@ td {
   font-weight: bold;
 }
 
-.toast {
-  position: sticky;
-  top: 70px;
+.cart-box {
+  position: relative;
+}
 
-  margin: 0 auto 10px auto;
-  width: fit-content;
+.cart-toast {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
 
   background: #28a745;
   color: white;
@@ -1389,5 +1392,8 @@ td {
   font-size: 14px;
   font-weight: 600;
 
-  z-index: 100;
+  white-space: nowrap;
+
+  z-index: 10000;
+  box-shadow: 0 4px 12px rgba(0,0,0,.2);
 }
