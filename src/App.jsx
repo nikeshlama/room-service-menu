@@ -2675,6 +2675,23 @@ return (
         <h2 className="section-title">Today&apos;s Featured Specials</h2>
       )}
 
+      {!roomServiceLive && (
+        <div className="room-service-closed-banner">
+          Room Service Hours Have Ended For The Night
+          {toastMessage && (
+            <div className="room-service-message">
+              {toastMessage}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+)}
+
+<div className="guest-layout">
+  <div className="menu-grid"></div>
+
       <div className="guest-layout">
         <div className="menu-grid">
           {visibleItems.length === 0 && (
@@ -2707,12 +2724,13 @@ return (
 
                         {item.available !== false && (
                           <button
-                            className="item-add-btn"
-                            onClick={() => addToCart(item)}
-                            type="button"
+                          className="item-add-btn"
+                          onClick={() => addToCart(item)}
+                          type="button"
+                          disabled={!roomServiceLive}
                           >
                             +
-                          </button>
+                            </button>
                         )}
                       </div>
                     </div>
