@@ -2678,7 +2678,7 @@ return (
       {!roomServiceLive && (
         <div className="room-service-closed-banner">
           Room Service Hours Have Ended!!!
-          Opening Hours: 5:00 P.M. - 10:00 P.M.
+          Opening Hours: 5:00 P.M. - 9:45 P.M.
           {toastMessage && (
             <div className="room-service-message">
               {toastMessage}
