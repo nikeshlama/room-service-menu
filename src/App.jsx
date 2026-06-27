@@ -1210,7 +1210,19 @@ const removeUnavailableAddonsFromCart = (latestAddons) => {
     return false;
   }
 
-  let removedItems = [];
+  const cartItemsToUpdate = cart.filter(
+    (item) =>
+      item.saladProtein &&
+      unavailableAddons.includes(item.saladProtein)
+  );
+
+  if (cartItemsToUpdate.length === 0) {
+    return false;
+  }
+
+  const uniqueRemoved = [
+    ...new Set(cartItemsToUpdate.map((item) => item.saladProtein))
+  ];
 
   setCart((currentCart) =>
     currentCart.map((item) => {
@@ -1218,14 +1230,12 @@ const removeUnavailableAddonsFromCart = (latestAddons) => {
         item.saladProtein &&
         unavailableAddons.includes(item.saladProtein)
       ) {
-        removedItems.push(item.saladProtein);
+        const priceReduction =
+          item.saladProtein === 'Garlic Shrimp' ? 7 : 8;
 
         return {
           ...item,
-          price:
-            item.saladProtein === 'Garlic Shrimp'
-              ? item.price - 7
-              : item.price - 8,
+          price: Math.max(0, item.price - priceReduction),
           saladProtein: ''
         };
       }
@@ -1234,19 +1244,13 @@ const removeUnavailableAddonsFromCart = (latestAddons) => {
     })
   );
 
-  if (removedItems.length > 0) {
-    const uniqueRemoved = [...new Set(removedItems)];
-
-    setCheckoutError(
-  `Sorry, we just ran out of ${uniqueRemoved.join(
-    ', '
-  )}. We removed it from your order and updated your final total. Please review your new total before placing the order.`
-);
-
-    return true;
-  }
-
-  return false;
+  setCheckoutError(
+    `Sorry, we just ran out of ${uniqueRemoved.join(
+      ', '
+    )}. We removed it from your order and updated your final total. Please review your new total before placing the order.`
+  );
+console.log('REMOVED ADDONS:', uniqueRemoved);
+  return true;
 };
 
 const removeUnavailableSaucesFromCart = (latestSauces) => {
@@ -2535,6 +2539,14 @@ if (wingsWithoutSauce) {
       </div>
     ))}
   </div>
+  
+
+  {checkoutError && (
+  <div className="field-error">
+    {checkoutError}
+  </div>
+)}
+
 
               <div className="summary-divider"></div>
 
