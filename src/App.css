@@ -1377,23 +1377,10 @@ td {
   position: relative;
 }
 
-.cart-toast {
-  position: absolute;
-  top: -40px;
-  left: 50%;
-  transform: translateX(-50%);
-
-  background: #28a745;
-  color: white;
-
-  padding: 8px 16px;
-  border-radius: 20px;
-
-  font-size: 14px;
-  font-weight: 600;
-
-  white-space: nowrap;
-
-  z-index: 10000;
-  box-shadow: 0 4px 12px rgba(0,0,0,.2);
+.cart-header-toast {
+  margin: 4px 0 0;
+  color: #28a745;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
 }

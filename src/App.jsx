@@ -2628,22 +2628,26 @@ return (
         </div>
 
         {cart.length > 0 && (
-          <div className={`cart-box ${cartOpen ? 'cart-open' : 'cart-closed'}`}>
-             {toastMessage && (
-      <div className="cart-toast">
-        {toastMessage}
-      </div>
-    )}
-            <div
-              className="cart-header"
-              onClick={() => setCartOpen(!cartOpen)}
-            >
-              <h2>Your Order</h2>
-              <span>{cartOpen ? '−' : '+'}</span>
-            </div>
+  <div className={`cart-box ${cartOpen ? 'cart-open' : 'cart-closed'}`}>
+    <div
+      className="cart-header"
+      onClick={() => setCartOpen(!cartOpen)}
+    >
+      <div>
+        <h2>Your Order</h2>
 
-            {!cartOpen && (
-              <p className="cart-mini-text">
+        {toastMessage && (
+          <p className="cart-header-toast">
+            ✓ Added to cart
+          </p>
+        )}
+      </div>
+
+      <span>{cartOpen ? '−' : '+'}</span>
+    </div>
+
+    {!cartOpen && (
+      <p className="cart-mini-text">
                 {cart.reduce((sum, item) => sum + item.quantity, 0)} item
                 {cart.reduce((sum, item) => sum + item.quantity, 0) > 1
                   ? 's'
