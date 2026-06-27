@@ -2343,6 +2343,54 @@ if (wingsWithoutSauce) {
   if (showCheckout) {
     return (
       <div className="page">
+        {showWingSauceModal && selectedMenuItem && (
+  <div className="modal-overlay">
+    <div className="option-modal">
+      <h2>{selectedMenuItem.name}</h2>
+
+      <p>Choose one sauce</p>
+
+      {sauceError && (
+        <p className="field-error">
+          {sauceError}
+        </p>
+      )}
+
+      {wingSauces
+        .filter((sauce) => sauce.available)
+        .map((sauce) => (
+          <label key={sauce._id}>
+            <input
+              type="radio"
+              name="wingSauce"
+              checked={selectedSauce === sauce.name}
+              onChange={() => {
+                setSelectedSauce(sauce.name);
+                setSauceError('');
+              }}
+            />
+            {sauce.name}
+          </label>
+        ))}
+
+      <button
+        className="save-btn"
+        type="button"
+        onClick={() => {
+          if (!selectedSauce) {
+            setSauceError('Please choose one sauce.');
+            return;
+          }
+
+          setShowWingSauceModal(false);
+          setShowSecondPoundModal(true);
+        }}
+      >
+        NEXT
+      </button>
+    </div>
+  </div>
+)}
         <div className="container">
           <h1>Pesto&apos;s Checkout</h1>
           <p className="subtitle">Guest Information</p>
