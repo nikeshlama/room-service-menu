@@ -1115,16 +1115,19 @@ const addWingsToCart = () => {
   const extraPrice = secondPound ? 10 : 0;
 
   const cartItem = {
-    _id: item._id,
-    cartKey:selectedMenuItem.editingCartKey ||
-  `${item._id}-${selectedSauce}-${secondPound ? 'second-pound' : 'regular'}-${Date.now()}`,
-    menuItemId: item._id,
-    name: item.name,
-    price: Number(item.price) + extraPrice,
-    quantity: 1,
-    sauce: selectedSauce,
-    secondPound
-  };
+  ...selectedMenuItem,
+
+  _id: item._id,
+  cartKey:
+    selectedMenuItem.editingCartKey ||
+    `${item._id}-${selectedSauce}-${secondPound ? 'second-pound' : 'regular'}-${Date.now()}`,
+
+  menuItemId: item._id,
+  sauce: selectedSauce,
+  secondPound,
+  price: Number(item.price) + extraPrice,
+  quantity: selectedMenuItem.quantity || 1
+};
 
   if (selectedMenuItem.editingCartKey) {
   setCart((currentCart) =>
@@ -1142,6 +1145,7 @@ const addWingsToCart = () => {
     ? 'Wing sauce updated'
     : `${cartItem.name} added to cart`
 );
+  setCheckoutError('');
   setShowSecondPoundModal(false);
   setSelectedMenuItem(null);
   setSelectedSauce('');
@@ -2374,20 +2378,22 @@ if (wingsWithoutSauce) {
         ))}
 
       <button
-        className="save-btn"
-        type="button"
-        onClick={() => {
-          if (!selectedSauce) {
-            setSauceError('Please choose one sauce.');
-            return;
-          }
+  className="save-btn"
+  type="button"
+  onClick={() => {
+    if (!selectedSauce) {
+      setSauceError('Please choose one sauce.');
+      return;
+    }
 
-          setShowWingSauceModal(false);
-          setShowSecondPoundModal(true);
-        }}
-      >
-        NEXT
-      </button>
+    addWingsToCart();
+
+    setShowWingSauceModal(false);
+    setShowSecondPoundModal(false);
+  }}
+>
+  UPDATE SAUCE
+</button>
     </div>
   </div>
 )}
@@ -2450,22 +2456,23 @@ if (wingsWithoutSauce) {
   </p>
 )}
 
-{item.sauce && (
+{item.sauce?.trim() && (
   <p className="option-text checkout-option">
     Sauce: {item.sauce}
   </p>
 )}
 
 {item.name === 'Chicken Wings & Fries' &&
-  item.sauce === '' && (
+  !item.sauce && (
     <button
       type="button"
       className="sauce-required-btn"
-      onClick={() =>
-        editWingSauce(item.cartKey || item._id)
-      }
+      onClick={() => {
+        setShowCheckout(false);
+        setCartOpen(true);
+      }}
     >
-      ⚠ Sauce selection required — tap to choose sauce
+      ⚠ Sauce selection required — tap to edit in cart
     </button>
 )}
 
@@ -3294,15 +3301,16 @@ return (
 )}
 
 {item.name === 'Chicken Wings & Fries' &&
-  item.sauce === '' && (
+  !item.sauce && (
     <button
       type="button"
       className="sauce-required-btn"
-      onClick={() =>
-        editWingSauce(item.cartKey || item._id)
-      }
+      onClick={() => {
+        setShowCheckout(false);
+        setCartOpen(true);
+      }}
     >
-      ⚠ Sauce selection required — tap to choose sauce
+      ⚠ Sauce selection required — tap to edit in cart
     </button>
 )}
 
