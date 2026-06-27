@@ -3306,11 +3306,10 @@ return (
       type="button"
       className="sauce-required-btn"
       onClick={() => {
-        setShowCheckout(false);
-        setCartOpen(true);
+        editWingSauce(item.cartKey || item._id);
       }}
     >
-      ⚠ Sauce selection required — tap to edit in cart
+      ⚠ Sauce selection required — tap to choose sauce
     </button>
 )}
 
