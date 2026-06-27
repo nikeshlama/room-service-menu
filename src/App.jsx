@@ -14,6 +14,7 @@ const NOTIFICATION_SOUND = `${import.meta.env.BASE_URL}notification.mp3`;
 const REPORTS_URL = 'https://pestos-backend.onrender.com/api/reports';
 const OUT_OF_STOCK_URL ='https://pestos-backend.onrender.com/api/out-of-stock';
 const WING_SAUCES_URL = 'https://pestos-backend.onrender.com/api/wing-sauces';
+const ROOM_SERVICE_STATUS_URL ='https://pestos-backend.onrender.com/api/room-service-status';
 
 const menuImages = {
   'Arranchini ': 'menu-images/aranchini.png',
@@ -116,6 +117,9 @@ function App() {
 
   const [checkoutError, setCheckoutError] = useState('');
   const [sauceError, setSauceError] = useState('');
+
+  const [roomServiceLive, setRoomServiceLive] = useState(true);
+
 
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
@@ -264,6 +268,37 @@ function App() {
       [id]: !current[id]
     }));
   };
+
+  const fetchRoomServiceStatus = async () => {
+  try {
+    const res = await fetch(ROOM_SERVICE_STATUS_URL);
+    const data = await res.json();
+
+    if (data.success) {
+      setRoomServiceLive(data.isLive);
+    }
+  } catch (err) {
+    console.error('GET ROOM SERVICE STATUS ERROR:', err);
+  }
+};
+
+const updateRoomServiceStatus = async (isLive) => {
+  try {
+    const res = await fetch(ROOM_SERVICE_STATUS_URL, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({ isLive })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      setRoomServiceLive(data.isLive);
+    }
+  } catch (err) {
+    console.error('UPDATE ROOM SERVICE STATUS ERROR:', err);
+  }
+};
 
   const fetchMenu = async () => {
     try {
@@ -538,6 +573,7 @@ const downloadOutOfStockExcel = async () => {
   setShowAdmin(false);
   fetchMenu();
   fetchWingSauces();
+  fetchRoomServiceStatus();
 }, []);
 
   useEffect(() => {
@@ -684,6 +720,11 @@ const downloadOutOfStockExcel = async () => {
   };
 
   const addToCart = (item) => {
+  if (!roomServiceLive) {
+    showToast('Room service hours have ended for the night.');
+    return;
+  }
+
   if (item.available === false) return;
 
   if (item.name === 'Classic Burger' ||
@@ -1283,6 +1324,34 @@ const addWingsToCart = () => {
           </div>
 
           <div className="gold-line"></div>
+
+          <div className="room-service-control">
+            <div
+            className={`room-service-status ${
+              roomServiceLive ? 'service-live' : 'service-stopped'
+            }`}
+            >
+              {roomServiceLive
+              ? '✅ Room service is live'
+              : '❌ Room service stopped'}
+              </div>
+              <div className="room-service-buttons">
+                <button
+                className="save-btn"
+                type="button"
+                onClick={() => updateRoomServiceStatus(true)}
+                >
+                  START ROOM SERVICE
+                  </button>
+                  <button
+                  className="back-btn"
+                  type="button"
+                  onClick={() => updateRoomServiceStatus(false)}
+                  >
+                    STOP ROOM SERVICE
+                    </button>
+                    </div>
+                    </div>
 
           <div className="admin-nav">
             <button

@@ -1395,3 +1395,38 @@ td {
   font-size: 14px;
   margin: 10px 0 15px;
 }
+
+.room-service-control {
+  background: #fffdf8;
+  border: 1px solid #d8cab8;
+  padding: 20px;
+  margin-bottom: 24px;
+  border-radius: 10px;
+}
+
+.room-service-status {
+  font-size: 20px;
+  font-weight: 900;
+  padding: 14px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.service-live {
+  background: #e9f8ee;
+  color: #0f7a36;
+  border: 1px solid #8fd19e;
+}
+
+.service-stopped {
+  background: #fff0f0;
+  color: #b00020;
+  border: 1px solid #f0b5b5;
+}
+
+.room-service-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
