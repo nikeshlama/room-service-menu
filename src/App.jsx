@@ -1323,10 +1323,41 @@ const sauceData = await sauceRes.json();
 if (sauceData.success) {
   setWingSauces(sauceData.sauces);
 
-  const removedUnavailableSauces =
-    removeUnavailableSaucesFromCart(sauceData.sauces);
+  const unavailableSauces = sauceData.sauces
+    .filter((sauce) => sauce.available === false)
+    .map((sauce) => sauce.name);
 
-  if (removedUnavailableSauces) {
+  const cartHasUnavailableSauce = cart.some(
+    (item) =>
+      item.sauce &&
+      unavailableSauces.includes(item.sauce)
+  );
+
+  if (cartHasUnavailableSauce) {
+    const removedSauces = [];
+
+    setCart((currentCart) =>
+      currentCart.map((item) => {
+        if (
+          item.sauce &&
+          unavailableSauces.includes(item.sauce)
+        ) {
+          removedSauces.push(item.sauce);
+
+          return {
+            ...item,
+            sauce: ''
+          };
+        }
+
+        return item;
+      })
+    );
+
+    setCheckoutError(
+      'One or more wing sauces are now out of stock and have been removed from your cart. Please use Edit Sauce and choose another sauce.'
+    );
+
     return;
   }
 }
@@ -3295,7 +3326,7 @@ return (
       editWingSauce(item.cartKey || item._id)
     }
   >
-    Edit Sauce
+    Edit
   </button>
 )}
 
