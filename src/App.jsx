@@ -114,6 +114,9 @@ function App() {
 
   const [toastMessage, setToastMessage] = useState('');
 
+  const [checkoutError, setCheckoutError] = useState('');
+  const [sauceError, setSauceError] = useState('');
+
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
   const ordersLoadedRef = useRef(false);
@@ -700,6 +703,7 @@ const downloadOutOfStockExcel = async () => {
     setSelectedMenuItem(item);
     setSelectedSauce('');
     setSecondPound(false);
+    setSauceError('');
     setShowWingSauceModal(true);
     return;
   }
@@ -974,9 +978,9 @@ const addBurgerToCart = (finalSide, finalUpgrade = '', finalDressing = '') => {
 
 const addWingsToCart = () => {
   if (!selectedMenuItem || !selectedSauce) {
-    alert('Please choose one sauce.');
-    return;
-  }
+  setSauceError('Please choose one sauce.');
+  return;
+}
 
   const item = selectedMenuItem;
   const extraPrice = secondPound ? 10 : 0;
@@ -1033,8 +1037,10 @@ const addWingsToCart = () => {
   const placeOrder = async (e) => {
     e.preventDefault();
 
+    setCheckoutError('');
+
     if (wordCount > 50) {
-      alert('Message must be 50 words or less.');
+      setCheckoutError('Message must be 50 words or less.');
       return;
     }
 
@@ -1072,12 +1078,12 @@ const addWingsToCart = () => {
     const data = await res.json();
 
     if (!res.ok || !data.success) {
-      alert(
-        data.message ||
-          'Guest name and room number do not match our check-in records. Please enter the correct room number and the exact name used during hotel check-in.'
-      );
-      return;
-    }
+  setCheckoutError(
+    data.message ||
+      'Guest name and room number do not match our check-in records. Please enter the correct room number and exact check-in name.'
+  );
+  return;
+}
 
     setReceiptData({
       orderNumber: data.order.orderNumber,
@@ -1872,12 +1878,17 @@ const addWingsToCart = () => {
           <div className="gold-line"></div>
 
           <form className="checkout-form" onSubmit={placeOrder}>
+            {checkoutError && (
+  <p className="field-error">
+    {checkoutError}
+  </p>
+)}
             <div className="form-group">
               <label>FULL NAME *</label>
               <input
                 type="text"
                 value={guestName}
-                onChange={(e) => setGuestName(e.target.value)}
+                onChange={(e) => {setGuestName(e.target.value);setCheckoutError('');}}
                 placeholder="Please enter your full name"
                 required
               />
@@ -1888,7 +1899,7 @@ const addWingsToCart = () => {
               <input
                 type="text"
                 value={roomNumber}
-                onChange={(e) => setRoomNumber(e.target.value)}
+                onChange={(e) => {setRoomNumber(e.target.value);setCheckoutError('');}}
                 placeholder="Please enter your room number"
                 required
               />
@@ -2036,6 +2047,11 @@ return (
       <h2>{selectedMenuItem.name}</h2>
 
       <p>Choose one sauce</p>
+      {sauceError && (
+  <p className="field-error">
+    {sauceError}
+  </p>
+)}
 
       {wingSauces
         .filter((sauce) => sauce.available)
@@ -2045,7 +2061,10 @@ return (
               type="radio"
               name="wingSauce"
               checked={selectedSauce === sauce.name}
-              onChange={() => setSelectedSauce(sauce.name)}
+              onChange={() => {
+                setSelectedSauce(sauce.name);
+                setSauceError('');
+                }}
             />
             {sauce.name}
           </label>
@@ -2056,7 +2075,7 @@ return (
         type="button"
         onClick={() => {
           if (!selectedSauce) {
-            alert('Please choose one sauce.');
+            setSauceError('Please choose one sauce.');
             return;
           }
 
