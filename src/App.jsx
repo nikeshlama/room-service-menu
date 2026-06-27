@@ -731,7 +731,7 @@ if (
       }
     ];
   });
-  showToast(`${item.name} has been added to cart`);
+  showToast(`${item.name} added to cart`);
 };
 
 const addSandwichToCart = (
@@ -763,7 +763,7 @@ const addSandwichToCart = (
   };
 
   setCart((currentCart) => [...currentCart, cartItem]);
-  showToast(`${cartItem.name} has been added to cart`);
+  showToast(`${cartItem.name} added to cart`);
 
   setShowSandwichSideModal(false);
   setShowFriesUpgradeModal(false);
@@ -792,7 +792,7 @@ const addSaladToCart = (finalDressing) => {
   };
 
   setCart((currentCart) => [...currentCart, cartItem]);
-  showToast(`${cartItem.name} has been added to cart`);
+  showToast(`${cartItem.name} added to cart`);
 
   setShowSaladDressingModal(false);
   setSelectedMenuItem(null);
@@ -816,7 +816,7 @@ const addCaesarSaladToCart = (protein = '', extraPrice = 0) => {
   };
 
   setCart((currentCart) => [...currentCart, cartItem]);
-  showToast(`${cartItem.name} has been added to cart`);
+  showToast(`${cartItem.name} added to cart`);
 
   setShowCaesarProteinModal(false);
   setSelectedMenuItem(null);
@@ -846,7 +846,7 @@ const addPoutineToCart = () => {
   };
 
   setCart((currentCart) => [...currentCart, cartItem]);
-  showToast(`${cartItem.name} has been added to cart`);
+  showToast(`${cartItem.name} added to cart`);
   setShowOptionModal(false);
   setSelectedMenuItem(null);
   setGlutenFree(false);
@@ -866,7 +866,7 @@ const addFettuccineToCart = (addShrimp = false) => {
   };
 
   setCart((currentCart) => [...currentCart, cartItem]);
-  showToast(`${cartItem.name} has been added to cart`);
+  showToast(`${cartItem.name} added to cart`);
   setShowFettuccineShrimpModal(false);
   setSelectedMenuItem(null);
   setGlutenFree(false);
@@ -886,7 +886,7 @@ const addSteakToCart = (doneness) => {
   };
 
   setCart((currentCart) => [...currentCart, cartItem]);
-  showToast(`${cartItem.name} has been added to cart`);
+  showToast(`${cartItem.name} added to cart`);
   setShowSteakDonenessModal(false);
   setSelectedMenuItem(null);
 };
@@ -920,7 +920,7 @@ const addBurgerToCart = (finalSide, finalUpgrade = '', finalDressing = '') => {
   };
 
   setCart((currentCart) => [...currentCart, cartItem]);
-  showToast(`${cartItem.name} has been added to cart`);
+  showToast(`${cartItem.name} added to cart`);
   setShowBurgerCheeseModal(false);
   setShowBurgerToppingsModal(false);
   setShowSandwichSideModal(false);
@@ -954,7 +954,7 @@ const addWingsToCart = () => {
   };
 
   setCart((currentCart) => [...currentCart, cartItem]);
-  showToast(`${cartItem.name} has been added to cart`);
+  showToast(`${cartItem.name} added to cart`);
   setShowSecondPoundModal(false);
   setSelectedMenuItem(null);
   setSelectedSauce('');

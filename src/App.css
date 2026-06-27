@@ -1374,19 +1374,20 @@ td {
 }
 
 .toast {
-  position: fixed;
-  bottom: 25px;
-  left: 50%;
-  transform: translateX(-50%);
+  position: sticky;
+  top: 70px;
+
+  margin: 0 auto 10px auto;
+  width: fit-content;
 
   background: #28a745;
   color: white;
 
-  padding: 12px 20px;
-  border-radius: 8px;
+  padding: 8px 16px;
+  border-radius: 20px;
 
+  font-size: 14px;
   font-weight: 600;
-  z-index: 9999;
 
-  box-shadow: 0 4px 12px rgba(0,0,0,.2);
+  z-index: 100;
 }
