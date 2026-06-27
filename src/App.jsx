@@ -2685,13 +2685,7 @@ return (
           )}
         </div>
       )}
-    </div>
-  </div>
-)}
-
-<div className="guest-layout">
-  <div className="menu-grid"></div>
-
+      
       <div className="guest-layout">
         <div className="menu-grid">
           {visibleItems.length === 0 && (
