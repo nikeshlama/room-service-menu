@@ -2964,7 +2964,7 @@ return (
     className="save-btn"
     type="button"
     onClick={() => {
-      if (selectedMenuItem.name === 'Pesto House Salad') {
+      if (selectedMenuItem.name === "Pesto's House Salad") {
         setDressing(option);
         setShowSaladDressingModal(false);
         setShowCaesarProteinModal(true);
@@ -3023,7 +3023,9 @@ return (
   <div className="modal-overlay">
     <div className="option-modal">
       <h2>{selectedMenuItem.name}</h2>
-      <p>Add protein?</p>
+      <p>
+  Would you like to add a protein to your {selectedMenuItem.name}?
+</p>
 
       {isAddonAvailable('Seasoned Chicken Breast') && (
   <button
