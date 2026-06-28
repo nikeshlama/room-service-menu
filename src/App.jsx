@@ -2385,16 +2385,23 @@ if (wingsWithoutSauce) {
   className="save-btn"
   type="button"
   onClick={() => {
-    if (!selectedSauce) {
-      setSauceError('Please choose one sauce.');
-      return;
-    }
+  if (!selectedSauce) {
+    setSauceError('Please choose one sauce.');
+    return;
+  }
 
+  // Editing an existing wings order
+  if (selectedMenuItem.editingCartKey) {
     addWingsToCart();
-
     setShowWingSauceModal(false);
     setShowSecondPoundModal(false);
-  }}
+    return;
+  }
+
+  // Adding a brand-new wings order
+  setShowWingSauceModal(false);
+  setShowSecondPoundModal(true);
+}}
 >
   UPDATE SAUCE
 </button>
@@ -2626,14 +2633,23 @@ return (
         className="save-btn"
         type="button"
         onClick={() => {
-          if (!selectedSauce) {
-            setSauceError('Please choose one sauce.');
-            return;
-          }
+  if (!selectedSauce) {
+    setSauceError('Please choose one sauce.');
+    return;
+  }
 
-          setShowWingSauceModal(false);
-          setShowSecondPoundModal(true);
-        }}
+  // Editing an existing wings order
+  if (selectedMenuItem.editingCartKey) {
+    addWingsToCart();
+    setShowWingSauceModal(false);
+    setShowSecondPoundModal(false);
+    return;
+  }
+
+  // Adding a brand-new wings order
+  setShowWingSauceModal(false);
+  setShowSecondPoundModal(true);
+}}
       >
         NEXT
       </button>
