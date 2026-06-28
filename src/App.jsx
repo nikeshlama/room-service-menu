@@ -2797,60 +2797,6 @@ if (wingsWithoutSauce) {
   {item.quantity} × ${item.price.toFixed(2)}
 </p>
 
-<div className="cart-controls">
-  <button
-    onClick={() =>
-      decreaseQuantity(item.cartKey || item._id)
-    }
-  >
-    −
-  </button>
-
-  <span>{item.quantity}</span>
-
-  <button
-    onClick={() =>
-      increaseQuantity(item.cartKey || item._id)
-    }
-  >
-    +
-  </button>
-
-  {item.sauce && (
-    <button
-      className="edit-cart-btn"
-      type="button"
-      onClick={() =>
-        editWingSauce(item.cartKey || item._id)
-      }
-    >
-      Edit
-    </button>
-  )}
-
-  <button
-  className="remove-cart-btn"
-  type="button"
-  onClick={() => {
-    const remainingItems = cart.filter(
-      (cartItem) =>
-        (cartItem.cartKey || cartItem._id) !==
-        (item.cartKey || item._id)
-    );
-
-    removeFromCart(item.cartKey || item._id);
-
-    if (remainingItems.length === 0) {
-      setShowCheckout(false);
-      setCartOpen(false);
-      showToast('Your cart is empty. Please add an item before checkout.');
-    }
-  }}
->
-  ×
-</button>
-</div>
-
 </div>
 
 <span>
