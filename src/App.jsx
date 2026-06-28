@@ -1430,16 +1430,37 @@ const removeUnavailableSaucesFromCart = (latestSauces) => {
   return false;
 };
 
-  const placeOrder = async (e) => {
-    e.preventDefault();
+const placeOrder = async (e) => {
+  e.preventDefault();
 
-    setCheckoutError('');
+  setCheckoutError('');
 
-  const statusRes = await fetch(ROOM_SERVICE_STATUS_URL);
-  const statusData = await statusRes.json();
-  if (!statusData.isLive) {
+  if (cart.length === 0) {
+    setShowCheckout(false);
+    setCartOpen(false);
+
+    showToast(
+      'Your cart is empty. Please add an item before checkout.'
+    );
+
+    return;
+  }
+
+  try {
+    const statusRes = await fetch(ROOM_SERVICE_STATUS_URL);
+    const statusData = await statusRes.json();
+
+    if (!statusData.isLive) {
+      setCheckoutError(
+        'Room service hours have ended for the night.'
+      );
+      return;
+    }
+
+  } catch (err) {
+  console.error(err);
   setCheckoutError(
-    'Room service hours have ended for the night.'
+    'Something went wrong. Please try again.'
   );
   return;
 }
@@ -1521,8 +1542,8 @@ if (sauceData.success) {
     );
 
     setCheckoutError(
-      'One or more wing sauces are now out of stock and have been removed from your cart. Please use Edit Sauce and choose another sauce.'
-    );
+  `${[...new Set(removedSauces)].join(', ')} are now out of stock and have been removed from your cart. Please use Edit Sauce to choose another sauce.`
+);
 
     return;
   }
@@ -2808,13 +2829,26 @@ if (wingsWithoutSauce) {
   )}
 
   <button
-    className="remove-cart-btn"
-    onClick={() =>
-      removeFromCart(item.cartKey || item._id)
+  className="remove-cart-btn"
+  type="button"
+  onClick={() => {
+    const remainingItems = cart.filter(
+      (cartItem) =>
+        (cartItem.cartKey || cartItem._id) !==
+        (item.cartKey || item._id)
+    );
+
+    removeFromCart(item.cartKey || item._id);
+
+    if (remainingItems.length === 0) {
+      setShowCheckout(false);
+      setCartOpen(false);
+      showToast('Your cart is empty. Please add an item before checkout.');
     }
-  >
-    ×
-  </button>
+  }}
+>
+  ×
+</button>
 </div>
 
 </div>
@@ -3572,8 +3606,12 @@ return (
                     {Array.isArray(item.tags) && item.tags.length > 0 && (
                       <p className="tags compact-tags">
                         {item.tags.join(', ')}
-                      </p>
-                    )}
+                        {!isGlutenOptionAvailable(item.name) && (
+                          <span className="gluten-out-tag">
+                            {' '}• Gluten option out of stock
+                            </span>
+                          )}
+                          </p>)}
 
                     {item.description && (
                       <button
