@@ -978,20 +978,22 @@ const addCaesarSaladToCart = (protein = '', extraPrice = 0) => {
   const item = selectedMenuItem;
 
   const cartItem = {
-    _id: item._id,
-    cartKey: `${item._id}-caesar-${protein || 'none'}-${Date.now()}`,
-    menuItemId: item._id,
-    name: item.name,
-    price: Number(item.price) + extraPrice,
-    quantity: 1,
-    saladProtein: protein
-  };
+  _id: item._id,
+  cartKey: `${item._id}-${dressing}-${protein || 'none'}-${Date.now()}`,
+  menuItemId: item._id,
+  name: item.name,
+  price: Number(item.price) + extraPrice,
+  quantity: 1,
+  dressing,
+  saladProtein: protein
+};
 
   setCart((currentCart) => [...currentCart, cartItem]);
   showToast(`${cartItem.name} added to cart`);
 
   setShowCaesarProteinModal(false);
   setSelectedMenuItem(null);
+  setDressing('');
 };
 
 const addPoutineToCart = () => {
@@ -2957,16 +2959,23 @@ return (
       <p>Choose one dressing</p>
 
       {['Balsamic', 'Ranch', 'Italian', 'French'].map((option) => (
-        <button
-          key={option}
-          className="save-btn"
-          type="button"
-          onClick={() => addSaladToCart(option)}
-        >
-          {option}
-        </button>
-      ))}
-
+  <button
+    key={option}
+    className="save-btn"
+    type="button"
+    onClick={() => {
+      if (selectedMenuItem.name === 'Pesto House Salad') {
+        setDressing(option);
+        setShowSaladDressingModal(false);
+        setShowCaesarProteinModal(true);
+      } else {
+        addSaladToCart(option);
+      }
+    }}
+  >
+    {option}
+  </button>
+))}
       <button
         className="back-btn"
         type="button"
