@@ -1125,7 +1125,9 @@ const addWingsToCart = () => {
   menuItemId: item._id,
   sauce: selectedSauce,
   secondPound,
-  price: Number(item.price) + extraPrice,
+  price: selectedMenuItem.editingCartKey
+  ? Number(selectedMenuItem.price)
+  : Number(item.price) + extraPrice,
   quantity: selectedMenuItem.quantity || 1
 };
 
