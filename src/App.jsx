@@ -123,6 +123,9 @@ function App() {
 
   const [addons, setAddons] = useState([]);
 
+  const [showKidsSpaghettiModal, setShowKidsSpaghettiModal] = useState(false);
+  const [kidsSpaghettiOption, setKidsSpaghettiOption] = useState('');
+
 
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
@@ -837,6 +840,13 @@ const toggleSauceAvailability = async (sauce) => {
     return;
   }
 
+  if (item.name === 'Kids Spaghetti & Meatball') {
+  setSelectedMenuItem(item);
+  setKidsSpaghettiOption('');
+  setShowKidsSpaghettiModal(true);
+  return;
+}
+
   if (item.category === 'Sandwiches') {
   setSelectedMenuItem(item);
   setSelectedSide('');
@@ -1044,6 +1054,29 @@ const addFettuccineToCart = (addShrimp = false) => {
   setShowFettuccineShrimpModal(false);
   setSelectedMenuItem(null);
   setGlutenFree(false);
+};
+
+const addKidsSpaghettiToCart = (option) => {
+  if (!selectedMenuItem || !option) return;
+
+  const item = selectedMenuItem;
+
+  const cartItem = {
+    _id: item._id,
+    cartKey: `${item._id}-${option}-${Date.now()}`,
+    menuItemId: item._id,
+    name: item.name,
+    price: Number(item.price),
+    quantity: 1,
+    kidsSpaghettiOption: option
+  };
+
+  setCart((currentCart) => [...currentCart, cartItem]);
+  showToast(`${item.name} added to cart`);
+
+  setShowKidsSpaghettiModal(false);
+  setSelectedMenuItem(null);
+  setKidsSpaghettiOption('');
 };
 
 const addSteakToCart = (doneness) => {
@@ -1440,6 +1473,7 @@ if (wingsWithoutSauce) {
         dressing: item.dressing || '',
         saladProtein: item.saladProtein || '',
         doneness: item.doneness || '',
+        kidsSpaghettiOption: item.kidsSpaghettiOption || '',
         burgerCheese: item.burgerCheese || false,
         burgerToppings: item.burgerToppings || ''})),
         subtotal,
@@ -1580,6 +1614,12 @@ if (wingsWithoutSauce) {
   <div className="option-text">
     Steak: {item.doneness}
   </div>
+)}
+
+{item.kidsSpaghettiOption && (
+  <p className="option-text">
+    {item.kidsSpaghettiOption}
+  </p>
 )}
 
 {item.burgerCheese && (
@@ -2185,6 +2225,12 @@ if (wingsWithoutSauce) {
   </p>
 )}
 
+{item.kidsSpaghettiOption && (
+  <p className="option-text">
+    {item.kidsSpaghettiOption}
+  </p>
+)}
+
 {item.doneness && (
   <p className="option-text">
     Steak: {item.doneness}
@@ -2559,6 +2605,12 @@ if (wingsWithoutSauce) {
   </p>
 )}
 
+{item.kidsSpaghettiOption && (
+  <p className="option-text">
+    {item.kidsSpaghettiOption}
+  </p>
+)}
+
 {item.burgerCheese && (
   <p className="option-text checkout-option">
     Add Cheese
@@ -2702,6 +2754,48 @@ return (
           setSelectedMenuItem(null);
           setSelectedSauce('');
           setSecondPound(false);
+        }}
+      >
+        CANCEL
+      </button>
+    </div>
+  </div>
+)}
+
+{showKidsSpaghettiModal && selectedMenuItem && (
+  <div className="modal-overlay">
+    <div className="option-modal">
+      <h2>{selectedMenuItem.name}</h2>
+
+      <p>Choose pasta option</p>
+
+      <button
+        className="save-btn"
+        type="button"
+        onClick={() => addKidsSpaghettiToCart('Regular')}
+      >
+        Regular
+      </button>
+
+      <button
+        className="save-btn"
+        type="button"
+        onClick={() =>
+          addKidsSpaghettiToCart(
+            'No sauce on pasta - Garlic butter on pasta'
+          )
+        }
+      >
+        No sauce on pasta & add garlic butter on pasta
+      </button>
+
+      <button
+        className="back-btn"
+        type="button"
+        onClick={() => {
+          setShowKidsSpaghettiModal(false);
+          setSelectedMenuItem(null);
+          setKidsSpaghettiOption('');
         }}
       >
         CANCEL
@@ -3423,6 +3517,12 @@ return (
 {item.doneness && (
   <p className="option-text checkout-option">
     Steak: {item.doneness}
+  </p>
+)}
+
+{item.kidsSpaghettiOption && (
+  <p className="option-text checkout-option">
+    {item.kidsSpaghettiOption}
   </p>
 )}
 
