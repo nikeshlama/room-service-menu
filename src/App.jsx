@@ -16,6 +16,7 @@ const OUT_OF_STOCK_URL ='https://pestos-backend.onrender.com/api/out-of-stock';
 const WING_SAUCES_URL = 'https://pestos-backend.onrender.com/api/wing-sauces';
 const ROOM_SERVICE_STATUS_URL ='https://pestos-backend.onrender.com/api/room-service-status';
 const ADDONS_URL = 'https://pestos-backend.onrender.com/api/addons';
+const GLUTEN_OPTIONS_URL ='https://pestos-backend.onrender.com/api/gluten-options';
 
 const menuImages = {
   'Arranchini ': 'menu-images/aranchini.png',
@@ -126,6 +127,8 @@ function App() {
   const [showKidsSpaghettiModal, setShowKidsSpaghettiModal] = useState(false);
   const [kidsSpaghettiOption, setKidsSpaghettiOption] = useState('');
 
+  const [glutenOptions, setGlutenOptions] = useState([]);
+
 
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
@@ -166,6 +169,14 @@ function App() {
   const isAddonAvailable = (addonName) => {
   const addon = addons.find((item) => item.name === addonName);
   return addon ? addon.available !== false : true;
+};
+
+const isGlutenOptionAvailable = (itemName) => {
+  const option = glutenOptions.find(
+    (item) => item.itemName === itemName
+  );
+
+  return option ? option.available !== false : true;
 };
 
   const getMenuImage = (itemName) => {
@@ -351,6 +362,19 @@ const updateRoomServiceStatus = async (isLive) => {
     }
   } catch (err) {
     console.error('GET ADDONS ERROR:', err);
+  }
+};
+
+const fetchGlutenOptions = async () => {
+  try {
+    const res = await fetch(GLUTEN_OPTIONS_URL);
+    const data = await res.json();
+
+    if (data.success) {
+      setGlutenOptions(data.options);
+    }
+  } catch (err) {
+    console.error('GET GLUTEN OPTIONS ERROR:', err);
   }
 };
 
@@ -601,12 +625,21 @@ const downloadOutOfStockExcel = async () => {
   fetchMenu();
   fetchWingSauces();
   fetchAddons();
+  fetchGlutenOptions();
   fetchRoomServiceStatus();
 }, []);
 
 useEffect(() => {
   const interval = setInterval(() => {
     fetchAddons();
+  }, 2000);
+
+  return () => clearInterval(interval);
+}, []);
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    fetchGlutenOptions();
   }, 2000);
 
   return () => clearInterval(interval);
@@ -764,6 +797,29 @@ useEffect(() => {
   }
 };
 
+const toggleGlutenOptionAvailability = async (option) => {
+  try {
+    const res = await fetch(`${GLUTEN_OPTIONS_URL}/${option._id}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify({
+        available: option.available === false ? true : false
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      alert(data.message || 'Failed to update gluten option');
+      return;
+    }
+
+    fetchGlutenOptions();
+  } catch (err) {
+    console.error('UPDATE GLUTEN OPTION ERROR:', err);
+  }
+};
+
 const toggleSauceAvailability = async (sauce) => {
   try {
     const res = await fetch(`${WING_SAUCES_URL}/${sauce._id}`, {
@@ -876,13 +932,27 @@ if (
 }
 
 if (
-  item.name === 'Poutine Platter' ||
   item.name === 'Spinach & Artichoke Dip' ||
   item.name === 'Paperdelle Primavera con aglio e olio' ||
-  item.name === 'Chicken & Sherry Cream Fettuccine' ||
+  item.name === 'Chicken & Sherry Cream Fettuccine'
+) {
+  setSelectedMenuItem(item);
+  setGlutenFree(false);
+
+  if (isGlutenOptionAvailable(item.name)) {
+    setShowOptionModal(true);
+    return;
+  }
+
+  addPoutineToCart();
+  return;
+}
+
+if (
+  item.name === 'Poutine Platter' ||
   item.name === 'Signature Porchetta' ||
   item.name === 'Chicken Marsala' ||
-  item.name === 'Beef Tagliata di Manzo' 
+  item.name === 'Beef Tagliata di Manzo'
 ) {
   setSelectedMenuItem(item);
   setGlutenFree(false);
@@ -1388,6 +1458,31 @@ if (addonData.success) {
   }
 }
 
+const glutenRes = await fetch(GLUTEN_OPTIONS_URL);
+const glutenData = await glutenRes.json();
+
+if (glutenData.success) {
+  setGlutenOptions(glutenData.options);
+
+  const unavailableGlutenItems = glutenData.options
+    .filter((option) => option.available === false)
+    .map((option) => option.itemName);
+
+  const cartHasUnavailableGlutenOption = cart.find(
+    (item) =>
+      item.glutenFree &&
+      unavailableGlutenItems.includes(item.name)
+  );
+
+  if (cartHasUnavailableGlutenOption) {
+    setCheckoutError(
+      `Sorry, gluten option for ${cartHasUnavailableGlutenOption.name} got out of stock, please order another item.`
+    );
+
+    return;
+  }
+}
+
 const sauceRes = await fetch(WING_SAUCES_URL);
 const sauceData = await sauceRes.json();
 
@@ -1805,6 +1900,18 @@ if (wingsWithoutSauce) {
   Sauce Inventory
 </button>
 
+<button
+  className={`admin-nav-btn ${
+    adminPage === 'gluten' ? 'active-admin' : ''
+  }`}
+  onClick={() => {
+    setAdminPage('gluten');
+    fetchGlutenOptions();
+  }}
+>
+  Gluten Inventory
+</button>
+
           </div>
 
           {adminPage === 'kitchen' && (
@@ -1930,6 +2037,48 @@ if (wingsWithoutSauce) {
                   onClick={() => toggleAddonAvailability(addon)}
                 >
                   {addon.available !== false
+                    ? 'In Stock'
+                    : 'Out of Stock'}
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </>
+)}
+
+{adminPage === 'gluten' && (
+  <>
+    <h2 className="section-title">Gluten Inventory</h2>
+
+    <div className="table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>Menu Item</th>
+            <th>Gluten Option Status</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {glutenOptions.map((option) => (
+            <tr key={option._id}>
+              <td>{option.itemName}</td>
+
+              <td>
+                <button
+                  className={
+                    option.available !== false
+                      ? 'stock-btn in-stock'
+                      : 'stock-btn out-stock'
+                  }
+                  onClick={() =>
+                    toggleGlutenOptionAvailability(option)
+                  }
+                >
+                  {option.available !== false
                     ? 'In Stock'
                     : 'Out of Stock'}
                 </button>
