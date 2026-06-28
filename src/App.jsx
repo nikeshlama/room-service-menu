@@ -3550,14 +3550,29 @@ return (
                     </div>
 
                     {Array.isArray(item.tags) && item.tags.length > 0 && (
-                      <p className="tags compact-tags">
-                        {item.tags.join(', ')}
-                        {!isGlutenOptionAvailable(item.name) && (
-                          <span className="gluten-out-tag">
-                            {' '}• Gluten option out of stock
-                            </span>
-                          )}
-                          </p>)}
+  <p className="tags compact-tags">
+    {item.tags
+      .filter((tag) => {
+        const lowerTag = tag.toLowerCase();
+
+        if (
+          !isGlutenOptionAvailable(item.name) &&
+          lowerTag.includes('gluten')
+        ) {
+          return false;
+        }
+
+        return true;
+      })
+      .join(', ')}
+
+    {!isGlutenOptionAvailable(item.name) && (
+      <span className="gluten-out-tag">
+        {' '}• Gluten option out of stock
+      </span>
+    )}
+  </p>
+)}
 
                     {item.description && (
                       <button
