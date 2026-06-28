@@ -2775,11 +2775,54 @@ if (wingsWithoutSauce) {
 <p>
   {item.quantity} × ${item.price.toFixed(2)}
 </p>
-        </div>
 
-        <span>
-          ${(item.price * item.quantity).toFixed(2)}
-        </span>
+<div className="cart-controls">
+  <button
+    onClick={() =>
+      decreaseQuantity(item.cartKey || item._id)
+    }
+  >
+    −
+  </button>
+
+  <span>{item.quantity}</span>
+
+  <button
+    onClick={() =>
+      increaseQuantity(item.cartKey || item._id)
+    }
+  >
+    +
+  </button>
+
+  {item.sauce && (
+    <button
+      className="edit-cart-btn"
+      type="button"
+      onClick={() =>
+        editWingSauce(item.cartKey || item._id)
+      }
+    >
+      Edit
+    </button>
+  )}
+
+  <button
+    className="remove-cart-btn"
+    onClick={() =>
+      removeFromCart(item.cartKey || item._id)
+    }
+  >
+    ×
+  </button>
+</div>
+
+</div>
+
+<span>
+  ${(item.price * item.quantity).toFixed(2)}
+</span>
+
       </div>
     ))}
   </div>
