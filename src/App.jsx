@@ -1154,7 +1154,33 @@ const addWingsToCart = () => {
   setSecondPound(false);
 };
 
-  const increaseQuantity = (cartKey) => {
+const increaseQuantity = (cartKey) => {
+  const cartItem = cart.find(
+    (item) => (item.cartKey || item._id) === cartKey
+  );
+
+  if (!cartItem) return;
+
+  if (cartItem.name === 'Chicken Wings & Fries') {
+  const originalMenuItem = menuItems.find(
+    (item) => item._id === (cartItem.menuItemId || cartItem._id)
+  );
+
+  if (!originalMenuItem) return;
+
+  setSelectedMenuItem({
+    ...originalMenuItem
+  });
+
+  setSelectedSauce('');
+  setSecondPound(false);
+  setSauceError('');
+
+  setShowWingSauceModal(true);
+
+  return;
+}
+
   setCart((currentCart) =>
     currentCart.map((item) =>
       (item.cartKey || item._id) === cartKey
