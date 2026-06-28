@@ -1126,7 +1126,7 @@ const addWingsToCart = () => {
   sauce: selectedSauce,
   secondPound,
   price: selectedMenuItem.editingCartKey
-  ? Number(selectedMenuItem.price)
+  ? Number(selectedMenuItem.price) + (secondPound && !selectedMenuItem.secondPound ? 10 : 0)
   : Number(item.price) + extraPrice,
   quantity: selectedMenuItem.quantity || 1
 };
@@ -2409,7 +2409,7 @@ if (wingsWithoutSauce) {
           </label>
         ))}
 
-      <button
+<button
   className="save-btn"
   type="button"
   onClick={() => {
@@ -2420,11 +2420,17 @@ if (wingsWithoutSauce) {
 
   // Editing an existing wings order
   if (selectedMenuItem.editingCartKey) {
+  if (selectedMenuItem.secondPound) {
     addWingsToCart();
     setShowWingSauceModal(false);
     setShowSecondPoundModal(false);
     return;
   }
+
+  setShowWingSauceModal(false);
+  setShowSecondPoundModal(true);
+  return;
+}
 
   // Adding a brand-new wings order
   setShowWingSauceModal(false);
@@ -2666,15 +2672,19 @@ return (
     return;
   }
 
-  // Editing an existing wings order
   if (selectedMenuItem.editingCartKey) {
-    addWingsToCart();
+    if (selectedMenuItem.secondPound) {
+      addWingsToCart();
+      setShowWingSauceModal(false);
+      setShowSecondPoundModal(false);
+      return;
+    }
+
     setShowWingSauceModal(false);
-    setShowSecondPoundModal(false);
+    setShowSecondPoundModal(true);
     return;
   }
 
-  // Adding a brand-new wings order
   setShowWingSauceModal(false);
   setShowSecondPoundModal(true);
 }}
