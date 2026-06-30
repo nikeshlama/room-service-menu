@@ -2508,6 +2508,7 @@ if (wingsWithoutSauce) {
     </span>
   </div>
 
+  <div className="print-section">
   <button
     className="save-btn"
     type="button"
@@ -2515,6 +2516,16 @@ if (wingsWithoutSauce) {
   >
     PRINT
   </button>
+
+  {order.printed && (
+    <div className="printed-status">
+  {order.printed
+    ? '🟢 Printed'
+    : '🟠 Waiting for Printer'}
+</div>
+  )}
+</div>
+
 </div>
 
                     <div className="order-info">

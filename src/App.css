@@ -1511,3 +1511,23 @@ td {
     margin: 0 auto;
   }
 }
+
+.print-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.printed-status {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.printed-status.printed {
+  color: #2e7d32;
+}
+
+.printed-status.waiting {
+  color: #ef6c00;
+}
