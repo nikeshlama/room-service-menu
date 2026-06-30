@@ -140,6 +140,10 @@ function App() {
   const [newGuestRoom, setNewGuestRoom] = useState('');
   const [newGuestName, setNewGuestName] = useState('');
 
+  const [inventorySearch, setInventorySearch] = useState('');
+
+  const [orderSearch, setOrderSearch] = useState('');
+
 
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
@@ -508,6 +512,30 @@ const fetchGlutenOptions = async () => {
       console.error('GET GUESTS ERROR:', err);
     }
   };
+
+  const filteredInventoryItems = menuItems.filter((item) => {
+  const search = inventorySearch.toLowerCase().trim();
+
+  if (!search) return true;
+
+  return (
+    String(item.name).toLowerCase().includes(search) ||
+    String(item.category).toLowerCase().includes(search) ||
+    String(item.price).includes(search)
+  );
+});
+
+const filteredOrders = orders.filter((order) => {
+  const search = orderSearch.toLowerCase().trim();
+
+  if (!search) return true;
+
+  return (
+    String(order.roomNumber).toLowerCase().includes(search) ||
+    String(order.guestName).toLowerCase().includes(search) ||
+    String(order.orderNumber).includes(search)
+  );
+});
 
   const filteredGuests = guests.filter((guest) => {
   const search = guestSearch.toLowerCase().trim();
@@ -1701,6 +1729,29 @@ if (wingsWithoutSauce) {
     setShowCheckout(false);
   };
 
+  const printAdminReceipt = (order) => {
+  setReceiptData({
+    orderNumber: order.orderNumber,
+    guestName: order.guestName,
+    roomNumber: order.roomNumber,
+    items: order.items,
+    subtotal: Number(order.subtotal || 0),
+    gratuity: Number(order.gratuity || 0),
+    tax: Number(order.tax || 0),
+    total: Number(order.total || 0),
+    date: new Date(order.createdAt).toLocaleString([], {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    })
+  });
+
+  setShowReceipt(true);
+};
+
   const resetAfterReceipt = () => {
     setShowReceipt(false);
     setReceiptData(null);
@@ -2364,6 +2415,20 @@ if (wingsWithoutSauce) {
 
               <h2 className="section-title">Live Inventory Control List</h2>
 
+              <div className="form-card">
+  <h2>Search Inventory</h2>
+
+  <div className="form-group">
+    <label>SEARCH BY ITEM NAME, CATEGORY, OR PRICE</label>
+    <input
+      type="text"
+      value={inventorySearch}
+      onChange={(e) => setInventorySearch(e.target.value)}
+      placeholder="Example: coke, burger, pasta, 19.99"
+    />
+  </div>
+</div>
+
               <div className="table-box">
                 <table>
                   <thead>
@@ -2378,7 +2443,7 @@ if (wingsWithoutSauce) {
                   </thead>
 
                   <tbody>
-                    {menuItems.map((item) => (
+                    {filteredInventoryItems.map((item) => (
                       <tr key={item._id}>
                         <td>{item.name}</td>
                         <td>{item.category}</td>
@@ -2424,6 +2489,20 @@ if (wingsWithoutSauce) {
 
           {adminPage === 'orders' && (
             <>
+            <div className="form-card">
+  <h2>Search Orders</h2>
+
+  <div className="form-group">
+    <label>SEARCH BY ROOM, GUEST OR ORDER #</label>
+
+    <input
+      type="text"
+      value={orderSearch}
+      onChange={(e) => setOrderSearch(e.target.value)}
+      placeholder="Example: 204, John, 1052"
+    />
+  </div>
+</div>
               <h2 className="section-title">Guest Orders</h2>
 
               <button
@@ -2450,21 +2529,31 @@ if (wingsWithoutSauce) {
                   <p className="empty-cart">No orders placed yet.</p>
                 )}
 
-                {orders.map((order) => (
+                {filteredOrders.map((order) => (
                   <div className="order-card" key={order._id}>
                     <div className="order-header">
-                      <h3>Order #{order.orderNumber}</h3>
-                      <span>
-                       {new Date(order.createdAt).toLocaleString('en-CA', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        hour12: true
-                      })}
-                      </span>
-                    </div>
+  <div>
+    <h3>Order #{order.orderNumber}</h3>
+    <span>
+      {new Date(order.createdAt).toLocaleString('en-CA', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      })}
+    </span>
+  </div>
+
+  <button
+    className="save-btn"
+    type="button"
+    onClick={() => printAdminReceipt(order)}
+  >
+    PRINT
+  </button>
+</div>
 
                     <div className="order-info">
                       <p><strong>Guest:</strong> {order.guestName}</p>
