@@ -1729,27 +1729,25 @@ if (wingsWithoutSauce) {
     setShowCheckout(false);
   };
 
-  const printAdminReceipt = (order) => {
-  setReceiptData({
-    orderNumber: order.orderNumber,
-    guestName: order.guestName,
-    roomNumber: order.roomNumber,
-    items: order.items,
-    subtotal: Number(order.subtotal || 0),
-    gratuity: Number(order.gratuity || 0),
-    tax: Number(order.tax || 0),
-    total: Number(order.total || 0),
-    date: new Date(order.createdAt).toLocaleString([], {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    })
-  });
+  const printAdminReceipt = async (order) => {
+  try {
+    const res = await fetch(`${ORDERS_URL}/${order._id}/reprint`, {
+      method: 'PUT',
+      headers: getAuthHeaders()
+    });
 
-  setShowReceipt(true);
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      alert(data.message || 'Print failed');
+      return;
+    }
+
+    alert('Order sent to kitchen printer.');
+  } catch (err) {
+    console.error('PRINT ORDER ERROR:', err);
+    alert('Printer error. Please check printer service.');
+  }
 };
 
   const resetAfterReceipt = () => {
