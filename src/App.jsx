@@ -1625,7 +1625,13 @@ if (wingsWithoutSauce) {
       gratuity,
       tax,
       total,
-      date: new Date().toLocaleString()
+      date: new Date().toLocaleString([], {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
     });
 
     setShowReceipt(true);
