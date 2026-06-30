@@ -1484,3 +1484,30 @@ td {
 .sauce-required-btn:hover {
   background: #ffe1e1;
 }
+
+.receipt-letterhead {
+  text-align: center;
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 1.25;
+  margin-bottom: 18px;
+}
+
+.receipt-letterhead p {
+  margin: 2px 0;
+}
+
+@media print {
+  .receipt-page h1,
+  .receipt-page .subtitle,
+  .receipt-page .gold-line {
+    display: none !important;
+  }
+
+  .receipt-box {
+    font-family: monospace;
+    font-size: 13px;
+    width: 80mm;
+    margin: 0 auto;
+  }
+}

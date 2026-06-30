@@ -1665,24 +1665,27 @@ if (wingsWithoutSauce) {
     return (
       <div className="page">
         <div className="container receipt-page">
-          <h1>Pesto&apos;s Restaurant</h1>
-          <p className="subtitle">Room Service Receipt</p>
-
-          <div className="gold-line"></div>
-
           <div className="receipt-box">
-            <h2>Order #{receiptData.orderNumber}</h2>
+            <div className="receipt-letterhead">
+  <p><strong>Pesto's</strong></p>
+  <p>Italian Eatery & Saloon</p>
+  <p>85 ST ANNE ROAD</p>
+  <p>Sudbury, ON P3E-454</p>
+  <p>705-671-6662</p>
+  <p>GST# 887494516</p>
+</div>
 
-            <p><strong>Date:</strong> {receiptData.date}</p>
-            <p><strong>Guest:</strong> {receiptData.guestName}</p>
-            <p><strong>Room:</strong> {receiptData.roomNumber}</p>
+<hr />
 
-            {receiptData.message && (
-              <p><strong>Message:</strong> {receiptData.message}</p>
-            )}
+<p>Room {receiptData.roomNumber}</p>
+<p>Guest: {receiptData.guestName}</p>
 
-            <hr />
+<hr />
 
+<p>Check #{receiptData.orderNumber}</p>
+<p>{receiptData.date}</p>
+
+<hr />
             {receiptData.items.map((item) => (
               <div className="receipt-item" key={item._id}>
                 <div>
@@ -1784,8 +1787,10 @@ if (wingsWithoutSauce) {
             </div>
 
             <p className="receipt-footer">
-              Thank you for dining with us. Please keep this receipt for your reference.
-            </p>
+  THANK YOU FOR DINING WITH US
+  <br />
+  FOR QUESTIONS CALL 705-671-6662
+</p>
 
             <div className="receipt-buttons">
               <button className="save-btn" onClick={() => window.print()}>
