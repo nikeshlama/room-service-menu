@@ -31,7 +31,13 @@ const menuImages = {
   'Chicken & Sherry Cream Fettuccine': 'menu-images/shericreamfettuchini.png',
   'Spaghetti & Meatballs': 'menu-images/spanmeatballs.png',
   'Beef Tagliata Di Manzo': 'menu-images/steak.png',
-  'Chicken Wings & Fries': 'menu-images/wingsnfries.png'
+  'Chicken Wings & Fries': 'menu-images/wingsnfries.png',
+  //Beverages images
+  'Coke': 'menu-images/Coke.png',
+  'Diet Coke': 'menu-images/DietCoke.png',
+  'Sprite': 'menu-images/Sprite.png',
+  'Ginger Ale': 'menu-images/GingerAle.png',
+  'Fuze Iced Tea': 'menu-images/FuzeIcedTea.png',
 };
 
 function App() {
