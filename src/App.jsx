@@ -135,6 +135,11 @@ function App() {
 
   const [glutenOptions, setGlutenOptions] = useState([]);
 
+  const [guestSearch, setGuestSearch] = useState('');
+  const [showAddGuestModal, setShowAddGuestModal] = useState(false);
+  const [newGuestRoom, setNewGuestRoom] = useState('');
+  const [newGuestName, setNewGuestName] = useState('');
+
 
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
@@ -503,6 +508,63 @@ const fetchGlutenOptions = async () => {
       console.error('GET GUESTS ERROR:', err);
     }
   };
+
+  const filteredGuests = guests.filter((guest) => {
+  const search = guestSearch.toLowerCase().trim();
+
+  if (!search) return true;
+
+  return (
+    String(guest.roomNumber).toLowerCase().includes(search) ||
+    String(guest.guestName).toLowerCase().includes(search)
+  );
+});
+
+const addSingleGuest = async () => {
+  if (!newGuestRoom.trim() || !newGuestName.trim()) {
+    alert('Room number and guest name are required.');
+    return;
+  }
+
+  const res = await fetch(GUESTS_URL, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      roomNumber: newGuestRoom,
+      guestName: newGuestName
+    })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok || !data.success) {
+    alert(data.message || 'Failed to add guest');
+    return;
+  }
+
+  setNewGuestRoom('');
+  setNewGuestName('');
+  setShowAddGuestModal(false);
+  fetchGuests();
+};
+
+const deleteGuest = async (guestId) => {
+  if (!window.confirm('Remove this guest?')) return;
+
+  const res = await fetch(`${GUESTS_URL}/${guestId}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders()
+  });
+
+  const data = await res.json();
+
+  if (!res.ok || !data.success) {
+    alert(data.message || 'Failed to remove guest');
+    return;
+  }
+
+  fetchGuests();
+};
 
   const fetchOutOfStockItems = async () => {
     try {
@@ -1629,8 +1691,9 @@ if (wingsWithoutSauce) {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
       })
     });
 
@@ -1814,9 +1877,59 @@ if (wingsWithoutSauce) {
   }
 
   if (showAdmin) {
-    return (
-      <div className="page">
-        <div className="container">
+  return (
+    <div className="page">
+
+      {showAddGuestModal && (
+        <div className="modal-overlay">
+          <div className="option-modal">
+            <h2>Add Guest</h2>
+
+            <div className="form-group">
+              <label>ROOM NUMBER</label>
+              <input
+                type="text"
+                value={newGuestRoom}
+                onChange={(e) => setNewGuestRoom(e.target.value)}
+                placeholder="Example: 204"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>FULL NAME</label>
+              <input
+                type="text"
+                value={newGuestName}
+                onChange={(e) => setNewGuestName(e.target.value)}
+                placeholder="Example: John Smith"
+              />
+            </div>
+
+            <button
+              className="save-btn"
+              type="button"
+              onClick={addSingleGuest}
+            >
+              SAVE GUEST
+            </button>
+
+            <button
+              className="back-btn"
+              type="button"
+              onClick={() => {
+                setShowAddGuestModal(false);
+                setNewGuestRoom('');
+                setNewGuestName('');
+              }}
+            >
+              CANCEL
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="container">
+        
           <div className="top-row">
             <div>
               <h1>Pesto&apos;s Control Panel</h1>
@@ -2453,52 +2566,90 @@ if (wingsWithoutSauce) {
           )}
 
           {adminPage === 'guests' && (
-            <>
-              <h2 className="section-title">Guest Verification List</h2>
+  <>
+    <h2 className="section-title">Guest Verification List</h2>
 
-              <div className="form-card">
-                <h2>Upload Guest Excel Sheet</h2>
-                <input
-                  type="file"
-                  accept=".xlsx,.xls"
-                  onChange={uploadGuestExcel}
-                  disabled={guestUploading}
-                />
+    <div className="form-card">
+      <h2>Upload Guest Excel Sheet</h2>
 
-                {guestUploadMessage && (
-                  <p className="add-hint">{guestUploadMessage}</p>
-                )}
-              </div>
+      <input
+        type="file"
+        accept=".xlsx,.xls"
+        onChange={uploadGuestExcel}
+        disabled={guestUploading}
+      />
 
-              <h2 className="section-title">Uploaded Guest List</h2>
+      {guestUploadMessage && (
+        <p className="add-hint">{guestUploadMessage}</p>
+      )}
+    </div>
 
-              <div className="table-box">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Room No</th>
-                      <th>Guest Name</th>
-                    </tr>
-                  </thead>
+    <div className="form-card">
+      <h2>Search / Add Guest</h2>
 
-                  <tbody>
-                    {guests.length === 0 && (
-                      <tr>
-                        <td colSpan="2">No guest list uploaded yet.</td>
-                      </tr>
-                    )}
+      <div className="form-grid reports-grid">
+        <div className="form-group">
+          <label>SEARCH BY NAME OR ROOM</label>
+          <input
+            type="text"
+            value={guestSearch}
+            onChange={(e) => setGuestSearch(e.target.value)}
+            placeholder="Example: 204 or John"
+          />
+        </div>
 
-                    {guests.map((guest) => (
-                      <tr key={guest._id}>
-                        <td>{guest.roomNumber}</td>
-                        <td>{guest.guestName}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
+        <div className="form-group">
+          <label>&nbsp;</label>
+          <button
+            className="save-btn"
+            type="button"
+            onClick={() => setShowAddGuestModal(true)}
+          >
+            ADD GUEST
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <h2 className="section-title">Uploaded Guest List</h2>
+
+    <div className="table-box">
+      <table>
+        <thead>
+          <tr>
+            <th>Room No</th>
+            <th>Guest Name</th>
+            <th>Remove</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {filteredGuests.length === 0 && (
+            <tr>
+              <td colSpan="3">No guest found.</td>
+            </tr>
           )}
+
+          {filteredGuests.map((guest) => (
+            <tr key={guest._id}>
+              <td>{guest.roomNumber}</td>
+              <td>{guest.guestName}</td>
+              <td>
+                <button
+                  className="delete-btn"
+                  type="button"
+                  onClick={() => deleteGuest(guest._id)}
+                >
+                  REMOVE
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </>
+)}
 
 
           {adminPage === 'reports' && (
