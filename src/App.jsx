@@ -1804,76 +1804,40 @@ if (wingsWithoutSauce) {
 <p>{receiptData.date}</p>
 
 <hr />
-            {receiptData.items.map((item) => (
-              <div className="receipt-item" key={item._id}>
+            {receiptData.items.map((item, index) => (
+  <div
+    className="receipt-item"
+    key={item.cartKey || `${item._id}-${index}`}
+  >
                 <div>
   <span>
     {item.quantity} × {item.name}
   </span>
 
-  {item.glutenFree && (
-    <div className="option-text">
-      Gluten Free
-    </div>
-  )}
-
-  {item.sauce && (
-    <div className="option-text">
-      Sauce: {item.sauce}
-    </div>
-  )}
-
-  {item.secondPound && (
-    <div className="option-text">
-      + 2nd Pound Wings
-    </div>
-  )}
-
-  {item.side && (
+{item.secondPound && (
   <div className="option-text">
-    Side: {item.side}
+    + 2nd Pound Wings (+$10.00)
   </div>
 )}
 
 {item.sideUpgrade && (
   <div className="option-text">
-    Upgrade: {item.sideUpgrade}
-  </div>
-)}
-
-{item.dressing && (
-  <div className="option-text">
-    Dressing: {item.dressing}
+    {item.sideUpgrade} (+$3.99)
   </div>
 )}
 
 {item.saladProtein && (
   <div className="option-text">
-    Add-on: {item.saladProtein}
+    {item.saladProtein}
+    {item.saladProtein === 'Garlic Shrimp'
+      ? ' (+$7.00)'
+      : ' (+$8.00)'}
   </div>
-)}
-
-{item.doneness && (
-  <div className="option-text">
-    Steak: {item.doneness}
-  </div>
-)}
-
-{item.kidsSpaghettiOption && (
-  <p className="option-text">
-    {item.kidsSpaghettiOption}
-  </p>
 )}
 
 {item.burgerCheese && (
   <p className="option-text checkout-option">
-    Add Cheese
-  </p>
-)}
-
-{item.burgerToppings && (
-  <p className="option-text checkout-option">
-    Toppings: {item.burgerToppings}
+    Add Cheese (+$2.00)
   </p>
 )}
 
