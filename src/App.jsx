@@ -2585,31 +2585,30 @@ if (wingsWithoutSauce) {
     </div>
 
     <div className="form-card">
-      <h2>Search / Add Guest</h2>
+  <h2>Add Single Guest</h2>
 
-      <div className="form-grid reports-grid">
-        <div className="form-group">
-          <label>SEARCH BY NAME OR ROOM</label>
-          <input
-            type="text"
-            value={guestSearch}
-            onChange={(e) => setGuestSearch(e.target.value)}
-            placeholder="Example: 204 or John"
-          />
-        </div>
+  <button
+    className="save-btn"
+    type="button"
+    onClick={() => setShowAddGuestModal(true)}
+  >
+    ADD GUEST
+  </button>
+</div>
 
-        <div className="form-group">
-          <label>&nbsp;</label>
-          <button
-            className="save-btn"
-            type="button"
-            onClick={() => setShowAddGuestModal(true)}
-          >
-            ADD GUEST
-          </button>
-        </div>
-      </div>
-    </div>
+<div className="form-card">
+  <h2>Search Guest</h2>
+
+  <div className="form-group">
+    <label>SEARCH BY NAME OR ROOM</label>
+    <input
+      type="text"
+      value={guestSearch}
+      onChange={(e) => setGuestSearch(e.target.value)}
+      placeholder="Example: 204 or John"
+    />
+  </div>
+</div>
 
     <h2 className="section-title">Uploaded Guest List</h2>
 
