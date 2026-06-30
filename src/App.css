@@ -1236,10 +1236,12 @@ td {
 .menu-thumbnail {
   width: 96px;
   height: 96px;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   border-radius: 14px;
+  background: #fff;
   border: 1px solid #d8cfc2;
-  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 5px 12px rgba(0,0,0,0.12);
   flex-shrink: 0;
 }
 
