@@ -2672,7 +2672,13 @@ if (wingsWithoutSauce) {
   </div>
 </div>
 
-    <h2 className="section-title">Uploaded Guest List</h2>
+    <div className="section-title-row">
+  <h2 className="section-title">Uploaded Guest List</h2>
+
+  <div className="guest-count-badge">
+    Total Rooms: {guests.length}
+  </div>
+</div>
 
     <div className="table-box">
       <table>
