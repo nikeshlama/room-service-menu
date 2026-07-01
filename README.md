@@ -1,16 +1,11 @@
-# React + Vite
+## Legal Notice
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This software was developed by Nikesh Lama.
 
-Currently, two official plugins are available:
+This software is provided "as is" without any express or implied warranties. While reasonable effort has been made to ensure its reliability, the author makes no guarantees regarding its performance, availability, or suitability for any particular purpose.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+By using this software, you acknowledge that the author shall not be liable for any direct, indirect, incidental, consequential, or financial damages, including but not limited to loss of data, business interruption, printing failures, ordering errors, or system downtime arising from the use of this software.
 
-## React Compiler
+Maintenance, technical support, updates, and bug fixes are not included unless separately agreed to in writing.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Use of this software constitutes acceptance of these terms.
