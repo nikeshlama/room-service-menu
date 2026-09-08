@@ -68,7 +68,9 @@ function App() {
 
   const [clickCount, setClickCount] = useState(0);
   const [selectedCategory, setSelectedCategory] = useState('Featured');
+  const [selectedAlcoholCategory, setSelectedAlcoholCategory] = useState('Wines');
   const [cart, setCart] = useState([]);
+  
   const [cartOpen, setCartOpen] = useState(false);
   const [openDescriptions, setOpenDescriptions] = useState({});
 
@@ -159,8 +161,24 @@ function App() {
     'Pizza',
     'Kids Menu',
     'Desserts',
-    'Beverages'
+    'Beverages',
+    'Alcoholic Beverages'
   ];
+
+  const inventoryCategories = [
+    'Featured',
+    'Appetizers',
+    'Salads',
+    'Sandwiches',
+    'Pasta',
+    'Pizza',
+    'Kids Menu',
+    'Desserts',
+    'Beverages',
+    'Wines',
+    'Beers'
+  ];
+  
 
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -1766,9 +1784,13 @@ if (wingsWithoutSauce) {
     stopAlarm();
   };
 
-  const visibleItems = menuItems.filter(
-    (item) => item.category === selectedCategory
-  );
+  const visibleItems = menuItems.filter((item) => {
+  if (selectedCategory === 'Alcoholic Beverages') {
+    return item.category === selectedAlcoholCategory;
+  }
+
+  return item.category === selectedCategory;
+});
 
   if (loading && !showAdmin) {
     return (
@@ -2336,7 +2358,7 @@ if (wingsWithoutSauce) {
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
                     >
-                      {categories.map((cat) => (
+                      {inventoryCategories.map((cat) => (
                         <option key={cat} value={cat}>
                           {cat}
                         </option>
@@ -3724,6 +3746,30 @@ return (
           </button>
         ))}
       </div>
+{/* Alcoholic Beverages Sub Navigation */}
+      {selectedCategory === 'Alcoholic Beverages' && (
+  <div className="category-nav alcohol-category-nav">
+    <button
+      type="button"
+      className={`category-btn ${
+        selectedAlcoholCategory === 'Wines' ? 'active' : ''
+      }`}
+      onClick={() => setSelectedAlcoholCategory('Wines')}
+    >
+      Wines
+    </button>
+
+    <button
+      type="button"
+      className={`category-btn ${
+        selectedAlcoholCategory === 'Beers' ? 'active' : ''
+      }`}
+      onClick={() => setSelectedAlcoholCategory('Beers')}
+    >
+      Beers
+    </button>
+  </div>
+)}
 
       {selectedCategory === 'Featured' && (
         <h2 className="section-title">Today&apos;s Featured Specials</h2>
