@@ -148,8 +148,11 @@ function App() {
 
   const [showBottleGlassModal, setShowBottleGlassModal] = useState(false);
   const [selectedBottleItem, setSelectedBottleItem] = useState(null);
-const [wineGlassCount, setWineGlassCount] = useState('');
+  const [wineGlassCount, setWineGlassCount] = useState('');
 
+  const [showBeerSpecialModal, setShowBeerSpecialModal] = useState(false);
+const [selectedBeerSpecial, setSelectedBeerSpecial] = useState(null);
+const [beerSpecialSelections, setBeerSpecialSelections] = useState({});
 
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
@@ -183,7 +186,20 @@ const [wineGlassCount, setWineGlassCount] = useState('');
     'Beers'
   ];
   
+const availableBeerSpecialOptions = menuItems.filter(
+  (item) =>
+    item.category === 'Beers' &&
+    item.available !== false &&
+    item._id !== selectedBeerSpecial?._id &&
+    !item.name.toLowerCase().includes('4 beers special')
+);
 
+const selectedBeerCount = Object.values(
+  beerSpecialSelections
+).reduce(
+  (sum, quantity) => sum + Number(quantity || 0),
+  0
+);
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0
@@ -991,6 +1007,17 @@ const toggleSauceAvailability = async (sauce) => {
 
   if (item.available === false) return;
 
+  // ===== 4 BEERS SPECIAL =====
+if (
+  item.category === 'Beers' &&
+  item.name.toLowerCase().includes('4 beers special')
+) {
+  setSelectedBeerSpecial(item);
+  setBeerSpecialSelections({});
+  setShowBeerSpecialModal(true);
+  return;
+}
+
   // ===== WINE BOTTLE GLASS REQUEST =====
 if (
   item.category === 'Wines' &&
@@ -1113,6 +1140,85 @@ if (
     ];
   });
   showToast(`${item.name} added to cart`);
+};
+
+const changeBeerSpecialQuantity = (beerId, change) => {
+  setBeerSpecialSelections((current) => {
+    const currentQuantity = Number(current[beerId] || 0);
+
+    const currentTotal = Object.values(current).reduce(
+      (sum, quantity) => sum + Number(quantity || 0),
+      0
+    );
+
+    // Do not allow more than 4 beers
+    if (change > 0 && currentTotal >= 4) {
+      return current;
+    }
+
+    const newQuantity = Math.max(
+      0,
+      currentQuantity + change
+    );
+
+    const updated = {
+      ...current,
+      [beerId]: newQuantity
+    };
+
+    if (newQuantity === 0) {
+      delete updated[beerId];
+    }
+
+    return updated;
+  });
+};
+
+const addBeerSpecialToCart = () => {
+  if (!selectedBeerSpecial) return;
+
+  if (selectedBeerCount !== 4) {
+    showToast('Please select exactly 4 beers.');
+    return;
+  }
+
+  const beerChoices = availableBeerSpecialOptions
+    .filter(
+      (beer) =>
+        Number(beerSpecialSelections[beer._id] || 0) > 0
+    )
+    .map(
+      (beer) =>
+        `${beerSpecialSelections[beer._id]}x ${beer.name}`
+    )
+    .join(', ');
+
+  const specialCartItem = {
+    _id: selectedBeerSpecial._id,
+
+    // Unique because another special may contain different beers
+    cartKey:
+      `${selectedBeerSpecial._id}-beer-special-${Date.now()}`,
+
+    menuItemId: selectedBeerSpecial._id,
+    name: selectedBeerSpecial.name,
+    price: Number(selectedBeerSpecial.price),
+    quantity: 1,
+    category: 'Beers',
+
+    beerChoices
+  };
+
+  setCart((currentCart) => [
+    ...currentCart,
+    specialCartItem
+  ]);
+
+  showToast('4 Beers Special added to cart');
+
+  setShowBeerSpecialModal(false);
+  setSelectedBeerSpecial(null);
+  setBeerSpecialSelections({});
 };
 
 const addWineBottleToCart = () => {
@@ -1773,6 +1879,7 @@ if (wingsWithoutSauce) {
         kidsSpaghettiOption: item.kidsSpaghettiOption || '',
         burgerCheese: item.burgerCheese || false,
         burgerToppings: item.burgerToppings || '',
+        beerChoices: item.beerChoices || '',
         wineGlasses: item.wineGlasses ?? null})),
         subtotal,
         gratuity,
@@ -1903,6 +2010,12 @@ if (wingsWithoutSauce) {
   <span>
     {item.quantity} × {item.name}
   </span>
+
+{item.beerChoices && (
+  <div className="option-text">
+    Beer choices: {item.beerChoices}
+  </div>
+)}
 
 {item.wineGlasses !== undefined && (
   <div className="option-text">
@@ -2640,6 +2753,12 @@ if (wingsWithoutSauce) {
     {item.quantity} × {item.name} — $
     {(item.price * item.quantity).toFixed(2)}
   </p>
+  
+{item.beerChoices && (
+  <p className="option-text">
+    Beer choices: {item.beerChoices}
+  </p>
+)}
 
 {item.wineGlasses !== undefined &&
  item.wineGlasses !== null && (
@@ -3197,6 +3316,100 @@ if (wingsWithoutSauce) {
 
 return (
   <div className="page">
+
+{showBeerSpecialModal && selectedBeerSpecial && (
+  <div className="modal-overlay">
+    <div className="option-modal">
+
+      <h2>4 Beers Special</h2>
+
+      <p>
+        Choose exactly 4 beers
+      </p>
+
+      <p>
+        <strong>
+          Selected: {selectedBeerCount} / 4
+        </strong>
+      </p>
+
+      <div
+        style={{
+          display: 'grid',
+          gap: '12px',
+          margin: '20px 0'
+        }}
+      >
+        {availableBeerSpecialOptions.map((beer) => (
+          <div
+            key={beer._id}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: '15px'
+            }}
+          >
+            <strong>{beer.name}</strong>
+
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
+              }}
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  changeBeerSpecialQuantity(beer._id, -1)
+                }
+              >
+                −
+              </button>
+
+              <strong>
+                {beerSpecialSelections[beer._id] || 0}
+              </strong>
+
+              <button
+                type="button"
+                onClick={() =>
+                  changeBeerSpecialQuantity(beer._id, 1)
+                }
+                disabled={selectedBeerCount >= 4}
+              >
+                +
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <button
+        className="save-btn"
+        type="button"
+        onClick={addBeerSpecialToCart}
+        disabled={selectedBeerCount !== 4}
+      >
+        ADD SPECIAL TO CART
+      </button>
+
+      <button
+        className="back-btn"
+        type="button"
+        onClick={() => {
+          setShowBeerSpecialModal(false);
+          setSelectedBeerSpecial(null);
+          setBeerSpecialSelections({});
+        }}
+      >
+        CANCEL
+      </button>
+
+    </div>
+  </div>
+)}
 
 {/* ===== WINE BOTTLE GLASS MODAL ===== */}
 {showBottleGlassModal && selectedBottleItem && (
@@ -4056,6 +4269,12 @@ return (
                   <div className="cart-item" key={item.cartKey || item._id}>
                     <div>
                       <strong>{item.name}</strong>
+
+                      {item.beerChoices && (
+  <p className="option-text checkout-option">
+    Beer choices: {item.beerChoices}
+  </p>
+)}
 
                        {item.wineGlasses !== undefined && (
         <p className="option-text checkout-option">
