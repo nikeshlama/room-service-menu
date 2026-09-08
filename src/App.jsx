@@ -146,6 +146,10 @@ function App() {
 
   const [orderSearch, setOrderSearch] = useState('');
 
+  const [showBottleGlassModal, setShowBottleGlassModal] = useState(false);
+  const [selectedBottleItem, setSelectedBottleItem] = useState(null);
+const [wineGlassCount, setWineGlassCount] = useState('');
+
 
   const categoryRefs = useRef({});
   const lastOrderIdRef = useRef(null);
@@ -987,6 +991,17 @@ const toggleSauceAvailability = async (sauce) => {
 
   if (item.available === false) return;
 
+  // ===== WINE BOTTLE GLASS REQUEST =====
+if (
+  item.category === 'Wines' &&
+  item.name.toLowerCase().includes('bottle')
+) {
+  setSelectedBottleItem(item);
+  setWineGlassCount('');
+  setShowBottleGlassModal(true);
+  return;
+}
+
   if (item.name === 'Classic Burger' ||
   item.name === 'Kids Burger & Fries') {
   setSelectedMenuItem(item);
@@ -1098,6 +1113,58 @@ if (
     ];
   });
   showToast(`${item.name} added to cart`);
+};
+
+const addWineBottleToCart = () => {
+  if (!selectedBottleItem) return;
+
+  if (wineGlassCount === '') {
+    showToast('Please enter how many wine glasses you need.');
+    return;
+  }
+
+  const glasses = Math.max(
+    0,
+    parseInt(wineGlassCount, 10) || 0
+  );
+
+  setCart((currentCart) => {
+    const existingItem = currentCart.find(
+      (item) => item._id === selectedBottleItem._id
+    );
+
+    if (existingItem) {
+      return currentCart.map((item) =>
+        item._id === selectedBottleItem._id
+          ? {
+              ...item,
+              quantity: item.quantity + 1,
+              wineGlasses:
+                Number(item.wineGlasses || 0) + glasses
+            }
+          : item
+      );
+    }
+
+    return [
+      ...currentCart,
+      {
+        _id: selectedBottleItem._id,
+        menuItemId: selectedBottleItem._id,
+        name: selectedBottleItem.name,
+        price: Number(selectedBottleItem.price),
+        quantity: 1,
+        category: selectedBottleItem.category,
+        wineGlasses: glasses
+      }
+    ];
+  });
+
+  showToast(`${selectedBottleItem.name} added to cart`);
+
+  setShowBottleGlassModal(false);
+  setSelectedBottleItem(null);
+  setWineGlassCount('');
 };
 
 const addSandwichToCart = (
@@ -1705,7 +1772,8 @@ if (wingsWithoutSauce) {
         doneness: item.doneness || '',
         kidsSpaghettiOption: item.kidsSpaghettiOption || '',
         burgerCheese: item.burgerCheese || false,
-        burgerToppings: item.burgerToppings || ''})),
+        burgerToppings: item.burgerToppings || '',
+        wineGlasses: item.wineGlasses ?? null})),
         subtotal,
         gratuity,
         tax,
@@ -1835,6 +1903,12 @@ if (wingsWithoutSauce) {
   <span>
     {item.quantity} × {item.name}
   </span>
+
+{item.wineGlasses !== undefined && (
+  <div className="option-text">
+    Wine glasses requested: {item.wineGlasses}
+  </div>
+)}
 
 {item.secondPound && (
   <div className="option-text">
@@ -2567,6 +2641,13 @@ if (wingsWithoutSauce) {
     {(item.price * item.quantity).toFixed(2)}
   </p>
 
+{item.wineGlasses !== undefined &&
+ item.wineGlasses !== null && (
+  <p className="option-text">
+    Wine glasses requested: {item.wineGlasses}
+  </p>
+)}
+
   {item.glutenFree && (
     <p className="option-text">
       Gluten Free
@@ -3116,6 +3197,51 @@ if (wingsWithoutSauce) {
 
 return (
   <div className="page">
+
+{/* ===== WINE BOTTLE GLASS MODAL ===== */}
+{showBottleGlassModal && selectedBottleItem && (
+  <div className="modal-overlay">
+    <div className="option-modal">
+
+      <h2>{selectedBottleItem.name}</h2>
+
+      <p>How many wine glasses do you need?</p>
+
+      <div className="form-group">
+        <input
+          type="number"
+          min="0"
+          step="1"
+          placeholder="Example: 3"
+          value={wineGlassCount}
+          onChange={(e) => setWineGlassCount(e.target.value)}
+        />
+      </div>
+
+      <button
+        className="save-btn"
+        type="button"
+        onClick={addWineBottleToCart}
+      >
+        ADD BOTTLE
+      </button>
+
+      <button
+        className="back-btn"
+        type="button"
+        onClick={() => {
+          setShowBottleGlassModal(false);
+          setSelectedBottleItem(null);
+          setWineGlassCount('');
+        }}
+      >
+        CANCEL
+      </button>
+
+    </div>
+  </div>
+)}
+
 
     {showWingSauceModal && selectedMenuItem && (
   <div className="modal-overlay">
@@ -3930,6 +4056,12 @@ return (
                   <div className="cart-item" key={item.cartKey || item._id}>
                     <div>
                       <strong>{item.name}</strong>
+
+                       {item.wineGlasses !== undefined && (
+        <p className="option-text checkout-option">
+          Wine glasses requested: {item.wineGlasses}
+        </p>
+      )}
 
                       {item.glutenFree && (
   <p className="option-text">

@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../../../../pestos-backend"
+		},
+		{
+			"path": "../../../../pestos-printer-service"
+		},
+		{
+			"path": "../.."
+		}
+	],
+	"settings": {}
+}
